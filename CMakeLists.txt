@@ -3,5 +3,5 @@ project(Textual_Game)
 
 set(CMAKE_CXX_STANDARD 11)
 
-glob_recursive(Textual_Game SOURCES src*/)
+file(GLOB_RECURSE SOURCES src/*)
 add_executable(Textual_Game ${SOURCES})
