@@ -1,6 +1,13 @@
 #include <iostream>
 
+#include "ecs.hpp"
+#include "entities/testEntity.hpp"
+
+
+
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    // Add Entities
+    ECS::AddEntity<TestEntity>();
+
     return 0;
 }
