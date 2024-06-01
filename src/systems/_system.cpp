@@ -2,7 +2,7 @@
 
 /**
  * @brief Run code on every entity that uses this system
- * @details This function is called by the Step function
+ * @details This function is called by the ECS class
  * This function should be overwritten by the child systems
  * @param entity
  */
