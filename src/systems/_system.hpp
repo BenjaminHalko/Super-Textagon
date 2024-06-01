@@ -26,6 +26,7 @@ public:
     /**
      * @brief Runs the system's code on every frame
      * @details This function is called by the ECS class
+     * This function should be overwritten by the child systems
      * @param entities
      */
     virtual void StepEntity(Entity &entity) = 0;
