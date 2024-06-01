@@ -14,7 +14,8 @@ class System {
 
     /**
      * @brief Callbacks to be called through out the Step function
-     * @details The first element of the pair is the function to be called, the second element is the priority of the callback
+     * @details The first element of the pair is the function to be called,
+     * the second element is the priority of the callback
      */
     std::vector<std::pair<void (*)(), int>> callbacks;
 public:
