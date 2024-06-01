@@ -9,7 +9,7 @@
 // ECS::systems
     // A function on how to manipulate the entities components
         // Gets looped over all entities, that use the system
-        
+
 int main() {
     // Add Entities
     ECS::AddEntity<TestEntity>();
