@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <unordered_set>
 
-
 class Entity {
     /**
      * @brief Components of the entity
@@ -27,7 +26,7 @@ class Entity {
 
     // Tells ECS to destroy the entity
     bool destroyed = false;
-public:
+
     /**
      * @brief Adds a component to the entity
      * @tparam ComponentType
@@ -39,6 +38,7 @@ public:
         components[typeid(ComponentType)] = std::make_unique<ComponentType>(std::forward<Args>(args)...);
     }
 
+public:
     /**
      * @brief Get a component from the entity
      * @details It is casted to the correct type

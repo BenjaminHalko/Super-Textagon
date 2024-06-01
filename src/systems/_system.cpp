@@ -1,15 +1,10 @@
 #include "_system.hpp"
 
-
-bool System::operator<(const System &other) const {
-    return executionPriority < other.executionPriority;
-}
-
 /**
- * @brief Construct a new System:: System object
- *
- * @param executionPriority The priority of the system
- * @return
+ * @brief Run code on every entity that uses this system
+ * @details This function is called by the Step function
+ * This function should be overwritten by the child systems
+ * @param entity
  */
 void System::Step(std::multiset<std::unique_ptr<Entity>> &entities) {
     auto callbackIt = callbacks.begin();
@@ -34,4 +29,9 @@ void System::Step(std::multiset<std::unique_ptr<Entity>> &entities) {
         callbackIt->first();
         ++callbackIt;
     }
+}
+
+// Allows the systems to be sorted by their execution priority
+bool System::operator<(const System &other) const {
+    return executionPriority < other.executionPriority;
 }

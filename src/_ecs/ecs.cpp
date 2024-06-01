@@ -1,5 +1,11 @@
 #include "ecs.hpp"
 
+std::multiset<std::unique_ptr<Entity>> ECS::entities;
+std::set<std::unique_ptr<System>> ECS::systems;
+
+/**
+ * @brief Runs the system's code on every frame
+ */
 void ECS::Step() {
     for (auto &system : systems) {
         system->Step(entities);

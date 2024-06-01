@@ -9,23 +9,16 @@
 // ECS::systems
     // A function on how to manipulate the entities components
         // Gets looped over all entities, that use the system
-
-
-
-
-
-
+        
 int main() {
-    ECS ecs;
-
     // Add Entities
-    ecs.AddEntity<TestEntity>();
+    ECS::AddEntity<TestEntity>();
 
     // Add Systems
-    ecs.AddSystem<RenderSystem>();
+    ECS::AddSystem<RenderSystem>();
 
     // Step
-    ecs.Step();
+    ECS::Step();
 
     return 0;
 }

@@ -4,5 +4,8 @@
 
 class TestEntity : public Entity {
 public:
-    TestEntity(){}
+    TestEntity(){
+
+
+    }
 };
