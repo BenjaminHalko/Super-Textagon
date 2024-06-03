@@ -1,33 +1,27 @@
 #pragma once
 
 #include "../entities/_entity.hpp"
-#include <vector>
-#include <set>
-#include <memory>
 
 /**
  * @brief Base class for all systems
  */
 class System {
-    // Execution priority of the system
-    int executionPriority = 0;
-
-    /**
-     * @brief Callbacks to be called through out the Step function
-     * @details The first element of the pair is the function to be called,
-     * the second element is the priority of the callback
-     */
-    std::vector<std::pair<void (*)(), int>> callbacks;
 public:
+    // It is important to have a virtual destructor
     virtual ~System() = default;
-    void Step(std::multiset<std::unique_ptr<Entity>> &entities);
-    bool operator<(const System &other) const;
 
     /**
      * @brief Runs the system's code on every frame
-     * @details This function is called by the Step class
-     * This function should be overwritten by the child systems
+     * @details This function gets called by the ECS class every frame
+     * and is called for every entity in the ECS.
+     * @note This function should be overwritten by the child systems.
      * @param entity
      */
-    virtual void StepEntity(Entity &entity) = 0;
+    virtual void UpdateEntity(Entity &entity) = 0;
+
+    // Runs before looping over entities
+    virtual void PreUpdate() {}
+
+    // Runs after looping over entities
+    virtual void PostUpdate() {}
 };

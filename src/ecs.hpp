@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../entities/_entity.hpp"
-#include "../systems/_system.hpp"
+#include "entities/_entity.hpp"
+#include "systems/_system.hpp"
 #include <memory>
 #include <set>
 
@@ -29,7 +29,7 @@ public:
         systems.insert(std::make_unique<SystemType>());
     }
 
-    static void Step();
+    static void Update();
 };
 
 

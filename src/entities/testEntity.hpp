@@ -2,10 +2,4 @@
 
 #include "_entity.hpp"
 
-class TestEntity : public Entity {
-public:
-    TestEntity(){
-
-
-    }
-};
+class TestEntity : public Entity {};

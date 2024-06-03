@@ -1,6 +1,3 @@
 #pragma once
 
-class Component {
-public:
-    Component() {}
-};
+class Component {};
