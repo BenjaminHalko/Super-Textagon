@@ -11,7 +11,7 @@ public:
     virtual ~System() = default;
 
     /**
-     * @brief Runs the system's code on every frame
+     * @brief Runs the system on an entity
      * @details This function gets called by the ECS class every frame
      * and is called for every entity in the ECS.
      * @note This function should be overwritten by the child systems.
