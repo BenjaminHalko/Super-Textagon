@@ -1,4 +1,4 @@
-#include "ecs.hpp"
+#include "ecs.h"
 
 // We need to define the static variables here
 std::multiset<std::unique_ptr<Entity>> ECS::entities;

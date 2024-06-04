@@ -1,8 +1,8 @@
-#include "ecs.hpp"
-#include "input.hpp"
-#include "entities/testEntity.hpp"
-#include "systems/renderSystem.hpp"
-#include "systems/debugSystem.hpp"
+#include "input.h"
+
+#include "ecs.h"
+#include "entities/testEntity.h"
+#include "systems/renderSystem.h"
 
 #include <chrono>
 #include <thread>
@@ -40,7 +40,7 @@ int main() {
     ECS::AddEntity<TestEntity>();
 
     // Add Systems
-    ECS::AddSystem<DebugSystem>();
+    ECS::AddSystem<RenderSystem>();
 
     // Game Loop
     GameLoop();

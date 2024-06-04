@@ -1,4 +1,4 @@
-#include "_entity.hpp"
+#include "_entity.h"
 
 /**
  * @brief Check if the entity uses a system
