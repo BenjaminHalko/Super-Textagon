@@ -1,9 +1,6 @@
 #pragma once
 
 #include <unordered_map>
-#ifndef _WIN32
-#include <termios.h>
-#endif
 
 enum Key {
     LEFT = 0,
