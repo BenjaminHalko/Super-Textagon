@@ -6,6 +6,9 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#define ComponentMap std::unordered_map<std::type_index, std::unique_ptr<Component>>
+#define SystemSet std::unordered_set<std::type_index>
+
 /*
  * @brief The base class for all entities
  */
@@ -16,13 +19,13 @@ class Entity {
      * The value is a unique pointer to the component.
      * This is a map so that we can easily access the component by its type.
      */
-    std::unordered_map<std::type_index, std::unique_ptr<Component>> components;
+    ComponentMap components;
 
     /**
      * @brief Systems that the entity uses
      * @details We can easily check if the entity uses a system by checking if the system type is in this set
      */
-    std::unordered_set<std::type_index> systemsToUse;
+    SystemSet systemsToUse;
 
     // Tells systems the order in which to execute the entity
     int executionPriority = 0;
@@ -30,6 +33,7 @@ class Entity {
     // Tells ECS to destroy the entity
     bool destroyed = false;
 
+protected:
     /**
      * @brief Adds a component to the entity
      * @tparam ComponentType The type of the component to add
