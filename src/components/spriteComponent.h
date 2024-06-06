@@ -7,7 +7,7 @@
 #define PI 3.14159265358979323846f
 
 struct Point {
-    float x, y;
+    float x, y, luminance;
 };
 
 /**
@@ -26,10 +26,13 @@ class SpriteComponent : public Component {
     }
 public:
     explicit SpriteComponent(TriangleStrip sprite) : sprite(std::move(sprite)) {}
-    explicit SpriteComponent(float radius, int numSides) {
+    explicit SpriteComponent(float radius, int numSides, float innerLuminance, float outerLuminance) {
         for (int i = 0; i < numSides; i++) {
             float angle = 2 * PI * (float)i / (float)numSides;
-            sprite.push_back({radius * cosf(angle), radius * sinf(angle)});
+            sprite.push_back({radius * cosf(angle), radius * sinf(angle), outerLuminance});
+            angle = 2 * PI * (float)(i + 1) / (float)numSides;
+            sprite.push_back({radius * cosf(angle), radius * sinf(angle), outerLuminance});
+            sprite.push_back({0, 0, 1});
         }
     }
 
@@ -41,7 +44,8 @@ public:
         for (int i = 0; i < sprite.size(); i++) {
             transformedSprite[i] = {
                 sprite[i].x * scale,
-                sprite[i].y * scale
+                sprite[i].y * scale,
+                sprite[i].luminance
             };
             transformedSprite[i] = rotateVector(transformedSprite[i], rotation);
             transformedSprite[i].x += x;

@@ -16,31 +16,66 @@ class RenderSystem : public System {
     std::string consoleBuffer;
     int charCount = 0;
 
+    // Queue screen clear
+    bool clearScreen = false;
+
+    /**
+     * @brief Determines the luminance of a point
+     * @details The luminance is calculated using the barycentric coordinates method
+     * @param triangleStrip The points of the triangle strip
+     * @param x The x-coordinate of the point
+     * @param y The y-coordinate of the point
+     * @return A character representing the luminance of the point
+     */
+    static char lumOfPoint(TriangleStrip &points, int x, int y) {
+        // Characters to use for luminance
+        static const std::string lumChars = ".`'^\",:;Il!i~+_-?][}{1)(|\\/*tjfrjxnvuczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@";
+        static const int lumCharsCount = (int)lumChars.size();
+
+        // Calculate the denominators for barycentric coordinates
+        float denominator = (points[1].y - points[2].y) * (points[0].x - points[2].x) + (points[2].x - points[1].x) * (points[0].y - points[2].y);
+
+        // Calculate barycentric coordinates
+        float lambda1 = ((points[1].y - points[2].y) * ((float)x - points[2].x) + (points[2].x - points[1].x) * ((float)y - points[2].y)) / denominator;
+        float lambda2 = ((points[2].y - points[0].y) * ((float)x - points[2].x) + (points[0].x - points[2].x) * ((float)y - points[2].y)) / denominator;
+        float lambda3 = 1.0f - lambda1 - lambda2;
+
+        // Calculate the luminance
+        float lum = lambda1 * points[0].luminance + lambda2 * points[1].luminance + lambda3 * points[2].luminance;
+
+        // Return the character based on the luminance
+        return lumChars.at((int)((float)(lumCharsCount-1) * lum));
+    }
+
     /**
      * @brief Sets a character at a position in the console
-     * @param x
-     * @param y
-     * @param c
+     * @param x The x-coordinate of the character
+     * @param y The y-coordinate of the character
+     * @param character The character to set
      */
-    void SetConsoleCharacter(int x, int y, char c) {
-        if (x >= 0 && x < consoleInfo.dwSize.X && y >= 0 && y < consoleInfo.dwSize.Y)
-            consoleBuffer[y * consoleInfo.dwSize.X + x] = c;
+    void SetConsoleCharacter(int x, int y, char character) {
+        if (x >= 0 && x < consoleInfo.dwSize.X && y >= 0 && y < consoleInfo.dwSize.Y) {
+            //std::cout << character;
+            consoleBuffer[y * consoleInfo.dwSize.X + x] = character;
+            //std::cout << "test";
+        }
     }
 
     /**
      * @brief Draws a triangle to the console
      * @param triangleStrip The points of the triangle strip
      * @param index The index of the first point in the triangle strip
-     * @param c The character to draw
      */
-    void DrawTriangle(TriangleStrip &triangleStrip, int index, char c) {
+    void DrawTriangle(TriangleStrip &triangleStrip, int index) {
         // Create a copy of the points
         TriangleStrip points(3);
 
         // Convert the points to screen space, from 0 to dwSize
+        int maxScreenSize = max(consoleInfo.dwSize.X, consoleInfo.dwSize.Y);
         for (int i = index; i < index + 3; i++) {
-            points[i].x = triangleStrip[i].x * consoleInfo.dwSize.X;
-            points[i].y = triangleStrip[i].y * consoleInfo.dwSize.Y;
+            points[i - index].x = triangleStrip[i].x * maxScreenSize + float(consoleInfo.dwSize.X - maxScreenSize) * 0.5f;
+            points[i - index].y = triangleStrip[i].y * maxScreenSize * 0.5f + float(consoleInfo.dwSize.Y - maxScreenSize * 0.5f) * 0.5f;
+            points[i - index].luminance = triangleStrip[i].luminance;
         }
 
         // Sort the points by y-coordinate
@@ -54,22 +89,22 @@ class RenderSystem : public System {
         float slopeAB = (points[1].y - points[0].y == 0) ? std::numeric_limits<float>::infinity() : (points[1].x - points[0].x) / (points[1].y - points[0].y);
 
         // Draw the upper part of the triangle (from A to B)
-        for (int y = std::ceil(points[0].y); y <= std::floor(points[1].y); y++) {
-            float x1 = points[0].x + slopeAC * (y - points[0].y);
-            float x2 = points[0].x + slopeAB * (y - points[0].y);
+        for (int y = (int)std::ceil(points[0].y); y <= (int)(points[1].y); y++) {
+            float x1 = points[0].x + slopeAC * ((float)y - points[0].y);
+            float x2 = points[0].x + slopeAB * ((float)y - points[0].y);
             if (x1 > x2) std::swap(x1, x2); // Ensure x1 is always less than x2
-            for (int x = std::ceil(x1); x <= std::floor(x2); x++) {
-                SetConsoleCharacter(x, y, c);
+            for (int x = (int)std::ceil(x1); x <= (int)(x2); x++) {
+                SetConsoleCharacter(x, y, lumOfPoint(points, x, y));
             }
         }
 
         // Draw the lower part of the triangle (from B to C)
-        for (int y = std::ceil(points[1].y); y <= std::floor(points[2].y); y++) {
-            float x1 = points[0].x + slopeAC * (y - points[0].y);
-            float x2 = points[1].x + slopeBC * (y - points[1].y);
+        for (int y = (int)std::ceil(points[1].y); y <= (int)(points[2].y); y++) {
+            float x1 = points[0].x + slopeAC * ((float)y - points[0].y);
+            float x2 = points[1].x + slopeBC * ((float)y - points[1].y);
             if (x1 > x2) std::swap(x1, x2); // Ensure x1 is always less than x2
-            for (int x = std::ceil(x1); x <= std::floor(x2); x++) {
-                SetConsoleCharacter(x, y, c);
+            for (int x = (int)std::ceil(x1); x <= (int)(x2); x++) {
+                SetConsoleCharacter(x, y, lumOfPoint(points, x, y));
             }
         }
     }
@@ -77,25 +112,40 @@ class RenderSystem : public System {
     /**
      * @brief Draws a triangle strip to the console
      * @param triangleStrip The points of the triangle strip
-     * @param c The character to draw
-     * @details For more info on a triangle strip, see https://en.wikipedia.org/wiki/Triangle_strip
      */
-    void DrawTriangleStrip(TriangleStrip &triangleStrip, char c) {
-        DrawTriangle(triangleStrip, 0, c);
-
+    void DrawTriangleStrip(TriangleStrip &triangleStrip) {
+        for (int i = 0; i < triangleStrip.size() - 2; i += 3)
+            DrawTriangle(triangleStrip, i);
     }
 public:
+    RenderSystem() {
+        // Disable the cursor
+        CONSOLE_CURSOR_INFO cursorInfo;
+        GetConsoleCursorInfo(hStdOut, &cursorInfo);
+        cursorInfo.bVisible = false;
+        SetConsoleCursorInfo(hStdOut, &cursorInfo);
+
+        // Disable scroll bars
+        SetConsoleMode(hStdOut, ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+
+        // Disable synchronous input
+        std::ios::sync_with_stdio(false);
+
+        // Enable unit buffering
+        std::cout << std::unitbuf;
+    }
+
     void UpdateEntity(Entity &entity) override {
         static int num = 0;
-        num++;
+        num += 2;
 
         // the 0.5 is for displaying in the center, this will get changed...
         auto component = entity.GetComponent<SpriteComponent>();
-        component.rotation = num;
+        component.rotation = (float)num;
         auto sprite = component.GetSprite(0.5f, 0.5f);
 
 
-        DrawTriangleStrip(sprite, '#');
+        DrawTriangleStrip(sprite);
     }
 
     void PreUpdate() override {
@@ -106,14 +156,20 @@ public:
         // If the size of the console has changed, clear the console
         if (consoleInfo.dwSize.X * consoleInfo.dwSize.Y != charCount) {
             charCount = consoleInfo.dwSize.X * consoleInfo.dwSize.Y;
-            system("cls");
+            clearScreen = true;
         }
 
-        // Create a string to store characters that will be drawn to the console
+        // Resize the console buffer
         consoleBuffer = std::string(charCount, ' ');
     }
 
     void PostUpdate() override {
+        // Clear the console
+        if (clearScreen) {
+            system("cls");
+            clearScreen = false;
+        }
+
         // Draw the console buffer
         std::cout << consoleBuffer;
 
