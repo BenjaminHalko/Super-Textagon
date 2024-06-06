@@ -1,4 +1,5 @@
 #include "renderSystem.h"
+#include "../ecs.h"
 
 RenderSystem::RenderSystem() {
     // Disable the cursor
@@ -125,8 +126,7 @@ void RenderSystem::DrawTriangle(TriangleList &triangleList, int index) {
  * @param triangleList The points of the triangle strip
  */
 void RenderSystem::DrawTriangleList(TriangleList &triangleList) {
-    for (int i = 0; i < triangleList.size() - 2; i += 3)
-        DrawTriangle(triangleList, i);
+
 }
 
 // Public
@@ -144,7 +144,7 @@ void RenderSystem::UpdateEntity(Entity &entity) {
     DrawTriangleList(sprite);
 }
 
-void RenderSystem::PreUpdate() {
+void RenderSystem::Update() {
     // Get the console info
     // consoleInfo.dwSize stores the amount of characters in the console
     GetConsoleScreenBufferInfo(hStdOut, &consoleInfo);
@@ -157,9 +157,17 @@ void RenderSystem::PreUpdate() {
 
     // Resize the console buffer
     consoleBuffer = std::vector<std::pair<char, Color>>(charCount, {' ', 0});
-}
 
-void RenderSystem::PostUpdate() {
+    // Loop over all the entities
+    for(auto& entity : ECS::GetEntities()) {
+        // Check if the entity has a sprite component
+        if (entity->HasComponent<SpriteComponent>()) {
+            TriangleList triangleList = entity->GetComponent<SpriteComponent>().GetSprite();
+            for (int i = 0; i < triangleList.size() - 2; i += 3)
+                DrawTriangle(triangleList, i);
+        }
+    }
+
     // Clear the console
     if (clearScreen) {
         system("cls");

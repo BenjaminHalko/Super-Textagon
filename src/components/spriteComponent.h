@@ -2,29 +2,23 @@
 
 #include "_component.h"
 #include <vector>
-
-// These might need their own file :/
-#define TriangleList std::vector<Point>
-#define Color unsigned int
-#define PI 3.14159265358979323846f
-
-struct Point {
-    float x, y, luminance;
-    Color color;
-};
+#include <iterator>
 
 /**
- * @brief This component is used to store the sprite of an entity
- * @details You pass a set of coordinates to the constructor
+ * @brief A component that represents a sprite.
+ * @details A sprite is a collection of points that are drawn on the screen.
  */
 class SpriteComponent : public Component {
-    TriangleList sprite;
-    static Point RotateVector(Point &point, float angle);
+private:
+    struct Point {
+        float x, y;
+        unsigned int color;
+        float alpha;
+    };
+    std::vector<Point> _sprite;
 public:
-    float scale = 1;
-    float rotation = 0;
-
-    explicit SpriteComponent(TriangleList sprite) : sprite(std::move(sprite)){}
-    static TriangleList GenerateShape(float radius, int numSides, float innerLuminance, float outerLuminance, Color innerColor, Color outerColor);
-    TriangleList GetSprite(float x, float y);
+    SpriteComponent(std::initializer_list<Point> sprite) {
+        std::copy(sprite.begin(), sprite.end(), std::back_inserter(_sprite));
+    }
+    std::vector<Point>& operator()() { return _sprite; }
 };

@@ -19,19 +19,14 @@ class RenderSystem : public System {
     // Queue screen clear
     bool clearScreen = false;
 
-    static std::pair<char, Color> RenderSystem::LumAndColorOfPoint(TriangleList &points, int x, int y);
+    static std::pair<char, Color> LumAndColorOfPoint(TriangleList &points, int x, int y);
 
-    void RenderSystem::SetConsoleCharacter(int x, int y, char character, Color color);
+    void SetConsoleCharacter(int x, int y, char character, Color color);
 
-    void RenderSystem::DrawTriangle(TriangleList &triangleList, int index);
+    void DrawTriangle(TriangleList &triangleList, int index);
 
-    void RenderSystem::DrawTriangleList(TriangleList &triangleList);
+    void DrawTriangleList(TriangleList &triangleList);
 public:
     RenderSystem();
-
-    void UpdateEntity(Entity &entity) override;
-
-    void PreUpdate() override;
-
-    void PostUpdate() override;
+    void Update() override;
 };

@@ -29,6 +29,8 @@ public:
         systems.insert(std::make_unique<SystemType>());
     }
 
+    static std::multiset<std::unique_ptr<Entity>>& GetEntities();
+
     static void Update();
 };
 

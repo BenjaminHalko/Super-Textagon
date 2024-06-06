@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+#include "_system.h"
 
 enum Key {
     LEFT = 0,
@@ -8,11 +9,11 @@ enum Key {
     QUIT
 };
 
-class Input {
+class Input : public System {
     enum KeyState {UP, PRESSED, HELD};
     static std::unordered_map<Key, KeyState> keys;
 public:
-    static void Update();
+    void Update() override;
     static bool GetKeyDown(Key key);
     static bool GetKeyPressed(Key key);
 };

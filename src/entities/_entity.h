@@ -9,7 +9,6 @@
 #include <iostream>
 
 #define ComponentMap std::unordered_map<std::type_index, std::unique_ptr<Component>>
-#define SystemSet std::vector<std::type_index>
 
 /*
  * @brief The base class for all entities
@@ -31,12 +30,6 @@ class Entity {
 
 protected:
     /**
-     * @brief Systems that the entity uses
-     * @details We can easily check if the entity uses a system by checking if the system type is in this set
-     */
-    SystemSet systemsToUse;
-
-    /**
      * @brief Adds a component to the entity
      * @tparam ComponentType The type of the component to add
      * @tparam Args The arguments to pass to the component constructor
@@ -56,7 +49,15 @@ public:
         return *static_cast<ComponentType*>(components[typeid(ComponentType)].get());
     }
 
-    bool UsesSystem(std::type_index system) const;
+    /**
+     * @brief Checks if the entity has a component
+     * @tparam ComponentType The type of the component to check
+     * @return bool True if the entity has the component
+     */
+    template <typename ComponentType>
+    bool HasComponent() {
+        return components.find(typeid(ComponentType)) != components.end();
+    }
 
     bool operator<(const Entity &other) const;
 
