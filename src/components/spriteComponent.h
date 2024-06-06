@@ -1,13 +1,16 @@
 #pragma once
 
 #include "_component.h"
+#include <vector>
 
 // These might need their own file :/
-#define TriangleStrip std::vector<Point>
+#define TriangleList std::vector<Point>
+#define Color unsigned short
 #define PI 3.14159265358979323846f
 
 struct Point {
     float x, y, luminance;
+    Color color;
 };
 
 /**
@@ -15,42 +18,13 @@ struct Point {
  * @details You pass a set of coordinates to the constructor
  */
 class SpriteComponent : public Component {
-    TriangleStrip sprite;
-
-    static Point rotateVector(Point &point, float angle) {
-        angle *= PI / 180;
-        return {
-            point.x * cosf(angle) - point.y * sinf(angle),
-            point.x * sinf(angle) + point.y * cosf(angle)
-        };
-    }
+    TriangleList sprite;
+    static Point RotateVector(Point &point, float angle);
 public:
-    explicit SpriteComponent(TriangleStrip sprite) : sprite(std::move(sprite)) {}
-    explicit SpriteComponent(float radius, int numSides, float innerLuminance, float outerLuminance) {
-        for (int i = 0; i < numSides; i++) {
-            float angle = 2 * PI * (float)i / (float)numSides;
-            sprite.push_back({radius * cosf(angle), radius * sinf(angle), outerLuminance});
-            angle = 2 * PI * (float)(i + 1) / (float)numSides;
-            sprite.push_back({radius * cosf(angle), radius * sinf(angle), outerLuminance});
-            sprite.push_back({0, 0, 1});
-        }
-    }
-
     float scale = 1;
     float rotation = 0;
 
-    TriangleStrip GetSprite(float x, float y) {
-        TriangleStrip transformedSprite(sprite.size());
-        for (int i = 0; i < sprite.size(); i++) {
-            transformedSprite[i] = {
-                sprite[i].x * scale,
-                sprite[i].y * scale,
-                sprite[i].luminance
-            };
-            transformedSprite[i] = rotateVector(transformedSprite[i], rotation);
-            transformedSprite[i].x += x;
-            transformedSprite[i].y += y;
-        }
-        return transformedSprite;
-    }
+    explicit SpriteComponent(TriangleList sprite) : sprite(std::move(sprite)){}
+    static TriangleList GenerateShape(float radius, int numSides, float innerLuminance, float outerLuminance, Color innerColor, Color outerColor);
+    TriangleList GetSprite(float x, float y);
 };

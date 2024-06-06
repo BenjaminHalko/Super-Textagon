@@ -10,7 +10,7 @@
 class RenderSystem : public System {
     // Handle to the console
     HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
+    CONSOLE_SCREEN_BUFFER_INFO consoleInfo{};
 
     // Buffer to store the console
     std::string consoleBuffer;
@@ -19,15 +19,18 @@ class RenderSystem : public System {
     // Queue screen clear
     bool clearScreen = false;
 
+    // Color Escape Sequence Length
+    static const int colorEscapeLength = 22 + 1;
+
     /**
      * @brief Determines the luminance of a point
      * @details The luminance is calculated using the barycentric coordinates method
-     * @param triangleStrip The points of the triangle strip
+     * @param TriangleList The points of the triangle strip
      * @param x The x-coordinate of the point
      * @param y The y-coordinate of the point
      * @return A character representing the luminance of the point
      */
-    static char lumOfPoint(TriangleStrip &points, int x, int y) {
+    static std::pair<char, Color> LumAndColorOfPoint(TriangleList &points, int x, int y) {
         // Characters to use for luminance
         static const std::string lumChars = ".`'^\",:;Il!i~+_-?][}{1)(|\\/*tjfrjxnvuczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@";
         static const int lumCharsCount = (int)lumChars.size();
@@ -43,8 +46,16 @@ class RenderSystem : public System {
         // Calculate the luminance
         float lum = lambda1 * points[0].luminance + lambda2 * points[1].luminance + lambda3 * points[2].luminance;
 
-        // Return the character based on the luminance
-        return lumChars.at((int)((float)(lumCharsCount-1) * lum));
+        // Calculate the color
+        int r = (int)(lambda1 * float(points[0].color & 0xFF) + lambda2 * float(points[1].color & 0xFF) + lambda3 * float(points[2].color & 0xFF));
+        int g = (int)(lambda1 * float(points[0].color >> 8 & 0xFF) + lambda2 * float(points[1].color >> 8 & 0xFF) + lambda3 * float(points[2].color >> 8 & 0xFF));
+        int b = (int)(lambda1 * float(points[0].color >> 16 & 0xFF) + lambda2 * float(points[1].color >> 16 & 0xFF) + lambda3 * float(points[2].color >> 16 & 0xFF));
+
+        // Calculate the color
+        auto color = (Color)(r | (g << 8) | (b << 16));
+
+        // Return the character based on the luminance & color
+        return {lumChars.at((int)((float)(lumCharsCount-1) * lum)), 0xFFFFFF};
     }
 
     /**
@@ -52,30 +63,31 @@ class RenderSystem : public System {
      * @param x The x-coordinate of the character
      * @param y The y-coordinate of the character
      * @param character The character to set
+     * @param color The character to set
      */
-    void SetConsoleCharacter(int x, int y, char character) {
-        if (x >= 0 && x < consoleInfo.dwSize.X && y >= 0 && y < consoleInfo.dwSize.Y) {
-            //std::cout << character;
+    void SetConsoleCharacter(int x, int y, char character, Color color) {
+        if (x >= 0 && x < consoleInfo.dwSize.X && y >= 0 && y < consoleInfo.dwSize.Y)
             consoleBuffer[y * consoleInfo.dwSize.X + x] = character;
-            //std::cout << "test";
-        }
     }
 
     /**
      * @brief Draws a triangle to the console
-     * @param triangleStrip The points of the triangle strip
+     * @param triangleList The points of the triangle strip
      * @param index The index of the first point in the triangle strip
      */
-    void DrawTriangle(TriangleStrip &triangleStrip, int index) {
+    void DrawTriangle(TriangleList &triangleList, int index) {
         // Create a copy of the points
-        TriangleStrip points(3);
+        TriangleList points(3);
 
         // Convert the points to screen space, from 0 to dwSize
-        int maxScreenSize = max(consoleInfo.dwSize.X, consoleInfo.dwSize.Y);
+        const float fontAspectRatio = 0.5f; // The x to y ratio of the font
+        float maxScreenSize = max(consoleInfo.dwSize.X, consoleInfo.dwSize.Y / fontAspectRatio);
+
         for (int i = index; i < index + 3; i++) {
-            points[i - index].x = triangleStrip[i].x * maxScreenSize + float(consoleInfo.dwSize.X - maxScreenSize) * 0.5f;
-            points[i - index].y = triangleStrip[i].y * maxScreenSize * 0.5f + float(consoleInfo.dwSize.Y - maxScreenSize * 0.5f) * 0.5f;
-            points[i - index].luminance = triangleStrip[i].luminance;
+            points[i - index].x = triangleList[i].x * maxScreenSize + ((float)consoleInfo.dwSize.X - maxScreenSize) * 0.5f;
+            points[i - index].y = triangleList[i].y * maxScreenSize * fontAspectRatio + ((float)consoleInfo.dwSize.Y - maxScreenSize * fontAspectRatio) * 0.5f;
+            points[i - index].luminance = triangleList[i].luminance;
+            points[i - index].color = triangleList[i].color;
         }
 
         // Sort the points by y-coordinate
@@ -94,7 +106,8 @@ class RenderSystem : public System {
             float x2 = points[0].x + slopeAB * ((float)y - points[0].y);
             if (x1 > x2) std::swap(x1, x2); // Ensure x1 is always less than x2
             for (int x = (int)std::ceil(x1); x <= (int)(x2); x++) {
-                SetConsoleCharacter(x, y, lumOfPoint(points, x, y));
+                auto lumAndColor = LumAndColorOfPoint(points, x, y);
+                SetConsoleCharacter(x, y, lumAndColor.first, lumAndColor.second);
             }
         }
 
@@ -104,18 +117,19 @@ class RenderSystem : public System {
             float x2 = points[1].x + slopeBC * ((float)y - points[1].y);
             if (x1 > x2) std::swap(x1, x2); // Ensure x1 is always less than x2
             for (int x = (int)std::ceil(x1); x <= (int)(x2); x++) {
-                SetConsoleCharacter(x, y, lumOfPoint(points, x, y));
+                auto lumAndColor = LumAndColorOfPoint(points, x, y);
+                SetConsoleCharacter(x, y, lumAndColor.first, lumAndColor.second);
             }
         }
     }
 
     /**
      * @brief Draws a triangle strip to the console
-     * @param triangleStrip The points of the triangle strip
+     * @param triangleList The points of the triangle strip
      */
-    void DrawTriangleStrip(TriangleStrip &triangleStrip) {
-        for (int i = 0; i < triangleStrip.size() - 2; i += 3)
-            DrawTriangle(triangleStrip, i);
+    void DrawTriangleList(TriangleList &triangleList) {
+        for (int i = 0; i < triangleList.size() - 2; i += 3)
+            DrawTriangle(triangleList, i);
     }
 public:
     RenderSystem() {
@@ -131,8 +145,16 @@ public:
         // Disable synchronous input
         std::ios::sync_with_stdio(false);
 
+        // Set the console mode to enable virtual terminal processing
+        DWORD mode = 0;
+        GetConsoleMode(hStdOut, &mode);
+        mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+        SetConsoleMode(hStdOut, mode);
+
         // Enable unit buffering
         std::cout << std::unitbuf;
+
+        std::cout << "\x1b[38;2;0;128;200m";
     }
 
     void UpdateEntity(Entity &entity) override {
@@ -145,7 +167,7 @@ public:
         auto sprite = component.GetSprite(0.5f, 0.5f);
 
 
-        DrawTriangleStrip(sprite);
+        DrawTriangleList(sprite);
     }
 
     void PreUpdate() override {
