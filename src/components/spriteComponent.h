@@ -5,7 +5,7 @@
 
 // These might need their own file :/
 #define TriangleList std::vector<Point>
-#define Color unsigned short
+#define Color unsigned int
 #define PI 3.14159265358979323846f
 
 struct Point {

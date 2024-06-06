@@ -13,14 +13,11 @@ class RenderSystem : public System {
     CONSOLE_SCREEN_BUFFER_INFO consoleInfo{};
 
     // Buffer to store the console
-    std::string consoleBuffer;
+    std::vector<std::pair<char, Color>> consoleBuffer;
     int charCount = 0;
 
     // Queue screen clear
     bool clearScreen = false;
-
-    // Color Escape Sequence Length
-    static const int colorEscapeLength = 22 + 1;
 
     /**
      * @brief Determines the luminance of a point
@@ -55,7 +52,7 @@ class RenderSystem : public System {
         auto color = (Color)(r | (g << 8) | (b << 16));
 
         // Return the character based on the luminance & color
-        return {lumChars.at((int)((float)(lumCharsCount-1) * lum)), 0xFFFFFF};
+        return {lumChars.at((int)((float)(lumCharsCount-1) * lum)), color};
     }
 
     /**
@@ -63,11 +60,11 @@ class RenderSystem : public System {
      * @param x The x-coordinate of the character
      * @param y The y-coordinate of the character
      * @param character The character to set
-     * @param color The character to set
+     * @param color The color to set
      */
     void SetConsoleCharacter(int x, int y, char character, Color color) {
         if (x >= 0 && x < consoleInfo.dwSize.X && y >= 0 && y < consoleInfo.dwSize.Y)
-            consoleBuffer[y * consoleInfo.dwSize.X + x] = character;
+            consoleBuffer[y * consoleInfo.dwSize.X + x] = {character, color};
     }
 
     /**
@@ -153,13 +150,11 @@ public:
 
         // Enable unit buffering
         std::cout << std::unitbuf;
-
-        std::cout << "\x1b[38;2;0;128;200m";
     }
 
     void UpdateEntity(Entity &entity) override {
-        static int num = 0;
-        num += 2;
+        static float num = 0;
+        num++;
 
         // the 0.5 is for displaying in the center, this will get changed...
         auto component = entity.GetComponent<SpriteComponent>();
@@ -182,7 +177,7 @@ public:
         }
 
         // Resize the console buffer
-        consoleBuffer = std::string(charCount, ' ');
+        consoleBuffer = std::vector<std::pair<char, Color>>(charCount, {' ', 0});
     }
 
     void PostUpdate() override {
@@ -193,7 +188,19 @@ public:
         }
 
         // Draw the console buffer
-        std::cout << consoleBuffer;
+        std::string stringToPrint;
+        for(auto &character : consoleBuffer) {
+            if (character.first == ' ') {
+                stringToPrint += " ";
+            } else {
+                auto r = character.second & 0xFF;
+                auto g = (character.second >> 8) & 0xFF;
+                auto b = (character.second >> 16) & 0xFF;
+                std::string color = "\033[38;2;" + std::to_string(b) + ";" + std::to_string(g) + ";" + std::to_string(r) + "m";
+                stringToPrint += color + character.first;
+            }
+        }
+        std::cout << stringToPrint;
 
         // Move cursor home
         SetConsoleCursorPosition(hStdOut, {0, 0});

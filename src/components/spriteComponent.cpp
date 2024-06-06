@@ -28,7 +28,8 @@ TriangleList SpriteComponent::GetSprite(float x, float y) {
         transformedSprite[i] = {
             sprite[i].x * scale,
             sprite[i].y * scale,
-            sprite[i].luminance
+            sprite[i].luminance,
+            sprite[i].color
         };
         transformedSprite[i] = RotateVector(transformedSprite[i], rotation);
         transformedSprite[i].x += x;
