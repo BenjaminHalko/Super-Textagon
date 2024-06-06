@@ -5,9 +5,11 @@
 #include <typeindex>
 #include <unordered_map>
 #include <unordered_set>
+#include <string>
+#include <iostream>
 
 #define ComponentMap std::unordered_map<std::type_index, std::unique_ptr<Component>>
-#define SystemSet std::unordered_set<std::type_index>
+#define SystemSet std::vector<std::type_index>
 
 /*
  * @brief The base class for all entities
@@ -21,12 +23,6 @@ class Entity {
      */
     ComponentMap components;
 
-    /**
-     * @brief Systems that the entity uses
-     * @details We can easily check if the entity uses a system by checking if the system type is in this set
-     */
-    SystemSet systemsToUse;
-
     // Tells systems the order in which to execute the entity
     int executionPriority = 0;
 
@@ -34,6 +30,12 @@ class Entity {
     bool destroyed = false;
 
 protected:
+    /**
+     * @brief Systems that the entity uses
+     * @details We can easily check if the entity uses a system by checking if the system type is in this set
+     */
+    SystemSet systemsToUse;
+
     /**
      * @brief Adds a component to the entity
      * @tparam ComponentType The type of the component to add

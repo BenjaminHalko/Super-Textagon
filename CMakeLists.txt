@@ -5,4 +5,5 @@ set(CMAKE_CXX_STANDARD 14)
 
 # Add source files
 file(GLOB_RECURSE SOURCES src/*)
-add_executable(Textual_Game ${SOURCES})
+add_executable(Textual_Game ${SOURCES}
+        src/systems/renderSystem.cpp)

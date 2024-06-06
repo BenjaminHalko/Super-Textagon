@@ -5,8 +5,8 @@
  * @param systemType The type of the system
  * @return bool True if the entity uses the system
  */
-bool Entity::UsesSystem(std::type_index systemType) const {
-    return systemsToUse.find(systemType) != systemsToUse.end();
+bool Entity::UsesSystem(std::type_index system) const {
+    return std::find(systemsToUse.begin(), systemsToUse.end(), system) != systemsToUse.end();
 }
 
 // Orders the entity inside of sets

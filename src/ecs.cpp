@@ -15,9 +15,8 @@ void ECS::Update() {
 
         // Loop over all the entities
         for(auto entity = entities.begin(); entity != entities.end(); entity++) {
-            if (!(*entity)->UsesSystem(typeid(system))) {
-                // Currently not working
-                //continue;
+            if (!(*entity)->UsesSystem(typeid(*(system.get())))) {
+                continue;
             }
 
             // Update the entity
