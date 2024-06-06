@@ -1,3 +1,4 @@
+#include <iostream>
 #include "ecs.h"
 
 // We need to define the static variables here
@@ -14,6 +15,11 @@ void ECS::Update() {
 
         // Loop over all the entities
         for(auto entity = entities.begin(); entity != entities.end(); entity++) {
+            if (!(*entity)->UsesSystem(typeid(system))) {
+                // Currently not working
+                //continue;
+            }
+
             // Update the entity
             system->UpdateEntity(**entity);
 
