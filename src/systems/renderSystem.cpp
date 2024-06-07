@@ -1,5 +1,7 @@
 #include "renderSystem.h"
 #include "../ecs.h"
+#include "../components/transformComponent.h"
+#include "transformSystem.h"
 
 RenderSystem::RenderSystem() {
     // Disable the cursor
@@ -63,7 +65,7 @@ std::pair<char, Color> RenderSystem::LumAndColorOfPoint(TriangleList &points, in
  * @param character The character to set
  * @param color The color to set
  */
-void RenderSystem::SetConsoleCharacter(int x, int y, char character, Color color) {
+void RenderSystem::SetConsoleCharacter(int x, int y, char character, unsigned int color) {
     if (x >= 0 && x < consoleInfo.dwSize.X && y >= 0 && y < consoleInfo.dwSize.Y)
         consoleBuffer[y * consoleInfo.dwSize.X + x] = {character, color};
 }
@@ -73,9 +75,9 @@ void RenderSystem::SetConsoleCharacter(int x, int y, char character, Color color
  * @param triangleList The points of the triangle strip
  * @param index The index of the first point in the triangle strip
  */
-void RenderSystem::DrawTriangle(TriangleList &triangleList, int index) {
+void RenderSystem::DrawTriangle(SpriteComponent& sprite, int index) {
     // Create a copy of the points
-    TriangleList points(3);
+    SpriteComponent points;
 
     // Convert the points to screen space, from 0 to dwSize
     const float fontAspectRatio = 0.5f; // The x to y ratio of the font
@@ -121,28 +123,7 @@ void RenderSystem::DrawTriangle(TriangleList &triangleList, int index) {
     }
 }
 
-/**
- * @brief Draws a triangle strip to the console
- * @param triangleList The points of the triangle strip
- */
-void RenderSystem::DrawTriangleList(TriangleList &triangleList) {
-
-}
-
 // Public
-
-void RenderSystem::UpdateEntity(Entity &entity) {
-    static float num = 0;
-    num++;
-
-    // the 0.5 is for displaying in the center, this will get changed...
-    auto component = entity.GetComponent<SpriteComponent>();
-    component.rotation = (float)num;
-    auto sprite = component.GetSprite(0.5f, 0.5f);
-
-
-    DrawTriangleList(sprite);
-}
 
 void RenderSystem::Update() {
     // Get the console info
@@ -160,11 +141,18 @@ void RenderSystem::Update() {
 
     // Loop over all the entities
     for(auto& entity : ECS::GetEntities()) {
+
         // Check if the entity has a sprite component
-        if (entity->HasComponent<SpriteComponent>()) {
-            TriangleList triangleList = entity->GetComponent<SpriteComponent>().GetSprite();
-            for (int i = 0; i < triangleList.size() - 2; i += 3)
-                DrawTriangle(triangleList, i);
+        if (entity->HasComponents<SpriteComponent, TransformComponent>()) {
+
+            auto entityTransformedSprite = TransformSystem::TransformSprite(
+                    entity->GetComponent<SpriteComponent>(),
+                    entity->GetComponent<TransformComponent>()
+                );
+
+            for(int i = 0; i < entityTransformedSprite.size(); i += 3) {
+                DrawTriangle(entityTransformedSprite, i);
+            }
         }
     }
 

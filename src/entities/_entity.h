@@ -54,9 +54,9 @@ public:
      * @tparam ComponentType The type of the component to check
      * @return bool True if the entity has the component
      */
-    template <typename ComponentType>
-    bool HasComponent() {
-        return components.find(typeid(ComponentType)) != components.end();
+    template <typename... ComponentTypes>
+    bool HasComponents() {
+        return ((components.find(typeid(ComponentTypes)) != components.end()) && ...);
     }
 
     bool operator<(const Entity &other) const;

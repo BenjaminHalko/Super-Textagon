@@ -1,6 +1,7 @@
 #pragma once
 
 #include "_component.h"
+#include "../common.h"
 #include <vector>
 #include <iterator>
 
@@ -10,15 +11,30 @@
  */
 class SpriteComponent : public Component {
 private:
-    struct Point {
-        float x, y;
-        unsigned int color;
-        float alpha;
-    };
-    std::vector<Point> _sprite;
+    std::vector<ColoredPoint> _sprite;
 public:
-    SpriteComponent(std::initializer_list<Point> sprite) {
+    SpriteComponent() = default;
+
+    SpriteComponent(std::initializer_list<ColoredPoint> sprite) {
         std::copy(sprite.begin(), sprite.end(), std::back_inserter(_sprite));
     }
-    std::vector<Point>& operator()() { return _sprite; }
+
+    explicit SpriteComponent(std::vector<ColoredPoint> sprite) : _sprite(std::move(sprite)) {}
+
+    ColoredPoint& operator[](int index) {
+        return _sprite[index];
+    }
+
+    void AddPoint(ColoredPoint point) {
+        _sprite.push_back(point);
+    }
+
+    // Begin and end for range-based for loops
+    std::vector<ColoredPoint>::iterator begin() {
+        return _sprite.begin();
+    }
+
+    std::vector<ColoredPoint>::iterator end() {
+        return _sprite.end();
+    }
 };
