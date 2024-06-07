@@ -19,8 +19,6 @@ public:
         std::copy(sprite.begin(), sprite.end(), std::back_inserter(_sprite));
     }
 
-    explicit SpriteComponent(std::vector<ColoredPoint> sprite) : _sprite(std::move(sprite)) {}
-
     ColoredPoint& operator[](int index) {
         return _sprite[index];
     }
