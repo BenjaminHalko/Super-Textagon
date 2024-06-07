@@ -6,7 +6,7 @@ class GravityComponent : public Component {
 private:
     float _gravity;
 public:
-    GravityComponent(float gravity) : _gravity(gravity) {}
+    explicit GravityComponent(float gravity) : _gravity(gravity) {}
     GravityComponent& operator=(float gravity) {
         this->_gravity = gravity;
         return *this;
