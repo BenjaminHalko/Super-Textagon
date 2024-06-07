@@ -17,6 +17,7 @@ jobs:
       with:
         apt_packages: liblapack-dev
         cmake_command: cmake . -DCMAKE_EXPORT_COMPILE_COMMANDS=on
+        config_file: .clang-tidy
 
     - uses: ZedThree/clang-tidy-review/upload@v0.14.0
       id: upload-review
