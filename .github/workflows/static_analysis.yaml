@@ -1,0 +1,26 @@
+name: Static analysis
+
+on: pull_request
+
+jobs:
+  clang-tidy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.TOKEN }}
+
+    - uses: ZedThree/clang-tidy-review@v0.14.0
+      id: review
+      with:
+        apt_packages: liblapack-dev
+        cmake_command: cmake . -DCMAKE_EXPORT_COMPILE_COMMANDS=on
+        lgtm_comment_body: ''
+
+    - uses: ZedThree/clang-tidy-review/upload@v0.14.0
+      id: upload-review
+
+    - if: steps.review.outputs.total_comments > 0
+      run: exit 1
