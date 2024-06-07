@@ -23,39 +23,52 @@ RenderSystem::RenderSystem() {
 // Private
 
 /**
- * @brief Determines the luminance of a point
- * @details The luminance is calculated using the barycentric coordinates method
- * @param TriangleList The points of the triangle strip
+ * @brief Determines the alpha and color of a point
+ * @details The alpha is calculated using the barycentric coordinates method
+ * @param SpriteComponent The points of the triangle strip
  * @param x The x-coordinate of the point
  * @param y The y-coordinate of the point
  * @return A character representing the luminance of the point
  */
-std::pair<char, Color> RenderSystem::LumAndColorOfPoint(TriangleList &points, int x, int y) {
-    // Characters to use for luminance
-    static const std::string lumChars = ".`'^\",:;Il!i~+_-?][}{1)(|\\/*tjfrjxnvuczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@";
-    static const int lumCharsCount = (int)lumChars.size();
+std::pair<char, Color> RenderSystem::AlphaColorOfPoint(SpriteComponent &sprite, int x, int y) {
+    // Characters to use for alpha
+    static const std::string alphaChars = ".`'^\",:;Il!i~+_-?][}{1)(|\\/*tjfrjxnvuczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@";
+    static const int alphaCharsCount = (int)alphaChars.size();
 
     // Calculate the denominators for barycentric coordinates
-    float denominator = (points[1].y - points[2].y) * (points[0].x - points[2].x) + (points[2].x - points[1].x) * (points[0].y - points[2].y);
+    float denominator =
+            (sprite[1].point.y - sprite[2].point.y) * (sprite[0].point.x - sprite[2].point.x) +
+            (sprite[2].point.x - sprite[1].point.x) * (sprite[0].point.y - sprite[2].point.y);
 
     // Calculate barycentric coordinates
-    float lambda1 = ((points[1].y - points[2].y) * ((float)x - points[2].x) + (points[2].x - points[1].x) * ((float)y - points[2].y)) / denominator;
-    float lambda2 = ((points[2].y - points[0].y) * ((float)x - points[2].x) + (points[0].x - points[2].x) * ((float)y - points[2].y)) / denominator;
+    float lambda1 = ((sprite[1].point.y - sprite[2].point.y) * ((float)x - sprite[2].point.x) + (sprite[2].point.x - sprite[1].point.x) * ((float)y - sprite[2].point.y)) / denominator;
+    float lambda2 = ((sprite[2].point.y - sprite[0].point.y) * ((float)x - sprite[2].point.x) + (sprite[0].point.x - sprite[2].point.x) * ((float)y - sprite[2].point.y)) / denominator;
     float lambda3 = 1.0f - lambda1 - lambda2;
 
     // Calculate the luminance
-    float lum = lambda1 * points[0].luminance + lambda2 * points[1].luminance + lambda3 * points[2].luminance;
+    float lum = lambda1 * sprite[0].alpha + lambda2 * sprite[1].alpha + lambda3 * sprite[2].alpha;
+
+    // Calculate the character
+    char character = alphaChars.at((int)((float)(alphaCharsCount-1) * lum));
 
     // Calculate the color
-    int r = (int)(lambda1 * float(points[0].color & 0xFF) + lambda2 * float(points[1].color & 0xFF) + lambda3 * float(points[2].color & 0xFF));
-    int g = (int)(lambda1 * float(points[0].color >> 8 & 0xFF) + lambda2 * float(points[1].color >> 8 & 0xFF) + lambda3 * float(points[2].color >> 8 & 0xFF));
-    int b = (int)(lambda1 * float(points[0].color >> 16 & 0xFF) + lambda2 * float(points[1].color >> 16 & 0xFF) + lambda3 * float(points[2].color >> 16 & 0xFF));
+    Color r = (int)(
+            lambda1 * float(sprite[0].color >> 16 & 0xFF) +
+            lambda2 * float(sprite[1].color >> 16 & 0xFF) +
+            lambda3 * float(sprite[2].color >> 16 & 0xFF));
+    Color g = (int)(
+            lambda1 * float(sprite[0].color >> 8 & 0xFF) +
+            lambda2 * float(sprite[1].color >> 8 & 0xFF) +
+            lambda3 * float(sprite[2].color >> 8 & 0xFF));
+    Color b = (int)(
+            lambda1 * float(sprite[0].color & 0xFF) +
+            lambda2 * float(sprite[1].color & 0xFF) +
+            lambda3 * float(sprite[2].color & 0xFF));
 
-    // Calculate the color
-    auto color = (Color)(r | (g << 8) | (b << 16));
+    Color color = ((r << 16) | (g << 8) | b);
 
     // Return the character based on the luminance & color
-    return {lumChars.at((int)((float)(lumCharsCount-1) * lum)), color};
+    return {character, color};
 }
 
 /**
@@ -63,11 +76,10 @@ std::pair<char, Color> RenderSystem::LumAndColorOfPoint(TriangleList &points, in
  * @param x The x-coordinate of the character
  * @param y The y-coordinate of the character
  * @param character The character to set
- * @param color The color to set
  */
-void RenderSystem::SetConsoleCharacter(int x, int y, char character, unsigned int color) {
+void RenderSystem::SetConsoleCharacter(int x, int y, std::pair<char, Color> character) {
     if (x >= 0 && x < consoleInfo.dwSize.X && y >= 0 && y < consoleInfo.dwSize.Y)
-        consoleBuffer[y * consoleInfo.dwSize.X + x] = {character, color};
+        consoleBuffer[y * consoleInfo.dwSize.X + x] = character;
 }
 
 /**
@@ -77,48 +89,49 @@ void RenderSystem::SetConsoleCharacter(int x, int y, char character, unsigned in
  */
 void RenderSystem::DrawTriangle(SpriteComponent& sprite, int index) {
     // Create a copy of the points
-    SpriteComponent points;
+    SpriteComponent points(3);
 
     // Convert the points to screen space, from 0 to dwSize
     const float fontAspectRatio = 0.5f; // The x to y ratio of the font
     float maxScreenSize = max(consoleInfo.dwSize.X, consoleInfo.dwSize.Y / fontAspectRatio);
 
     for (int i = index; i < index + 3; i++) {
-        points[i - index].x = triangleList[i].x * maxScreenSize + ((float)consoleInfo.dwSize.X - maxScreenSize) * 0.5f;
-        points[i - index].y = triangleList[i].y * maxScreenSize * fontAspectRatio + ((float)consoleInfo.dwSize.Y - maxScreenSize * fontAspectRatio) * 0.5f;
-        points[i - index].luminance = triangleList[i].luminance;
-        points[i - index].color = triangleList[i].color;
+        points[i - index].point.x = sprite[i].point.x * maxScreenSize + ((float)consoleInfo.dwSize.X - maxScreenSize) * 0.5f;
+        points[i - index].point.y = sprite[i].point.y * maxScreenSize * fontAspectRatio + ((float)consoleInfo.dwSize.Y - maxScreenSize * fontAspectRatio) * 0.5f;
+        points[i - index].color = sprite[i].color;
+        points[i - index].alpha = sprite[i].alpha;
     }
 
     // Sort the points by y-coordinate
-    std::sort(points.begin(), points.end(), [](const Point &a, const Point &b) {
-        return a.y < b.y;
+    std::sort(points.begin(), points.end(), [](const ColoredPoint &a, const ColoredPoint &b) {
+        return a.point.y < b.point.y;
     });
 
     // Calculate the slopes
-    float slopeAC = (points[2].y - points[0].y == 0) ? std::numeric_limits<float>::infinity() : (points[2].x - points[0].x) / (points[2].y - points[0].y);
-    float slopeBC = (points[2].y - points[1].y == 0) ? std::numeric_limits<float>::infinity() : (points[2].x - points[1].x) / (points[2].y - points[1].y);
-    float slopeAB = (points[1].y - points[0].y == 0) ? std::numeric_limits<float>::infinity() : (points[1].x - points[0].x) / (points[1].y - points[0].y);
+    float slopeAC = (points[2].point.y - points[0].point.y == 0) ?
+            std::numeric_limits<float>::infinity() : (points[2].point.x - points[0].point.x) / (points[2].point.y - points[0].point.y);
+    float slopeBC = (points[2].point.y - points[1].point.y == 0) ?
+            std::numeric_limits<float>::infinity() : (points[2].point.x - points[1].point.x) / (points[2].point.y - points[1].point.y);
+    float slopeAB = (points[1].point.y - points[0].point.y == 0) ?
+            std::numeric_limits<float>::infinity() : (points[1].point.x - points[0].point.x) / (points[1].point.y - points[0].point.y);
 
     // Draw the upper part of the triangle (from A to B)
-    for (int y = (int)std::ceil(points[0].y); y <= (int)(points[1].y); y++) {
-        float x1 = points[0].x + slopeAC * ((float)y - points[0].y);
-        float x2 = points[0].x + slopeAB * ((float)y - points[0].y);
+    for (int y = (int)std::ceil(points[0].point.y); y <= (int)(points[1].point.y); y++) {
+        float x1 = points[0].point.x + slopeAC * ((float)y - points[0].point.y);
+        float x2 = points[0].point.x + slopeAB * ((float)y - points[0].point.y);
         if (x1 > x2) std::swap(x1, x2); // Ensure x1 is always less than x2
         for (int x = (int)std::ceil(x1); x <= (int)(x2); x++) {
-            auto lumAndColor = LumAndColorOfPoint(points, x, y);
-            SetConsoleCharacter(x, y, lumAndColor.first, lumAndColor.second);
+            SetConsoleCharacter(x, y, AlphaColorOfPoint(points, x, y));
         }
     }
 
     // Draw the lower part of the triangle (from B to C)
-    for (int y = (int)std::ceil(points[1].y); y <= (int)(points[2].y); y++) {
-        float x1 = points[0].x + slopeAC * ((float)y - points[0].y);
-        float x2 = points[1].x + slopeBC * ((float)y - points[1].y);
+    for (int y = (int)std::ceil(points[1].point.y); y <= (int)(points[2].point.y); y++) {
+        float x1 = points[0].point.x + slopeAC * ((float)y - points[0].point.y);
+        float x2 = points[1].point.x + slopeBC * ((float)y - points[1].point.y);
         if (x1 > x2) std::swap(x1, x2); // Ensure x1 is always less than x2
         for (int x = (int)std::ceil(x1); x <= (int)(x2); x++) {
-            auto lumAndColor = LumAndColorOfPoint(points, x, y);
-            SetConsoleCharacter(x, y, lumAndColor.first, lumAndColor.second);
+            SetConsoleCharacter(x, y, AlphaColorOfPoint(points, x, y));
         }
     }
 }
@@ -150,7 +163,7 @@ void RenderSystem::Update() {
                     entity->GetComponent<TransformComponent>()
                 );
 
-            for(int i = 0; i < entityTransformedSprite.size(); i += 3) {
+            for(int i = 0; i < entityTransformedSprite.Size(); i += 3) {
                 DrawTriangle(entityTransformedSprite, i);
             }
         }
@@ -173,10 +186,9 @@ void RenderSystem::Update() {
             auto b = character.second & 0xFF;
 
             std::string color = "\033[38;2;" + std::to_string(r) + ";" + std::to_string(g) + ";" + std::to_string(b) + "m";
-            stringToPrint += color + character.first + "\033[0m";
+            stringToPrint += color + character.first;
         }
     }
-    std::cout.flush();
     std::cout << stringToPrint;
 
     // Move cursor home

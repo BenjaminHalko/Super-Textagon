@@ -13,15 +13,15 @@ class RenderSystem : public System {
     CONSOLE_SCREEN_BUFFER_INFO consoleInfo{};
 
     // Buffer to store the console
-    std::vector<std::pair<char, unsigned int>> consoleBuffer;
+    std::vector<std::pair<char, Color>> consoleBuffer;
     int charCount = 0;
 
     // Queue screen clear
     bool clearScreen = false;
 
-    static std::pair<char, Color> LumAndColorOfPoint(SpriteComponent &sprite, int x, int y);
+    static std::pair<char, Color> AlphaColorOfPoint(SpriteComponent &sprite, int x, int y);
 
-    void SetConsoleCharacter(int x, int y, char character, unsigned int color);
+    void SetConsoleCharacter(int x, int y, std::pair<char, Color> character);
 
     void DrawTriangle(SpriteComponent &sprite, int index);
 public:

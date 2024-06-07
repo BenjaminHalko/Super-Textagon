@@ -5,6 +5,14 @@
 #include <vector>
 #include <iterator>
 
+#define Color unsigned int
+
+struct ColoredPoint {
+    Point point;
+    Color color;
+    float alpha;
+};
+
 /**
  * @brief A component that represents a sprite.
  * @details A sprite is a collection of points that are drawn on the screen.
@@ -15,24 +23,17 @@ private:
 public:
     SpriteComponent() = default;
 
-    SpriteComponent(std::initializer_list<ColoredPoint> sprite) {
-        std::copy(sprite.begin(), sprite.end(), std::back_inserter(_sprite));
-    }
+    SpriteComponent(std::initializer_list<ColoredPoint> sprite);
 
-    ColoredPoint& operator[](int index) {
-        return _sprite[index];
-    }
+    explicit SpriteComponent(int size);
 
-    void AddPoint(ColoredPoint point) {
-        _sprite.push_back(point);
-    }
+    ColoredPoint& operator[](int index);
 
-    // Begin and end for range-based for loops
-    std::vector<ColoredPoint>::iterator begin() {
-        return _sprite.begin();
-    }
+    void AddPoint(ColoredPoint point);
 
-    std::vector<ColoredPoint>::iterator end() {
-        return _sprite.end();
-    }
+    size_t Size();
+
+    std::vector<ColoredPoint>::iterator begin();
+
+    std::vector<ColoredPoint>::iterator end();
 };
