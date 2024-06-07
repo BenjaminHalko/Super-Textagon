@@ -1,8 +1,5 @@
-#include "ecs.hpp"
-#include "input.hpp"
-#include "entities/testEntity.hpp"
-#include "systems/renderSystem.hpp"
-#include "systems/debugSystem.hpp"
+#include "ecs.h"
+#include "systems/input.h"
 
 #include <chrono>
 #include <thread>
@@ -24,9 +21,6 @@ void GameLoop() {
         // Start the timer
         auto start = std::chrono::high_resolution_clock::now();
 
-        // Update the input
-        Input::Update();
-
         // Update the entities
         ECS::Update();
 
@@ -36,12 +30,6 @@ void GameLoop() {
 }
 
 int main() {
-    // Add Entities
-    ECS::AddEntity<TestEntity>();
-
-    // Add Systems
-    ECS::AddSystem<DebugSystem>();
-
     // Game Loop
     GameLoop();
 

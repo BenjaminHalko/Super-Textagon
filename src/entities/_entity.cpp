@@ -1,13 +1,4 @@
-#include "_entity.hpp"
-
-/**
- * @brief Check if the entity uses a system
- * @param systemType The type of the system
- * @return bool True if the entity uses the system
- */
-bool Entity::UsesSystem(std::type_index systemType) const {
-    return systemsToUse.find(systemType) != systemsToUse.end();
-}
+#include "_entity.h"
 
 // Orders the entity inside of sets
 bool Entity::operator<(const Entity &other) const {

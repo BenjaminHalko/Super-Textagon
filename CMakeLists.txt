@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 project(Textual_Game)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
+# Add source files
 file(GLOB_RECURSE SOURCES src/*)
-add_executable(Textual_Game ${SOURCES})
+add_executable(Textual_Game ${SOURCES}
+        src/systems/renderSystem.cpp)

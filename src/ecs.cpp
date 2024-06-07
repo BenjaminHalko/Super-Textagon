@@ -1,8 +1,16 @@
-#include "ecs.hpp"
+#include <iostream>
+#include "ecs.h"
 
 // We need to define the static variables here
 std::multiset<std::unique_ptr<Entity>> ECS::entities;
 std::set<std::unique_ptr<System>> ECS::systems;
+
+/**
+ * @brief Gets the entities
+ */
+std::multiset<std::unique_ptr<Entity>>& ECS::GetEntities() {
+    return entities;
+}
 
 /**
  * @brief Runs the every frame
@@ -10,20 +18,15 @@ std::set<std::unique_ptr<System>> ECS::systems;
  */
 void ECS::Update() {
     for (auto& system : systems) {
-        system->PreUpdate();
+        system->Update();
+    }
 
-        // Loop over all the entities
-        for(auto entity = entities.begin(); entity != entities.end(); entity++) {
-            // Update the entity
-            system->UpdateEntity(**entity);
-
-            // Check if the entity got destroyed
-            // If it did, remove it from the set
-            // and move the iterator back one step
-            if ((*entity)->gotDestroyed())
-                entity = std::prev(entities.erase(entity));
-        }
-
-        system->PostUpdate();
+    // Loop over all the entities
+    for(auto entity = entities.begin(); entity != entities.end(); entity++) {
+        // Check if the entity got destroyed
+        // If it did, remove it from the set
+        // and move the iterator back one step
+        if ((*entity)->gotDestroyed())
+            entity = std::prev(entities.erase(entity));
     }
 }
