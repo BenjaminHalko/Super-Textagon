@@ -2,8 +2,8 @@
 
 class ScriptComponent : public Component {
 private:
-    void (*_script)(void);
+    void (*_script)();
 public:
-    ScriptComponent(void (*script)(void)) : _script(script) {}
+    explicit ScriptComponent(void (*script)()) : _script(script) {}
     void operator()() { _script(); }
 };

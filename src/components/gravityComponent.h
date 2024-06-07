@@ -2,11 +2,16 @@
 
 #include "_component.h"
 
-class GravityComponent : Component {
+class GravityComponent : public Component {
 private:
     float _gravity;
 public:
     GravityComponent(float gravity) : _gravity(gravity) {}
-    void operator=(float gravity) { this->_gravity = gravity; }
-    float operator()() { return _gravity; }
+    GravityComponent& operator=(float gravity) {
+        this->_gravity = gravity;
+        return *this;
+    }
+    float operator()() const {
+        return _gravity;
+    }
 };
