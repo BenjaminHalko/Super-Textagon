@@ -6,8 +6,9 @@
 #include <set>
 
 class ECS {
-    static std::multiset<std::unique_ptr<Entity>> entities;
-    static std::set<std::unique_ptr<System>> systems;
+    static std::multiset<std::unique_ptr<Entity>> _entities;
+    static std::set<std::unique_ptr<System>> _systems;
+    static bool _isRunning;
 public:
     /**
      * @brief Adds an entity to the ECS
@@ -17,7 +18,7 @@ public:
      */
     template <typename EntityType, typename... Args>
     static void AddEntity(Args&&... args) {
-        entities.insert(std::make_unique<EntityType>());
+        _entities.insert(std::make_unique<EntityType>());
     }
 
     /**
@@ -26,12 +27,14 @@ public:
      */
     template <typename SystemType>
     static void AddSystem() {
-        systems.insert(std::make_unique<SystemType>());
+        _systems.insert(std::make_unique<SystemType>());
     }
 
     static std::multiset<std::unique_ptr<Entity>>& GetEntities();
 
-    static void Update();
+    static void GameLoop();
+
+    static void StopGame();
 };
 
 

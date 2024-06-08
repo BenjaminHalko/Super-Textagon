@@ -5,5 +5,5 @@ private:
     void (*_script)();
 public:
     explicit ScriptComponent(void (*script)()) : _script(script) {}
-    void operator()() { _script(); }
+    void operator()();
 };
