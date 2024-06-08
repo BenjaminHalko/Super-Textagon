@@ -5,7 +5,7 @@
 #include <chrono>
 
 class TimeSystem : public System {
-    static std::chrono::time_point<std::chrono::steady_clock>_frameStart;
+    static std::chrono::time_point<std::chrono::steady_clock> _frameStart;
     static std::chrono::milliseconds _frameRate;
 public:
     static void FrameStart();
