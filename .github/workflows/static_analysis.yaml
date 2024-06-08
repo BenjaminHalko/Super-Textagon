@@ -18,6 +18,7 @@ jobs:
         apt_packages: liblapack-dev
         cmake_command: cmake . -DCMAKE_EXPORT_COMPILE_COMMANDS=on
         lgtm_comment_body: ''
+        config_file: .clang-tidy
 
     - if: steps.review.outputs.total_comments > 0
       run: exit 1
