@@ -1,14 +1,9 @@
-#include "input.h"
+#include <engine/systems/input.h>
 #include <windows.h>
 
 // Define the static variable
 std::unordered_map<Key, Input::KeyState> Input::keys;
 
-/**
- * @brief Loops over all the keys and tracks their state
- * @note This function should be called once per frame
- * to update the key states for the current frame
- */
 void Input::Update() {
     for(int i = Key::LEFT; i <= Key::QUIT; i++) {
         bool held;
@@ -39,20 +34,10 @@ void Input::Update() {
     }
 }
 
-/**
- * @brief Check if a key is held down
- * @param key The key to check
- * @return bool True if the key is held
- */
 bool Input::GetKeyDown(Key key) {
     return keys[key] != KeyState::UP;
 }
 
- /**
- * @brief Check if a key is pressed
- * @param key The key to check
- * @return bool True if the key is pressed
- */
 bool Input::GetKeyPressed(Key key) {
     return keys[key] == KeyState::PRESSED;
 }

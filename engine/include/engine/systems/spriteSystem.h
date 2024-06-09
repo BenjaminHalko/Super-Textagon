@@ -1,7 +1,7 @@
 #pragma once
 
-#include "_system.h"
-#include "../components/spriteComponent.h"
+#include <engine/systems/_system.h>
+#include <engine/components/spriteComponent.h>
 
 class SpriteSystem : public System {
 public:

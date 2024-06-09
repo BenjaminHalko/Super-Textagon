@@ -1,6 +1,6 @@
 #pragma once
 
-#include "_component.h"
+#include <engine/components/_component.h>
 
 class GravityComponent : public Component {
 private:

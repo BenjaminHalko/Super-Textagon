@@ -1,4 +1,4 @@
-#include "spriteSystem.h"
+#include <engine/systems/spriteSystem.h>
 
 SpriteComponent SpriteSystem::GenerateShape(
     float radius,

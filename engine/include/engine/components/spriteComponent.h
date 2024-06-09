@@ -1,7 +1,7 @@
 #pragma once
 
-#include "_component.h"
-#include "../common.h"
+#include <engine/components/_component.h>
+#include <engine/common.h>
 #include <vector>
 #include <iterator>
 

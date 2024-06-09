@@ -1,5 +1,5 @@
-#include "ecs.h"
-#include "systems/timeSystem.h"
+#include <engine/ecs.h>
+#include <engine/systems/timeSystem.h>
 
 // We need to define the static variables here
 std::multiset<std::unique_ptr<Entity>> ECS::_entities;
@@ -13,10 +13,6 @@ std::multiset<std::unique_ptr<Entity>>& ECS::GetEntities() {
     return _entities;
 }
 
-/**
- * @brief Runs the every frame
- * @details It loops over all the systems and calls their UpdateEntity function
- */
 void ECS::GameLoop() {
     while(_isRunning) {
         TimeSystem::FrameStart();
@@ -27,9 +23,6 @@ void ECS::GameLoop() {
     }
 }
 
-/**
- * @brief Stops the game loop
- */
 void ECS::StopGame() {
     _isRunning = false;
 }

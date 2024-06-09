@@ -1,4 +1,6 @@
-#include "_component.h"
+#pragma once
+
+#include <engine/components/_component.h>
 
 class ScriptComponent : public Component {
 private:
