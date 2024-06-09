@@ -4,21 +4,15 @@ on: pull_request
 
 jobs:
   clang-tidy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: 0
         token: ${{ secrets.TOKEN }}
 
-    - uses: ZedThree/clang-tidy-review@v0.14.0
-      id: review
+    - name: Run static analysis
+      uses: JacobDomagala/StaticAnalysis@master
       with:
-        apt_packages: liblapack-dev
-        cmake_command: cmake . -DCMAKE_EXPORT_COMPILE_COMMANDS=on
-        lgtm_comment_body: ''
-        config_file: .clang-tidy
-
-    - if: steps.review.outputs.total_comments > 0
-      run: exit 1
+        language: c++
+        use_cmake: true
