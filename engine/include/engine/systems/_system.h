@@ -1,8 +1,5 @@
 #pragma once
 
-#include "../entities/_entity.h"
-
-
 /**
  * @brief Base class for all systems
  */

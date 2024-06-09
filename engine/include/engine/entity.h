@@ -1,14 +1,12 @@
 #pragma once
 
-#include "../components/_component.h"
+#include <engine/components/_component.h>
 #include <memory>
 #include <typeindex>
 #include <unordered_map>
 #include <unordered_set>
 #include <string>
 #include <iostream>
-
-#define ComponentMap std::unordered_map<std::type_index, std::unique_ptr<Component>>
 
 /*
  * @brief The base class for all entities
@@ -20,7 +18,7 @@ class Entity {
      * The value is a unique pointer to the component.
      * This is a map so that we can easily access the component by its type.
      */
-    ComponentMap components;
+    std::unordered_map<std::type_index, std::unique_ptr<Component>> components;
 
     // Tells systems the order in which to execute the entity
     int executionPriority = 0;
@@ -59,7 +57,9 @@ public:
         return ((components.find(typeid(ComponentTypes)) != components.end()) && ...);
     }
 
+    // Orders the entity inside of sets
     bool operator<(const Entity &other) const;
 
-    bool gotDestroyed() const;
+    // Check if the entity is destroyed
+    [[nodiscard]] bool gotDestroyed() const;
 };

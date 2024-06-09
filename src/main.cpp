@@ -1,4 +1,4 @@
-#include "engine/ecs.h"
+#include <engine/ecs.h>
 
 int main() {
     ECS::GameLoop();
