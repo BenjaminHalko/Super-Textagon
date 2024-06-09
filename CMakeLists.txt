@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(Textual_Game)
 
+# Set compiler flags
+enable_language(CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 # Add source files
