@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine/components/_component.h>
+#include <engine/comp/_component.h>
 
 /**
  * @brief A component that represents the position, scale, and rotation of an entity.

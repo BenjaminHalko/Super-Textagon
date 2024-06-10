@@ -1,5 +1,5 @@
 #include <engine/ecs.h>
-#include <engine/systems/timeSystem.h>
+#include <engine/sys/timeSystem.h>
 
 // We need to define the static variables here
 std::multiset<std::unique_ptr<Entity>> ECS::_entities;

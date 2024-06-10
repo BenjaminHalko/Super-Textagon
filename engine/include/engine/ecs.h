@@ -1,7 +1,7 @@
 #pragma once
 
 #include <engine/entity.h>
-#include <engine/systems/_system.h>
+#include <engine/sys/_system.h>
 #include <memory>
 #include <set>
 

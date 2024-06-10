@@ -1,4 +1,4 @@
-#include <engine/systems/input.h>
+#include <engine/sys/input.h>
 #include <windows.h>
 
 // Define the static variable
