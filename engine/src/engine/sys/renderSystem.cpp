@@ -1,7 +1,7 @@
-#include <engine/systems/renderSystem.h>
+#include <engine/sys/renderSystem.h>
 #include <engine/ecs.h>
-#include <engine/systems/transformSystem.h>
-#include <engine/systems/spriteSystem.h>
+#include <engine/sys/transformSystem.h>
+#include <engine/sys/spriteSystem.h>
 
 RenderSystem::RenderSystem() {
     // Disable the cursor

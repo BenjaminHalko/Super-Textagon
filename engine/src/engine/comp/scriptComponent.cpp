@@ -1,4 +1,4 @@
-#include <engine/components/scriptComponent.h>
+#include <engine/comp/scriptComponent.h>
 
 void ScriptComponent::operator()() {
     _script();

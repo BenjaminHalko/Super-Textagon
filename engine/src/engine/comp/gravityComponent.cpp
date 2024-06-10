@@ -1,4 +1,4 @@
-#include <engine/components/gravityComponent.h>
+#include <engine/comp/gravityComponent.h>
 
 GravityComponent& GravityComponent::operator=(float gravity) {
     this->_gravity = gravity;

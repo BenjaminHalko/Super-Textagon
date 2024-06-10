@@ -1,7 +1,7 @@
-#include <engine/systems/_system.h>
+#include <engine/sys/_system.h>
 #include <engine/common.h>
-#include <engine/components/transformComponent.h>
-#include <engine/components/spriteComponent.h>
+#include <engine/comp/transformComponent.h>
+#include <engine/comp/spriteComponent.h>
 
 class TransformSystem : public System {
 public:
