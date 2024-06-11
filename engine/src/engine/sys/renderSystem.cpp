@@ -2,6 +2,8 @@
 #include <engine/ecs.h>
 #include <engine/sys/transformSystem.h>
 #include <engine/sys/spriteSystem.h>
+#include <limits>
+#include <cmath>
 
 RenderSystem::RenderSystem() {
     // Disable the cursor
@@ -74,13 +76,13 @@ void RenderSystem::DrawTriangle(SpriteComponent& sprite, int index) {
 
     // Convert the points to screen space, from 0 to dwSize
     const float fontAspectRatio = 0.5f; // The x to y ratio of the font
-    float maxScreenSize = max(consoleInfo.dwSize.X, consoleInfo.dwSize.Y / fontAspectRatio);
+    auto maxScreenSize = (float)fmax(consoleInfo.dwSize.X, (float)consoleInfo.dwSize.Y / fontAspectRatio);
 
-    for (int i = index; i < index + 3; i++) {
-        points[i - index].point.x = sprite[i].point.x * maxScreenSize + ((float)consoleInfo.dwSize.X - maxScreenSize) * 0.5f;
-        points[i - index].point.y = sprite[i].point.y * maxScreenSize * fontAspectRatio + ((float)consoleInfo.dwSize.Y - maxScreenSize * fontAspectRatio) * 0.5f;
-        points[i - index].color = sprite[i].color;
-        points[i - index].alpha = sprite[i].alpha;
+    for (int i = 0; i < 3; i++) {
+        points[i].point.x = sprite[i + index].point.x * maxScreenSize + ((float)consoleInfo.dwSize.X - maxScreenSize) * 0.5f;
+        points[i].point.y = sprite[i + index].point.y * maxScreenSize * fontAspectRatio + ((float)consoleInfo.dwSize.Y - maxScreenSize * fontAspectRatio) * 0.5f;
+        points[i].color = sprite[i + index].color;
+        points[i].alpha = sprite[i + index].alpha;
     }
 
     // Sort the points by y-coordinate
@@ -166,6 +168,7 @@ void RenderSystem::Update() {
             auto g = (character.second >> 8) & 0xFF;
             auto b = character.second & 0xFF;
 
+            // The color code is in the format \033[38;2;r;g;bm
             std::string color = "\033[38;2;" + std::to_string(r) + ";" + std::to_string(g) + ";" + std::to_string(b) + "m";
             stringToPrint += color + character.first;
         }

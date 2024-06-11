@@ -1,6 +1,7 @@
 #include <engine/sys/spriteSystem.h>
+#include <cmath>
 
-SpriteComponent SpriteSystem::GenerateShape(
+std::vector<ColoredPoint> SpriteSystem::GenerateShape(
         float radius,
         int numSides,
         Color innerColor,
@@ -8,13 +9,13 @@ SpriteComponent SpriteSystem::GenerateShape(
         Color outerColor,
         float outerAlpha
 ) {
-    SpriteComponent sprite;
+    std::vector<ColoredPoint> sprite;
     for (int i = 0; i < numSides; i++) {
-        float angle = 2 * 3.14f * (float) i / (float) numSides;
-        sprite.AddPoint({{radius * cosf(angle), radius * sinf(angle)}, outerColor, outerAlpha});
-        angle = 2 * 3.14f * (float) (i + 1) / (float) numSides;
-        sprite.AddPoint({{radius * cosf(angle), radius * sinf(angle)}, outerColor, outerAlpha});
-        sprite.AddPoint({{0, 0}, innerColor, innerAlpha});
+        float angle = 2 * PI * (float) i / (float) numSides;
+        sprite.push_back({{radius * cosf(angle), radius * sinf(angle)}, outerColor, outerAlpha});
+        angle = 2 * PI * (float) (i + 1) / (float) numSides;
+        sprite.push_back({{radius * cosf(angle), radius * sinf(angle)}, outerColor, outerAlpha});
+        sprite.push_back({{0, 0}, innerColor, innerAlpha});
     }
     return sprite;
 }

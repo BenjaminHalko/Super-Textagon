@@ -1,4 +1,5 @@
 #include <engine/sys/transformSystem.h>
+#include <cmath>
 
 void TransformSystem::TranslatePoint(Point &point, float x, float y) {
     point.x += x;

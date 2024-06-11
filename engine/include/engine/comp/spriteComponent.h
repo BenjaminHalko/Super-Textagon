@@ -25,6 +25,8 @@ public:
 
     SpriteComponent(std::initializer_list<ColoredPoint> sprite);
 
+    SpriteComponent(std::vector<ColoredPoint> sprite);
+
     explicit SpriteComponent(int size);
 
     ColoredPoint& operator[](int index);

@@ -44,6 +44,13 @@ class RenderSystem : public System {
      */
     void DrawTriangle(SpriteComponent &sprite, int index);
 public:
+    /**
+     * @brief Initializes the render system
+     */
     RenderSystem();
-    void Update() override;
+
+    /**
+     * @brief Draws all the entities
+     */
+    void Update();
 };

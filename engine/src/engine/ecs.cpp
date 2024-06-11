@@ -1,10 +1,11 @@
 #include <engine/ecs.h>
 #include <engine/sys/timeSystem.h>
+#include <engine/sys/input.h>
 
 // We need to define the static variables here
 std::multiset<std::unique_ptr<Entity>> ECS::_entities;
-std::set<std::unique_ptr<System>> ECS::_systems;
 bool ECS::_isRunning = true;
+RenderSystem ECS::_renderSystem;
 
 /**
  * @brief Gets the entities
@@ -16,10 +17,16 @@ std::multiset<std::unique_ptr<Entity>>& ECS::GetEntities() {
 void ECS::GameLoop() {
     while(_isRunning) {
         TimeSystem::FrameStart();
-        for(auto& system : _systems) {
-            system->Update();
-        }
+
+        Input::Update();
+        _renderSystem.Update();
+
         TimeSystem::FrameEnd();
+
+
+        // TEMP
+        if (Input::GetKeyPressed(Key::QUIT))
+            StopGame();
     }
 }
 

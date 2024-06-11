@@ -5,7 +5,7 @@
 
 class SpriteSystem : public System {
 public:
-    static SpriteComponent GenerateShape(
+    static std::vector<ColoredPoint> GenerateShape(
         float radius,
         int numSides,
         Color innerColor,

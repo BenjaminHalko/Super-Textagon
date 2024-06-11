@@ -1,23 +1,14 @@
 #pragma once
 
 #include <engine/entity.h>
-#include <engine/sys/_system.h>
+#include <engine/sys/renderSystem.h>
 #include <memory>
 #include <set>
 
 class ECS {
     static std::multiset<std::unique_ptr<Entity>> _entities;
-    static std::set<std::unique_ptr<System>> _systems;
     static bool _isRunning;
-
-    /**
-     * @brief Adds a system to the ECS
-     * @tparam SystemType
-     */
-    template <typename SystemType>
-    static void AddSystem() {
-        _systems.insert(std::make_unique<SystemType>());
-    }
+    static RenderSystem _renderSystem;
 public:
     /**
      * @brief Adds an entity to the ECS

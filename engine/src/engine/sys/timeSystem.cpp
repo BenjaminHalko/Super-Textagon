@@ -6,7 +6,7 @@ std::chrono::time_point<std::chrono::steady_clock> TimeSystem::_frameStart;
 std::chrono::milliseconds TimeSystem::_frameRate = std::chrono::milliseconds(1000 / 60);
 
 void TimeSystem::FrameStart() {
-    _frameStart = std::chrono::high_resolution_clock::now();
+    _frameStart = std::chrono::steady_clock::now();
 }
 
 void TimeSystem::FrameEnd() {
