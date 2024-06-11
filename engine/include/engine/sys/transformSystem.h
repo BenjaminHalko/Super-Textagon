@@ -2,6 +2,7 @@
 #include <engine/common.h>
 #include <engine/comp/transformComponent.h>
 #include <engine/comp/spriteComponent.h>
+#include <engine/comp/colliderComponent.h>
 
 class TransformSystem : public System {
 public:
@@ -10,4 +11,5 @@ public:
     static void RotatePoint(Point& point, float angle);
     static void ApplyTransformation(Point& point, TransformComponent& transform);
     static SpriteComponent TransformSprite(SpriteComponent& sprite, TransformComponent& transform);
+    static ColliderComponent TransformCollider(ColliderComponent& collider, TransformComponent& transform);
 };

@@ -35,3 +35,13 @@ SpriteComponent TransformSystem::TransformSprite(SpriteComponent &sprite, Transf
     }
     return newSprite;
 }
+
+ColliderComponent TransformSystem::TransformCollider(ColliderComponent &collider, TransformComponent &transform) {
+    ColliderComponent newCollider;
+    for (auto &point : collider) {
+        Point newPoint = point;
+        ApplyTransformation(newPoint, transform);
+        newCollider.AddPoint(newPoint);
+    }
+    return newCollider;
+}
