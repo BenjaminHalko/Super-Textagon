@@ -9,8 +9,10 @@ void TransformSystem::TranslatePoint(Point &point, float x, float y) {
 void TransformSystem::RotatePoint(Point& point, float angle) {
     angle *= PI / 180;
 
-    point.x = point.x * cosf(angle) - point.y * sinf(angle);
-    point.y = point.x * sinf(angle) + point.y * cosf(angle);
+    auto original = point;
+
+    point.x = original.x * cosf(angle) - original.y * sinf(angle);
+    point.y = original.x * sinf(angle) + original.y * cosf(angle);
 }
 
 void TransformSystem::ScalePoint(Point &point, float x_scale, float y_scale) {
