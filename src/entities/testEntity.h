@@ -5,4 +5,6 @@
 class TestEntity : public Entity {
 public:
     TestEntity();
+
+    void Update() override;
 };

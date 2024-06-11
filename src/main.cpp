@@ -1,8 +1,8 @@
-#include <engine/ecs.h>
+#include <engine/engine.h>
 #include "entities/testEntity.h"
 
 int main() {
-    ECS::AddEntity<TestEntity>();
-    ECS::GameLoop();
+    Engine::AddEntity<TestEntity>();
+    Engine::GameLoop();
     return 0;
 }

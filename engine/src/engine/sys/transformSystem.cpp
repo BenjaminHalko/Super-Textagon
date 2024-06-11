@@ -13,6 +13,9 @@ void TransformSystem::ScalePoint(Point &point, float x_scale, float y_scale) {
 
 void TransformSystem::RotatePoint(Point &point, float angle) {
     angle *= PI / 180;
+
+    //angle = 90 * PI / 180;
+
     point.x = point.x * cosf(angle) - point.y * sinf(angle);
     point.y = point.x * sinf(angle) + point.y * cosf(angle);
 }

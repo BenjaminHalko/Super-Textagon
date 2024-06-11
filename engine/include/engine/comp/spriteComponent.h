@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine/comp/_component.h>
+#include <engine/comp/_basicComponent.h>
 #include <engine/common.h>
 #include <vector>
 #include <iterator>
@@ -17,7 +17,7 @@ struct ColoredPoint {
  * @brief A component that represents a sprite.
  * @details A sprite is a collection of points that are drawn on the screen.
  */
-class SpriteComponent : public Component {
+class SpriteComponent : public BasicComponent {
 private:
     std::vector<ColoredPoint> _sprite;
 public:
@@ -25,7 +25,7 @@ public:
 
     SpriteComponent(std::initializer_list<ColoredPoint> sprite);
 
-    SpriteComponent(std::vector<ColoredPoint> sprite);
+    explicit SpriteComponent(std::vector<ColoredPoint> sprite);
 
     explicit SpriteComponent(int size);
 
