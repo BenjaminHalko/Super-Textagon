@@ -126,6 +126,8 @@ void RenderSystem::Update() {
     // consoleInfo.dwSize stores the amount of characters in the console
     GetConsoleScreenBufferInfo(hStdOut, &consoleInfo);
 
+    //consoleInfo.dwSize.Y = 30;
+
     // If the size of the console has changed, clear the console
     if (consoleInfo.dwSize.X * consoleInfo.dwSize.Y != charCount) {
         charCount = consoleInfo.dwSize.X * consoleInfo.dwSize.Y;
@@ -173,8 +175,10 @@ void RenderSystem::Update() {
             stringToPrint += color + character.first;
         }
     }
-    std::cout << stringToPrint;
 
-    // Move cursor home
-    SetConsoleCursorPosition(hStdOut, {0, 0});
+    // Move the cursor to the top left
+    stringToPrint += "\033[H";
+
+    // Print the string
+    std::cout << stringToPrint;
 }
