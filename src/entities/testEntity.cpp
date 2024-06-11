@@ -11,3 +11,11 @@ TestEntity::TestEntity() {
     // With a radius of 0.25 (or quarter the screen width)
     AddComponent<SpriteComponent>(SpriteSystem::GenerateShape(0.25f, 3, 0xFFFFFF, 1, 0xFF0000, 0.5f));
 }
+
+void TestEntity::Update() {
+    // Get the transform component
+    auto& transform = GetComponent<TransformComponent>();
+
+    // Rotate the entity by 1 degree per frame
+    transform.rotation += 1;
+}

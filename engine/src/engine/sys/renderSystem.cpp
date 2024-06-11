@@ -1,5 +1,5 @@
 #include <engine/sys/renderSystem.h>
-#include <engine/ecs.h>
+#include <engine/engine.h>
 #include <engine/sys/transformSystem.h>
 #include <engine/sys/spriteSystem.h>
 #include <limits>
@@ -136,7 +136,7 @@ void RenderSystem::Update() {
     consoleBuffer = std::vector<std::pair<char, Color>>(charCount, {' ', 0});
 
     // Loop over all the entities
-    for(auto& entity : ECS::GetEntities()) {
+    for(auto& entity : Engine::GetEntities()) {
 
         // Check if the entity has a sprite component
         if (entity->HasComponents<SpriteComponent, TransformComponent>()) {

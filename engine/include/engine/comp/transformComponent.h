@@ -1,11 +1,11 @@
 #pragma once
 
-#include <engine/comp/_component.h>
+#include <engine/comp/_basicComponent.h>
 
 /**
  * @brief A component that represents the position, scale, and rotation of an entity.
  */
-class TransformComponent : public Component {
+class TransformComponent : public BasicComponent {
 public:
     float x, y;
     float x_scale = 1, y_scale = 1;

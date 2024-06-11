@@ -4,8 +4,9 @@
 #include <engine/sys/renderSystem.h>
 #include <memory>
 #include <set>
+#include <engine/sys/entityUpdateSystem.h>
 
-class ECS {
+class Engine {
     static std::multiset<std::unique_ptr<Entity>> _entities;
     static bool _isRunning;
     static RenderSystem _renderSystem;
