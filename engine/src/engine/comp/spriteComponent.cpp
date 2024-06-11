@@ -4,8 +4,12 @@ SpriteComponent::SpriteComponent(std::initializer_list<ColoredPoint> sprite) {
     std::copy(sprite.begin(), sprite.end(), std::back_inserter(_sprite));
 }
 
+SpriteComponent::SpriteComponent(std::vector<ColoredPoint> sprite) {
+    std::copy(sprite.begin(), sprite.end(), std::back_inserter(_sprite));
+}
+
 SpriteComponent::SpriteComponent(int size) {
-    _sprite.reserve(size);
+    _sprite.resize(size);
 }
 
 ColoredPoint& SpriteComponent::operator[](int index) {

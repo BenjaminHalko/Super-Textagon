@@ -18,7 +18,7 @@ public:
      * @note This function should be called once per frame
      * to update the key states for the current frame
      */
-    void Update() override;
+    static void Update();
 
     /**
      * @brief Check if a key is held down
