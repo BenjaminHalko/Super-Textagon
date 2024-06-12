@@ -5,6 +5,7 @@
 #include <engine/sys/spriteSystem.h>
 #include <engine/comp/transformComponent.h>
 #include <engine/comp/spriteComponent.h>
+#include <cmath>
 
 TestEntity::TestEntity(int offset) : _offset(offset) {
     // Create a transform component with a position of (0.5, 0.5)
