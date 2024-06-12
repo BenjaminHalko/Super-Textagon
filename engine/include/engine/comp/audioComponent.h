@@ -1,15 +1,12 @@
 #pragma once
 
 #include <engine/comp/_component.h>
-#include <string>
+#include <soloud_wav.h>
+#include <memory>
 
 class AudioComponent : public Component {
-private:
-    std::string _audioPath;
-    bool _isPlaying = false;
-    bool _loop;
+    unsigned int _handle;
 public:
-    explicit AudioComponent(std::string audioPath);
-
-    std::string GetAudioPath();
+    explicit AudioComponent(unsigned int handle);
+    unsigned int operator()() const;
 };

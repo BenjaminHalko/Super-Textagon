@@ -1,6 +1,7 @@
-#include <engine/Engine.h>
+#include <engine/engine.h>
 #include <engine/sys/timeSystem.h>
 #include <engine/sys/input.h>
+#include <engine/sys/audioSystem.h>
 
 // We need to define the static variables here
 std::multiset<std::unique_ptr<Entity>> Engine::_entities;
@@ -15,10 +16,13 @@ std::multiset<std::unique_ptr<Entity>>& Engine::GetEntities() {
 }
 
 void Engine::GameLoop() {
+    AudioSystem::Init();
+
     while(_isRunning) {
         TimeSystem::FrameStart();
 
         Input::Update();
+        AudioSystem::Update();
         EntityUpdateSystem::Update();
         _renderSystem.Update();
 
@@ -28,6 +32,8 @@ void Engine::GameLoop() {
         if (Input::GetKeyPressed(Key::QUIT))
             StopGame();
     }
+
+    AudioSystem::Clean();
 }
 
 void Engine::StopGame() {
