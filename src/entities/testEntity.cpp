@@ -1,10 +1,12 @@
 #include "testEntity.h"
 #include "engine/engine.h"
+#include "engine/sys/audioSystem.h"
 #include <engine/sys/collisionSystem.h>
 #include <engine/sys/timeSystem.h>
 #include <engine/sys/spriteSystem.h>
 #include <engine/comp/transformComponent.h>
 #include <engine/comp/spriteComponent.h>
+#include <engine/sys/input.h>
 #include <cmath>
 
 TestEntity::TestEntity(int offset) : _offset(offset) {
@@ -35,5 +37,10 @@ void TestEntity::Update() {
         } else {
             GetComponent<SpriteComponent>()[0].color = 0xFFFF00;
         }
+    }
+
+
+    if (Input::GetKeyPressed(Key::RIGHT) && _offset == 0) {
+        AudioSystem::PlayAudio("audio/explode.wav", false, 0.04f);
     }
 }
