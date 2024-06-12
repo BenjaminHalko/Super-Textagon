@@ -3,21 +3,30 @@
 #include <engine/sys/_system.h>
 #include <engine/comp/spriteComponent.h>
 #include <string>
-#include <windows.h>
 #include <algorithm>
 #include <iostream>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 class RenderSystem : public System {
     // Handle to the console
+    #ifdef _WIN32
     HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_SCREEN_BUFFER_INFO consoleInfo{};
+    #endif
 
     // Buffer to store the console
     std::vector<std::pair<char, Color>> consoleBuffer;
     int charCount = 0;
+    int width = 0;
+    int height = 0;
 
     // Queue screen clear
     bool clearScreen = false;
+
+    // Draw color
+    bool drawColor = true;
 
     /**
      * @brief Determines the alpha and color of a point
@@ -27,7 +36,7 @@ class RenderSystem : public System {
      * @param y The y-coordinate of the point
      * @return A character representing the luminance of the point
      */
-    static std::pair<char, Color> AlphaColorOfPoint(SpriteComponent &sprite, int x, int y);
+    std::pair<char, Color> AlphaColorOfPoint(SpriteComponent &sprite, int x, int y);
 
     /**
      * @brief Sets a character at a position in the console

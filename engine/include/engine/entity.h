@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include <string>
 #include <forward_list>
+#include <vector>
 
 /*
  * @brief The base class for all entities
