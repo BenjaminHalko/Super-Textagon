@@ -18,7 +18,11 @@ TestEntity::TestEntity(int offset) : _offset(offset) {
     // With a radius of 0.25 (or quarter the screen width)
     auto sprite = AddComponent<SpriteComponent>(SpriteSystem::GenerateShape(0.2f, 3, 0xFFFFFF, 1, 0xFF0000, 0.5f));
 
-
+    if (offset == 1) {
+        depth = 1;
+    } else {
+        GetComponent<TransformComponent>().rotation = 60;
+    }
 
     AddComponent<ColliderComponent>(sprite);
 }
@@ -31,7 +35,7 @@ void TestEntity::Update() {
 
     transform.x = 0.5f + 0.25f * cosf((float)TimeSystem::TimeRunning() + _offset * 2);
 
-    transform.y = 0.5f + 0.1f * sinf((float)TimeSystem::TimeRunning() + _offset * 2);
+    //transform.y = 0.5f + 0.1f * sinf((float)TimeSystem::TimeRunning() + _offset * 2);
 
     if (_offset == 0) {
         auto entity = (Engine::GetEntities().begin())->get();
@@ -40,7 +44,6 @@ void TestEntity::Update() {
            
         } else {
             GetComponent<SpriteComponent>()[0].color = 0xFFFF00;
-            exit(1);
         }
     }
 
