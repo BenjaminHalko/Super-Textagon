@@ -1,10 +1,8 @@
 #include "testEntity.h"
 #include "engine/engine.h"
 #include "engine/sys/audioSystem.h"
-#include "engine/sys/cameraSystem.h"
 #include <engine/sys/collisionSystem.h>
 #include <engine/sys/timeSystem.h>
-#include <engine/sys/spriteSystem.h>
 #include <engine/comp/transformComponent.h>
 #include <engine/comp/spriteComponent.h>
 #include <engine/sys/input.h>
@@ -16,7 +14,7 @@ TestEntity::TestEntity(int offset) : _offset(offset) {
 
     // Create a triangle with a red outline and a white fill
     // With a radius of 0.25 (or quarter the screen width)
-    auto sprite = AddComponent<SpriteComponent>(SpriteSystem::GenerateShape(0.2f, 3, 0xFFFFFF, 1, 0xFF0000, 0.5f));
+    auto sprite = AddComponent<SpriteComponent>(0.2f, 3, 0xFFFFFF, 1, 0xFF0000, 0.5f);
 
 
 

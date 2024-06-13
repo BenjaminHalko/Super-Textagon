@@ -6,17 +6,25 @@
 #include <string>
 #include <vector>
 
-
-
 class AudioSystem : public System {
     friend class Engine;
     static SoLoud::Soloud _soLoud;
     static std::vector<std::pair<std::unique_ptr<SoLoud::Wav>, unsigned int>> _audioClips;
 
+    /**
+     * @brief Initializes SoLoud
+     */
     static void Init();
-    static void Update();
-    static void Clean();
 
+    /**
+     * @brief Checks if sounds are still playing
+     */
+    static void Update();
+
+    /**
+     * @brief De-initializes SoLoud
+     */
+    static void Clean();
 public:
     static AudioComponent PlayAudio(std::string audioPath, bool loop, float volume);
     static void StopAudio(AudioComponent& audio);
