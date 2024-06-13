@@ -126,8 +126,12 @@ void RenderSystem::Update() {
     // consoleInfo.dwSize stores the amount of characters in the console
     GetConsoleScreenBufferInfo(hStdOut, &consoleInfo);
 
+    consoleInfo.dwSize.Y = 30;
+
     // If the size of the console has changed, clear the console
-    if (consoleInfo.dwSize.X * consoleInfo.dwSize.Y != charCount) {
+    if (consoleInfo.dwSize.X * consoleInfo.dwSize.Y != charCount) 
+    
+    {
         charCount = consoleInfo.dwSize.X * consoleInfo.dwSize.Y;
         clearScreen = true;
     }
