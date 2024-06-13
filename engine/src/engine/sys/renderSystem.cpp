@@ -4,12 +4,15 @@
 #include <engine/sys/spriteSystem.h>
 #include <limits>
 #include <cmath>
-#include "engine/sys/input.h"
+#include <engine/sys/cameraSystem.h>
 
 #ifndef _WIN32
 #include <sys/ioctl.h>
 #include <unistd.h>
 #endif
+
+// TEMP
+#include "engine/sys/input.h"
 
 RenderSystem::RenderSystem() {
 #ifdef _WIN32
@@ -46,6 +49,9 @@ std::pair<char, Color> RenderSystem::AlphaColorOfPoint(SpriteComponent &sprite, 
 
     // Calculate the alpha
     float alpha = lambda1 * sprite[0].alpha + lambda2 * sprite[1].alpha + lambda3 * sprite[2].alpha;
+
+    if (alpha <= 0.0f || alpha >= 1.0f)
+        return {' ', 0};
 
     // Calculate the character
     char character = alphaChars.at((int)((float)(alphaCharsCount-1) * alpha));
@@ -160,8 +166,14 @@ void RenderSystem::Update() {
         if (entity->HasComponents<SpriteComponent, TransformComponent>()) {
 
             auto entityTransformedSprite = TransformSystem::TransformSprite(
-                    entity->GetComponent<SpriteComponent>(),
-                    entity->GetComponent<TransformComponent>()
+                entity->GetComponent<SpriteComponent>(),
+                entity->GetComponent<TransformComponent>()
+            );
+
+            // Move the sprite to camera space
+            entityTransformedSprite = TransformSystem::TransformSprite(
+                entityTransformedSprite,
+                CameraSystem::GetCameraTransform()
             );
 
             for (int i = 0; i < entityTransformedSprite.Size(); i += 3) {

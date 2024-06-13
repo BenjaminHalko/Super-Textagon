@@ -18,7 +18,7 @@ class AudioSystem : public System {
     static void Clean();
 
 public:
-    static AudioComponent PlayAudio(std::string audioPath, bool loop, float volume = 1.0f);
+    static AudioComponent PlayAudio(std::string audioPath, bool loop, float volume);
     static void StopAudio(AudioComponent& audio);
 
     static float GetAudioPosition(AudioComponent& audio);
@@ -32,5 +32,4 @@ public:
 
     static void StopAllAudio();
     static void SetGlobalVolume(float volume);
-
 };

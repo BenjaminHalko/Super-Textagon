@@ -1,6 +1,7 @@
 #include "testEntity.h"
 #include "engine/engine.h"
 #include "engine/sys/audioSystem.h"
+#include "engine/sys/cameraSystem.h"
 #include <engine/sys/collisionSystem.h>
 #include <engine/sys/timeSystem.h>
 #include <engine/sys/spriteSystem.h>
@@ -28,7 +29,9 @@ void TestEntity::Update() {
 
     // Rotate the entity by 1 degree per frame
 
-    transform.x = 0.5f + 0.25f * cosf((float)TimeSystem::FrameCount() / 10 + _offset * 2);
+    transform.x = 0.5f + 0.25f * cosf((float)TimeSystem::TimeRunning() + _offset * 2);
+
+    transform.y = 0.5f + 0.1f * sinf((float)TimeSystem::TimeRunning() + _offset * 2);
 
     if (_offset == 0) {
         auto entity = (Engine::GetEntities().begin())->get();
@@ -38,7 +41,6 @@ void TestEntity::Update() {
             GetComponent<SpriteComponent>()[0].color = 0xFFFF00;
         }
     }
-
 
     if (Input::GetKeyPressed(Key::RIGHT) && _offset == 0) {
         AudioSystem::PlayAudio("audio/explode.wav", false, 0.04f);
