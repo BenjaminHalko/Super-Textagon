@@ -9,7 +9,7 @@ private:
 public:
     int timeRemaining = -1;
 
-    TimerComponent(ScriptComponent onTimerEnd);
+    explicit TimerComponent(ScriptComponent onTimerEnd);
 
     void operator()();
 };

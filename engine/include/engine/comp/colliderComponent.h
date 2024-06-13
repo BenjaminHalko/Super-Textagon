@@ -1,12 +1,12 @@
 #pragma once
 
-#include <engine/comp/_basicComponent.h>
+#include <engine/comp/_uniqueComponent.h>
 #include <engine/comp/spriteComponent.h>
 #include <vector>
 #include <engine/common.h>
 #include <iterator>
 
-class ColliderComponent : public BasicComponent {
+class ColliderComponent : public UniqueComponent {
     std::vector<Point> _points;
 public:
     ColliderComponent() = default;

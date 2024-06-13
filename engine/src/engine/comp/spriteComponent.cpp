@@ -12,6 +12,23 @@ SpriteComponent::SpriteComponent(int size) {
     _sprite.resize(size);
 }
 
+SpriteComponent::SpriteComponent(
+    float radius,
+    int numSides,
+    Color innerColor,
+    float innerAlpha,
+    Color outerColor,
+    float outerAlpha
+) {
+    for (int i = 0; i < numSides; i++) {
+        float angle = 2 * PI * (float) i / (float) numSides;
+        _sprite.push_back({{radius * cosf(angle), radius * sinf(angle)}, outerColor, outerAlpha});
+        angle = 2 * PI * (float) (i + 1) / (float) numSides;
+        _sprite.push_back({{radius * cosf(angle), radius * sinf(angle)}, outerColor, outerAlpha});
+        _sprite.push_back({{0, 0}, innerColor, innerAlpha});
+    }
+}
+
 ColoredPoint& SpriteComponent::operator[](int index) {
     return _sprite[index];
 }

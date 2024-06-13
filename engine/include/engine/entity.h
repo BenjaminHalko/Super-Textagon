@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine/comp/_basicComponent.h>
+#include <engine/comp/_uniqueComponent.h>
 #include <engine/comp/timerComponent.h>
 #include <memory>
 #include <typeindex>
@@ -21,7 +21,7 @@ class Entity {
      * The value is a unique pointer to the component.
      * This is a map so that we can easily access the component by its type.
      */
-    std::unordered_map<std::type_index, std::unique_ptr<BasicComponent>> basicComponents;
+    std::unordered_map<std::type_index, std::unique_ptr<UniqueComponent>> uniqueComponents;
 
     /**
      * @brief Stores all the timers of the entity
@@ -42,8 +42,8 @@ protected:
      */
     template <typename ComponentType, typename... Args>
     ComponentType& AddComponent(Args&&... args) {
-        basicComponents[typeid(ComponentType)] = std::make_unique<ComponentType>(std::forward<Args>(args)...);
-        return *static_cast<ComponentType*>(basicComponents[typeid(ComponentType)].get());
+        uniqueComponents[typeid(ComponentType)] = std::make_unique<ComponentType>(std::forward<Args>(args)...);
+        return *static_cast<ComponentType*>(uniqueComponents[typeid(ComponentType)].get());
     }
 
     /**
@@ -64,7 +64,7 @@ public:
      */
     template <typename ComponentType>
     ComponentType& GetComponent() {
-        return *static_cast<ComponentType*>(basicComponents[typeid(ComponentType)].get());
+        return *static_cast<ComponentType*>(uniqueComponents[typeid(ComponentType)].get());
     }
 
     /**
@@ -74,7 +74,7 @@ public:
      */
     template <typename... ComponentTypes>
     bool HasComponents() {
-        return ((basicComponents.find(typeid(ComponentTypes)) != basicComponents.end()) && ...);
+        return ((uniqueComponents.find(typeid(ComponentTypes)) != uniqueComponents.end()) && ...);
     }
 
     /**

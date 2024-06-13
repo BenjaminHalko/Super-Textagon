@@ -1,10 +1,8 @@
 #include <engine/sys/renderSystem.h>
 #include <engine/engine.h>
 #include <engine/sys/transformSystem.h>
-#include <engine/sys/spriteSystem.h>
 #include <limits>
 #include <cmath>
-#include <engine/sys/cameraSystem.h>
 
 #ifndef _WIN32
 #include <sys/ioctl.h>
@@ -168,12 +166,6 @@ void RenderSystem::Update() {
             auto entityTransformedSprite = TransformSystem::TransformSprite(
                 entity->GetComponent<SpriteComponent>(),
                 entity->GetComponent<TransformComponent>()
-            );
-
-            // Move the sprite to camera space
-            entityTransformedSprite = TransformSystem::TransformSprite(
-                entityTransformedSprite,
-                CameraSystem::GetCameraTransform()
             );
 
             for (int i = 0; i < entityTransformedSprite.Size(); i += 3) {

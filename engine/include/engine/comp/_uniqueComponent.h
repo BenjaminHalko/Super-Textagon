@@ -2,4 +2,4 @@
 
 #include <engine/comp/_component.h>
 
-class BasicComponent : public Component {};
+class UniqueComponent : public Component {};
