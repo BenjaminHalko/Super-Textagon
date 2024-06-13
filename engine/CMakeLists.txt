@@ -10,7 +10,6 @@ include(FetchContent)
 FetchContent_Declare(
     so_loud
     URL https://solhsa.com/soloud/soloud_20200207_lite.zip
-    DOWNLOAD_EXTRACT_TIMESTAMP true
 )
 FetchContent_MakeAvailable(so_loud)
 

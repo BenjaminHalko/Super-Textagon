@@ -49,35 +49,23 @@ bool EdgeIntersection(Point p1, Point q1, Point p2, Point q2) {
 }
 
 
-bool CollisionSystem::CheckTriangleCollision(ColliderComponent& collider1, ColliderComponent& collider2, int start1, int start2) {
-    Point tri1[3] = {
-        collider1[start1],
-        collider1[start1+1],
-        collider1[start1+2]
-    };
-
-    Point tri2[3] = {
-        collider2[start2],
-        collider2[start2+1],
-        collider2[start2+2]
-    };
-
+bool CollisionSystem::CheckTriangleCollision(ColliderComponent& collider1, ColliderComponent& collider2) {
     // Check if any vertex of one triangle is inside the other triangle
-    for (auto pt : tri1) {
-        if (PointInTriangle(pt, tri2[0], tri2[1], tri2[2])) {
+    for (int i = 0; i < 3; ++i) {
+        if (PointInTriangle(collider1[i], collider2[0], collider2[1], collider2[2])) {
             return true;
         }
     }
-    for (auto pt : tri2) {
-        if (PointInTriangle(pt, tri1[0], tri1[1], tri1[2])) {
+    for (int i = 0; i < 3; ++i) {
+        if (PointInTriangle(collider2[i], collider1[0], collider1[1], collider1[2])) {
             return true;
         }
     }
 
 
     // Check if any edges intersect
-    std::vector<std::pair<Point, Point>> edges1 = { {tri1[0], tri1[1]}, {tri1[1], tri1[2]}, {tri1[2], tri1[0]} };
-    std::vector<std::pair<Point, Point>> edges2 = { {tri2[0], tri2[1]}, {tri2[1], tri2[2]}, {tri2[2], tri2[0]} };
+    std::vector<std::pair<Point, Point>> edges1 = { {collider1[0], collider1[1]}, {collider1[1], collider1[2]}, {collider1[2], collider1[0]} };
+    std::vector<std::pair<Point, Point>> edges2 = { {collider2[0], collider2[1]}, {collider2[1], collider2[2]}, {collider2[2], collider2[0]} };
 
     for (const auto& edge1 : edges1) {
         for (const auto& edge2 : edges2) {
@@ -86,6 +74,7 @@ bool CollisionSystem::CheckTriangleCollision(ColliderComponent& collider1, Colli
             }
         }
     }
+
 
     return false;
 }
@@ -98,13 +87,21 @@ bool CollisionSystem::CheckCollision(Entity& entity1, Entity& entity2) {
     auto position2 = entity2.GetComponent<TransformComponent>();
 
     // Transform colliders to their current position
-    auto transformedCollider1 = TransformSystem::TransformCollider(originalCollider1, position1);
-    auto transformedCollider2 = TransformSystem::TransformCollider(originalCollider2, position2);
+    auto collider1 = TransformSystem::TransformCollider(originalCollider1, position1);
+    auto collider2 = TransformSystem::TransformCollider(originalCollider2, position2);
+
+    // These represent triangles
+    ColliderComponent colliderToCheck1(3);
+    ColliderComponent colliderToCheck2(3);
 
     // Loop through all triangles in collider1 and collider2
-    for(int i = 0; i < transformedCollider1.Size(); i += 3) {
-        for(int j = 0; j < transformedCollider2.Size(); j += 3) {
-            if(CheckTriangleCollision(transformedCollider1, transformedCollider2, i, j)) {
+    for(int i = 0; i < collider1.Size(); i += 3) {
+        std::copy(colliderToCheck1.begin(), colliderToCheck1.end(), collider1.begin() + i);
+
+        for(int j = 0; j < collider2.Size(); j += 3) {
+            std::copy(colliderToCheck2.begin(), colliderToCheck2.end(), collider2.begin() + j);
+
+            if(CheckTriangleCollision(colliderToCheck1, colliderToCheck2)) {
                 return true;
             }
         }

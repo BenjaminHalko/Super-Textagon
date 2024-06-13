@@ -28,13 +28,17 @@ class Entity {
      */
     std::vector<std::unique_ptr<TimerComponent>> timers;
 
-    // Tells systems the order in which to execute the entity
-    int depth = 0;
 
+
+
+
+protected:
     // Tells ECS to destroy the entity
     bool destroyed = false;
 
-protected:
+    // Tells systems the order in which to execute the entity
+    int depth = 0;
+
     /**
      * @brief Adds a component to the entity
      * @tparam ComponentType The type of the component to add
