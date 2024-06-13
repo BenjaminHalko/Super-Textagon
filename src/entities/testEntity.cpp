@@ -37,8 +37,10 @@ void TestEntity::Update() {
         auto entity = (Engine::GetEntities().begin())->get();
         if (CollisionSystem::CheckCollision(*this, *entity)) {
             GetComponent<SpriteComponent>()[0].color = 0x00FF00;
+           
         } else {
             GetComponent<SpriteComponent>()[0].color = 0xFFFF00;
+            exit(1);
         }
     }
 
