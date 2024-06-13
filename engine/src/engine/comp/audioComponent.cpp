@@ -1,7 +1,7 @@
 #include <engine/comp/audioComponent.h>
 
-AudioComponent::AudioComponent(std::string audioPath) : _audioPath(std::move(audioPath)) {}
+AudioComponent::AudioComponent(unsigned int handle) : _handle(handle) {}
 
-std::string AudioComponent::GetAudioPath() {
-    return _audioPath;
+unsigned int AudioComponent::operator()() const {
+    return _handle;
 }

@@ -3,8 +3,10 @@
 #include <engine/entity.h>
 
 class TestEntity : public Entity {
+    int _offset;
+
 public:
-    TestEntity();
+    TestEntity(int offset);
 
     void Update() override;
 };

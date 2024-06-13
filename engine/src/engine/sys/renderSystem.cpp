@@ -4,22 +4,30 @@
 #include <engine/sys/spriteSystem.h>
 #include <limits>
 #include <cmath>
+#include <engine/sys/cameraSystem.h>
+
+#ifndef _WIN32
+#include <sys/ioctl.h>
+#include <unistd.h>
+#endif
+
+// TEMP
+#include "engine/sys/input.h"
 
 RenderSystem::RenderSystem() {
-    // Disable the cursor
-    CONSOLE_CURSOR_INFO cursorInfo;
-    GetConsoleCursorInfo(hStdOut, &cursorInfo);
-    cursorInfo.bVisible = false;
-    SetConsoleCursorInfo(hStdOut, &cursorInfo);
-
+#ifdef _WIN32
     // Disable scroll bars
     SetConsoleMode(hStdOut, ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+#endif
+
+    // Disable the cursor
+    std::cout << "\033[?25l";
 
     // Disable synchronous input
     std::ios::sync_with_stdio(false);
 
-    // Enable unit buffering
-    std::cout << std::unitbuf;
+    // Untie cin and cout
+    std::cin.tie(nullptr);
 }
 
 // Private
@@ -39,35 +47,43 @@ std::pair<char, Color> RenderSystem::AlphaColorOfPoint(SpriteComponent &sprite, 
     float lambda2 = ((sprite[2].point.y - sprite[0].point.y) * ((float)x - sprite[2].point.x) + (sprite[0].point.x - sprite[2].point.x) * ((float)y - sprite[2].point.y)) / denominator;
     float lambda3 = 1.0f - lambda1 - lambda2;
 
-    // Calculate the luminance
-    float lum = lambda1 * sprite[0].alpha + lambda2 * sprite[1].alpha + lambda3 * sprite[2].alpha;
+    // Calculate the alpha
+    float alpha = lambda1 * sprite[0].alpha + lambda2 * sprite[1].alpha + lambda3 * sprite[2].alpha;
+
+    if (alpha <= 0.0f || alpha >= 1.0f)
+        return {' ', 0};
 
     // Calculate the character
-    char character = alphaChars.at((int)((float)(alphaCharsCount-1) * lum));
+    char character = alphaChars.at((int)((float)(alphaCharsCount-1) * alpha));
 
-    // Calculate the color
-    Color r = (int)(
-            lambda1 * float(sprite[0].color >> 16 & 0xFF) +
-            lambda2 * float(sprite[1].color >> 16 & 0xFF) +
-            lambda3 * float(sprite[2].color >> 16 & 0xFF));
-    Color g = (int)(
-            lambda1 * float(sprite[0].color >> 8 & 0xFF) +
-            lambda2 * float(sprite[1].color >> 8 & 0xFF) +
-            lambda3 * float(sprite[2].color >> 8 & 0xFF));
-    Color b = (int)(
-            lambda1 * float(sprite[0].color & 0xFF) +
-            lambda2 * float(sprite[1].color & 0xFF) +
-            lambda3 * float(sprite[2].color & 0xFF));
+    if (drawColor) {
+        // Calculate the color
+        Color r = (int) (
+                lambda1 * float(sprite[0].color >> 16 & 0xFF) +
+                lambda2 * float(sprite[1].color >> 16 & 0xFF) +
+                lambda3 * float(sprite[2].color >> 16 & 0xFF));
+        Color g = (int) (
+                lambda1 * float(sprite[0].color >> 8 & 0xFF) +
+                lambda2 * float(sprite[1].color >> 8 & 0xFF) +
+                lambda3 * float(sprite[2].color >> 8 & 0xFF));
+        Color b = (int) (
+                lambda1 * float(sprite[0].color & 0xFF) +
+                lambda2 * float(sprite[1].color & 0xFF) +
+                lambda3 * float(sprite[2].color & 0xFF));
 
-    Color color = ((r << 16) | (g << 8) | b);
+        Color color = ((r << 16) | (g << 8) | b);
 
-    // Return the character based on the luminance & color
-    return {character, color};
+        // Return the character based on the luminance & color
+        return {character, color};
+    }
+
+    // Return the character based on the alpha & color
+    return {character, 0};
 }
 
 void RenderSystem::SetConsoleCharacter(int x, int y, std::pair<char, Color> character) {
-    if (x >= 0 && x < consoleInfo.dwSize.X && y >= 0 && y < consoleInfo.dwSize.Y)
-        consoleBuffer[y * consoleInfo.dwSize.X + x] = character;
+    if (x >= 0 && x < width && y >= 0 && y < height)
+        consoleBuffer[y * width + x] = character;
 }
 
 void RenderSystem::DrawTriangle(SpriteComponent& sprite, int index) {
@@ -76,11 +92,11 @@ void RenderSystem::DrawTriangle(SpriteComponent& sprite, int index) {
 
     // Convert the points to screen space, from 0 to dwSize
     const float fontAspectRatio = 0.5f; // The x to y ratio of the font
-    auto maxScreenSize = (float)fmax(consoleInfo.dwSize.X, (float)consoleInfo.dwSize.Y / fontAspectRatio);
+    auto maxScreenSize = (float)fmax(width, (float)height / fontAspectRatio);
 
     for (int i = 0; i < 3; i++) {
-        points[i].point.x = sprite[i + index].point.x * maxScreenSize + ((float)consoleInfo.dwSize.X - maxScreenSize) * 0.5f;
-        points[i].point.y = sprite[i + index].point.y * maxScreenSize * fontAspectRatio + ((float)consoleInfo.dwSize.Y - maxScreenSize * fontAspectRatio) * 0.5f;
+        points[i].point.x = sprite[i + index].point.x * maxScreenSize + ((float)width - maxScreenSize) * 0.5f;
+        points[i].point.y = sprite[i + index].point.y * maxScreenSize * fontAspectRatio + ((float)height - maxScreenSize * fontAspectRatio) * 0.5f;
         points[i].color = sprite[i + index].color;
         points[i].alpha = sprite[i + index].alpha;
     }
@@ -123,12 +139,20 @@ void RenderSystem::DrawTriangle(SpriteComponent& sprite, int index) {
 
 void RenderSystem::Update() {
     // Get the console info
-    // consoleInfo.dwSize stores the amount of characters in the console
+#ifdef _WIN32
     GetConsoleScreenBufferInfo(hStdOut, &consoleInfo);
+    width = consoleInfo.srWindow.Right - consoleInfo.srWindow.Left + 1;
+    height = consoleInfo.srWindow.Bottom - consoleInfo.srWindow.Top + 1;
+#else
+    struct winsize w{};
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    width = w.ws_col;
+    height = w.ws_row;
+#endif
 
     // If the size of the console has changed, clear the console
-    if (consoleInfo.dwSize.X * consoleInfo.dwSize.Y != charCount) {
-        charCount = consoleInfo.dwSize.X * consoleInfo.dwSize.Y;
+    if (width * height != charCount) {
+        charCount = width * height;
         clearScreen = true;
     }
 
@@ -136,17 +160,23 @@ void RenderSystem::Update() {
     consoleBuffer = std::vector<std::pair<char, Color>>(charCount, {' ', 0});
 
     // Loop over all the entities
-    for(auto& entity : Engine::GetEntities()) {
+    for (auto &entity: Engine::GetEntities()) {
 
         // Check if the entity has a sprite component
         if (entity->HasComponents<SpriteComponent, TransformComponent>()) {
 
             auto entityTransformedSprite = TransformSystem::TransformSprite(
-                    entity->GetComponent<SpriteComponent>(),
-                    entity->GetComponent<TransformComponent>()
-                );
+                entity->GetComponent<SpriteComponent>(),
+                entity->GetComponent<TransformComponent>()
+            );
 
-            for(int i = 0; i < entityTransformedSprite.Size(); i += 3) {
+            // Move the sprite to camera space
+            entityTransformedSprite = TransformSystem::TransformSprite(
+                entityTransformedSprite,
+                CameraSystem::GetCameraTransform()
+            );
+
+            for (int i = 0; i < entityTransformedSprite.Size(); i += 3) {
                 DrawTriangle(entityTransformedSprite, i);
             }
         }
@@ -154,27 +184,41 @@ void RenderSystem::Update() {
 
     // Clear the console
     if (clearScreen) {
+#ifdef _WIN32
         system("cls");
+#else
+        std::cout << "\033[2J";
+#endif
         clearScreen = false;
+    }
+
+    // Disable color
+    if (Input::GetKeyPressed(Key::LEFT)) {
+        drawColor = !drawColor;
     }
 
     // Draw the console buffer
     std::string stringToPrint;
+    Color lastColor = 0;
     for(auto &character : consoleBuffer) {
         if (character.first == ' ') {
             stringToPrint += " ";
         } else {
-            auto r = (character.second >> 16) & 0xFF;
-            auto g = (character.second >> 8) & 0xFF;
-            auto b = character.second & 0xFF;
-
             // The color code is in the format \033[38;2;r;g;bm
-            std::string color = "\033[38;2;" + std::to_string(r) + ";" + std::to_string(g) + ";" + std::to_string(b) + "m";
-            stringToPrint += color + character.first;
+            if (drawColor && character.second != lastColor) {
+                auto r = (character.second >> 16) & 0xFF;
+                auto g = (character.second >> 8) & 0xFF;
+                auto b = character.second & 0xFF;
+                stringToPrint += "\033[38;2;" + std::to_string(r) + ";" + std::to_string(g) + ";" + std::to_string(b) + "m";
+                lastColor = character.second;
+            }
+            stringToPrint += character.first;
         }
     }
-    std::cout << stringToPrint;
 
-    // Move cursor home
-    SetConsoleCursorPosition(hStdOut, {0, 0});
+    // Move the cursor to the top left
+    stringToPrint += "\033[H\033[0m";
+
+    // Print the string
+    std::cout << stringToPrint;
 }

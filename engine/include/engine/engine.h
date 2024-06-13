@@ -19,7 +19,7 @@ public:
      */
     template <typename EntityType, typename... Args>
     static void AddEntity(Args&&... args) {
-        _entities.insert(std::make_unique<EntityType>());
+        _entities.insert(std::make_unique<EntityType>(std::forward<Args>(args)...));
     }
 
     static std::multiset<std::unique_ptr<Entity>>& GetEntities();

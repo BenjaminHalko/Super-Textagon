@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include <string>
 #include <forward_list>
+#include <vector>
 
 /*
  * @brief The base class for all entities
@@ -40,8 +41,9 @@ protected:
      * @tparam Args The arguments to pass to the component constructor
      */
     template <typename ComponentType, typename... Args>
-    void AddComponent(Args&&... args) {
+    ComponentType& AddComponent(Args&&... args) {
         basicComponents[typeid(ComponentType)] = std::make_unique<ComponentType>(std::forward<Args>(args)...);
+        return *static_cast<ComponentType*>(basicComponents[typeid(ComponentType)].get());
     }
 
     /**

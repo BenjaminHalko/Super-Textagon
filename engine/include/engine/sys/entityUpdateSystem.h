@@ -3,6 +3,6 @@
 #include <engine/sys/_system.h>
 
 class EntityUpdateSystem : public System {
-public:
+    friend class Engine;
     static void Update();
 };

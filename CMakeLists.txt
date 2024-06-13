@@ -12,3 +12,6 @@ add_executable(Textual_Game ${SOURCES})
 # Link libraries
 add_subdirectory(engine)
 target_link_libraries(Textual_Game Engine)
+
+# Copy resources
+file(COPY assets/ DESTINATION ${CMAKE_BINARY_DIR})
