@@ -10,6 +10,6 @@ public:
     static void ScalePoint(Point& point, float x_scale, float y_scale);
     static void RotatePoint(Point& point, float angle);
     static void ApplyTransformation(Point& point, Transform& transform);
-    static SpriteComponent TransformSprite(SpriteComponent& sprite, Transform& transform);
+    static Sprite TransformSprite(Sprite& sprite, Transform& transform);
     static Collider TransformCollider(Collider& collider, Transform& transform);
 };

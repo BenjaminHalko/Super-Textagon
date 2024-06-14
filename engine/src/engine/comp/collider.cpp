@@ -5,7 +5,7 @@ Collider::Collider(std::initializer_list<Point> points) {
     std::copy(_points.begin(), _points.end(), std::back_inserter(_points));
 }
 
-Collider::Collider(SpriteComponent& sprite) {
+Collider::Collider(Sprite& sprite) {
     for (auto& point : sprite) {
         _points.push_back(point.point);
     }

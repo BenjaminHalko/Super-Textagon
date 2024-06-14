@@ -35,8 +35,8 @@ public:
      * @param depth The depth of the entity
      */
     template <typename... ComponentTypes>
-    explicit Entity(ComponentTypes... components, int depth = 0) : _depth(depth) {
-        ((_components[typeid(components)] = std::make_unique<ComponentTypes>(std::move(components))), ...);
+    explicit Entity(ComponentTypes&&... components) : _depth(0) {
+        ((_components[typeid(components)] = std::make_unique<ComponentTypes>(std::forward<ComponentTypes>(components))), ...);
     }
 
     /**

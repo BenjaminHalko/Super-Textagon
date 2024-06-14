@@ -17,25 +17,28 @@ struct ColoredPoint {
  * @brief A component that represents a sprite.
  * @details A sprite is a collection of points that are drawn on the screen.
  */
-class SpriteComponent : public Component {
+class Sprite : public Component {
 private:
     std::vector<ColoredPoint> _sprite;
 public:
-    SpriteComponent() = default;
+    Sprite() = default;
 
-    SpriteComponent(std::initializer_list<ColoredPoint> sprite);
+    Sprite(std::initializer_list<ColoredPoint> sprite);
 
-    explicit SpriteComponent(std::vector<ColoredPoint> sprite);
+    explicit Sprite(std::vector<ColoredPoint> sprite);
 
-    explicit SpriteComponent(int size);
+    explicit Sprite(int size);
 
-    SpriteComponent(
+    Sprite(
         float radius,
         int numSides,
         Color innerColor,
         float innerAlpha,
         Color outerColor,
-        float outerAlpha
+        float outerAlpha,
+        float originX=0.0f,
+        float originY=0.0f,
+        float rotation=0.0f
     );
 
     ColoredPoint& operator[](int index);

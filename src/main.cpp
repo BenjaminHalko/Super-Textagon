@@ -2,8 +2,7 @@
 #include "entities/testEntity.h"
 
 int main() {
-    Engine::AddEntity<TestEntity>(0);
-    Engine::AddEntity<TestEntity>(1);
+    CreateTestEntity();
 
     Engine::GameLoop();
     return 0;

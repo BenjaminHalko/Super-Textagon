@@ -13,7 +13,7 @@ public:
 
     Collider(std::initializer_list<Point> points);
 
-    explicit Collider(SpriteComponent& sprite);
+    explicit Collider(Sprite& sprite);
 
     explicit Collider(int size);
 

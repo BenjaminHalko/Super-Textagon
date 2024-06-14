@@ -3,8 +3,4 @@
 /**
  * @brief Base class for all systems
  */
-class System {
-public:
-    // It is important to have a virtual destructor
-    virtual ~System() = default;
-};
+class System {};

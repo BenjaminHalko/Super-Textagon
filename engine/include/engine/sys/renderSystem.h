@@ -36,7 +36,7 @@ class RenderSystem : public System {
      * @param y The y-coordinate of the point
      * @return A character representing the luminance of the point
      */
-    std::pair<char, Color> AlphaColorOfPoint(SpriteComponent &sprite, int x, int y);
+    std::pair<char, Color> AlphaColorOfPoint(Sprite &sprite, int x, int y);
 
     /**
      * @brief Sets a character at a position in the console
@@ -51,7 +51,7 @@ class RenderSystem : public System {
      * @param triangleList The points of the triangle strip
      * @param index The index of the first point in the triangle strip
      */
-    void DrawTriangle(SpriteComponent &sprite, int index);
+    void DrawTriangle(Sprite &sprite, int index);
 public:
     /**
      * @brief Initializes the render system

@@ -49,7 +49,7 @@ bool EdgeIntersection(Point p1, Point q1, Point p2, Point q2) {
 }
 
 
-bool CollisionSystem::CheckTriangleCollision(ColliderComponent& collider1, ColliderComponent& collider2, int start1, int start2) {
+bool CollisionSystem::CheckTriangleCollision(Collider& collider1, Collider& collider2, int start1, int start2) {
     Point tri1[3] = {
         collider1[start1],
         collider1[start1+1],
@@ -92,10 +92,10 @@ bool CollisionSystem::CheckTriangleCollision(ColliderComponent& collider1, Colli
 
 bool CollisionSystem::CheckCollision(Entity& entity1, Entity& entity2) {
     // Get the original colliders and positions
-    auto originalCollider1 = entity1.GetComponent<ColliderComponent>();
-    auto originalCollider2 = entity1.GetComponent<ColliderComponent>();
-    auto position1 = entity1.GetComponent<TransformComponent>();
-    auto position2 = entity2.GetComponent<TransformComponent>();
+    auto originalCollider1 = entity1.GetComponent<Collider>();
+    auto originalCollider2 = entity1.GetComponent<Collider>();
+    auto position1 = entity1.GetComponent<Transform>();
+    auto position2 = entity2.GetComponent<Transform>();
 
     // Transform colliders to their current position
     auto transformedCollider1 = TransformSystem::TransformCollider(originalCollider1, position1);
