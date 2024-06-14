@@ -1,7 +1,6 @@
 #pragma once
 
-#include <engine/comp/_uniqueComponent.h>
-#include <engine/comp/timerComponent.h>
+#include <engine/comp/_component.h>
 #include <memory>
 #include <typeindex>
 #include <unordered_map>
@@ -21,45 +20,24 @@ class Entity {
      * The value is a unique pointer to the component.
      * This is a map so that we can easily access the component by its type.
      */
-    std::unordered_map<std::type_index, std::unique_ptr<UniqueComponent>> uniqueComponents;
+    std::unordered_map<std::type_index, std::unique_ptr<Component>> _components;
 
     /**
-     * @brief Stores all the timers of the entity
+     * @brief The depth of a component
+     * @details This is used to order the entities in a set.
+     * @note This might be turned into a component in the future.
      */
-    std::vector<std::unique_ptr<TimerComponent>> timers;
-
-
-
-
-
-protected:
-    // Tells ECS to destroy the entity
-    bool destroyed = false;
-
-    // Tells systems the order in which to execute the entity
-    int depth = 0;
-
-    /**
-     * @brief Adds a component to the entity
-     * @tparam ComponentType The type of the component to add
-     * @tparam Args The arguments to pass to the component constructor
-     */
-    template <typename ComponentType, typename... Args>
-    ComponentType& AddComponent(Args&&... args) {
-        uniqueComponents[typeid(ComponentType)] = std::make_unique<ComponentType>(std::forward<Args>(args)...);
-        return *static_cast<ComponentType*>(uniqueComponents[typeid(ComponentType)].get());
-    }
-
-    /**
-     * @brief Adds a timer to the entity
-     * @param script The script to run when the timer ends
-     */
-    TimerComponent& AddTimer(ScriptComponent script);
+    int _depth;
 public:
     /**
-     * @brief Updates the entity each frame
+     * @brief Constructs an entity with a list of components
+     * @tparam components The components to add to the entity
+     * @param depth The depth of the entity
      */
-    virtual void Update() {};
+    template <typename... ComponentTypes>
+    explicit Entity(ComponentTypes&&... components) : _depth(0) {
+        ((_components[typeid(components)] = std::make_unique<ComponentTypes>(std::forward<ComponentTypes>(components))), ...);
+    }
 
     /**
      * @brief Gets a component from the entity
@@ -68,7 +46,7 @@ public:
      */
     template <typename ComponentType>
     ComponentType& GetComponent() {
-        return *static_cast<ComponentType*>(uniqueComponents[typeid(ComponentType)].get());
+        return *static_cast<ComponentType*>(_components[typeid(ComponentType)].get());
     }
 
     /**
@@ -78,20 +56,9 @@ public:
      */
     template <typename... ComponentTypes>
     bool HasComponents() {
-        return ((uniqueComponents.find(typeid(ComponentTypes)) != uniqueComponents.end()) && ...);
+        return ((_components.find(typeid(ComponentTypes)) != _components.end()) && ...);
     }
-
-    /**
-     * @brief Gets all the timers of the entity
-     */
-    std::vector<std::unique_ptr<TimerComponent>>& GetTimers();
 
     // Orders the entity inside of sets
     bool operator<(const Entity &other) const;
-
-    // Marks the entity for destruction
-    void Destroy();
-
-    // Check if the entity is destroyed
-    [[nodiscard]] bool gotDestroyed() const;
 };

@@ -2,6 +2,7 @@
 #include <engine/sys/timeSystem.h>
 #include <engine/sys/input.h>
 #include <engine/sys/audioSystem.h>
+#include <engine/sys/entityUpdateSystem.h>
 
 // We need to define the static variables here
 std::multiset<std::unique_ptr<Entity>> Engine::_entities;

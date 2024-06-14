@@ -30,7 +30,7 @@ RenderSystem::RenderSystem() {
 
 // Private
 
-std::pair<char, Color> RenderSystem::AlphaColorOfPoint(SpriteComponent &sprite, int x, int y) {
+std::pair<char, Color> RenderSystem::AlphaColorOfPoint(Sprite &sprite, int x, int y) {
     // Characters to use for alpha
     static const std::string alphaChars = ".`'^\",:;Il!i~+_-?][}{1)(|\\/*tjfrjxnvuczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@";
     static const int alphaCharsCount = (int)alphaChars.size();
@@ -84,9 +84,9 @@ void RenderSystem::SetConsoleCharacter(int x, int y, std::pair<char, Color> char
         consoleBuffer[y * width + x] = character;
 }
 
-void RenderSystem::DrawTriangle(SpriteComponent& sprite, int index) {
+void RenderSystem::DrawTriangle(Sprite& sprite, int index) {
     // Create a copy of the points
-    SpriteComponent points(3);
+    Sprite points(3);
 
     // Convert the points to screen space, from 0 to dwSize
     const float fontAspectRatio = 0.5f; // The x to y ratio of the font
@@ -161,11 +161,11 @@ void RenderSystem::Update() {
     for (auto &entity: Engine::GetEntities()) {
 
         // Check if the entity has a sprite component
-        if (entity->HasComponents<SpriteComponent, TransformComponent>()) {
+        if (entity->HasComponents<Sprite, Transform>()) {
 
             auto entityTransformedSprite = TransformSystem::TransformSprite(
-                entity->GetComponent<SpriteComponent>(),
-                entity->GetComponent<TransformComponent>()
+                entity->GetComponent<Sprite>(),
+                entity->GetComponent<Transform>()
             );
 
             for (int i = 0; i < entityTransformedSprite.Size(); i += 3) {

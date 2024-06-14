@@ -3,29 +3,22 @@
 #include "engine/sys/audioSystem.h"
 #include <engine/sys/collisionSystem.h>
 #include <engine/sys/timeSystem.h>
-#include <engine/comp/transformComponent.h>
-#include <engine/comp/spriteComponent.h>
+#include <engine/comp/transform.h>
+#include <engine/comp/sprite.h>
 #include <engine/sys/input.h>
 #include <cmath>
 
-TestEntity::TestEntity(int offset) : _offset(offset) {
-    // Create a transform component with a position of (0.5, 0.5)
-    AddComponent<TransformComponent>(0.5f, 0.5f);
-
-    // Create a triangle with a red outline and a white fill
-    // With a radius of 0.25 (or quarter the screen width)
-    auto sprite = AddComponent<SpriteComponent>(0.2f, 3, 0xFFFFFF, 1, 0xFF0000, 0.5f);
-
-    if (offset == 1) {
-        depth = 1;
-    } else {
-        GetComponent<TransformComponent>().rotation = 60;
-    }
-
-    AddComponent<ColliderComponent>(sprite);
+Entity& CreateTestEntity() {
+    return Engine::AddEntity(
+        Transform(0.5f, 0.5f),
+        Sprite(0.2f, 3, 0xFFFFFF, 1, 0xFF0000, 0.5f)
+    );
 }
 
-void TestEntity::Update() {
+
+/*
+void Update(Entity& entity) {
+ CreateTestEntity();
     // Get the transform component
     auto& transform = GetComponent<TransformComponent>();
 
@@ -49,3 +42,4 @@ void TestEntity::Update() {
         AudioSystem::PlayAudio("audio/explode.wav", false, 0.04f);
     }
 }
+ */

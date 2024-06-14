@@ -1,4 +1,4 @@
-#include <engine/comp/audioComponent.h>
+#include <engine/comp/audio.h>
 
 AudioComponent::AudioComponent(unsigned int handle) : _handle(handle) {}
 
