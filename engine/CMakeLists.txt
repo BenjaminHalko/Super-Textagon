@@ -30,7 +30,15 @@ target_include_directories(so_loud PUBLIC ${so_loud_SOURCE_DIR}/include)
 # Add source files
 file(GLOB_RECURSE ENGINE_SOURCES src/*)
 add_library(Engine ${ENGINE_SOURCES})
-target_link_libraries(Engine so_loud)
 
 # Include Dependencies
 target_include_directories(Engine PUBLIC include)
+
+# Link Ncurses
+if (UNIX)
+    find_package(Curses REQUIRED)
+    target_link_libraries(Engine PUBLIC ${CURSES_LIBRARIES} so_loud)
+    target_include_directories(Engine PUBLIC ${CURSES_INCLUDE_DIR})
+else()
+    target_link_libraries(Engine so_loud)
+endif()
