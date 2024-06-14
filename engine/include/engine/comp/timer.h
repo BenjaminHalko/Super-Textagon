@@ -1,15 +1,15 @@
 #pragma once
 
 #include <engine/comp/_component.h>
-#include <engine/comp/scriptComponent.h>
+#include <engine/comp/script.h>
 
 class TimerComponent : public Component {
 private:
-    ScriptComponent _onTimerEnd;
+    Script _onTimerEnd;
 public:
     int timeRemaining = -1;
 
-    explicit TimerComponent(ScriptComponent onTimerEnd);
+    explicit TimerComponent(Script onTimerEnd);
 
     void operator()();
 };

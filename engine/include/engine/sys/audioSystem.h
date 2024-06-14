@@ -1,7 +1,7 @@
 #pragma once
 
 #include <engine/sys/_system.h>
-#include <engine/comp/audioComponent.h>
+#include <engine/comp/audio.h>
 #include <soloud_wav.h>
 #include <string>
 #include <vector>

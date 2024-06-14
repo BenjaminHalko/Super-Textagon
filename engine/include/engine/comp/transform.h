@@ -1,11 +1,11 @@
 #pragma once
 
-#include <engine/comp/_uniqueComponent.h>
+#include <engine/comp/_component.h>
 
 /**
  * @brief A component that represents the position, scale, and rotation of an entity.
  */
-class TransformComponent : public UniqueComponent {
+class TransformComponent : public Component {
 public:
     float x, y;
     float x_scale = 1, y_scale = 1;

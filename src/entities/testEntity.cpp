@@ -3,8 +3,8 @@
 #include "engine/sys/audioSystem.h"
 #include <engine/sys/collisionSystem.h>
 #include <engine/sys/timeSystem.h>
-#include <engine/comp/transformComponent.h>
-#include <engine/comp/spriteComponent.h>
+#include <engine/comp/transform.h>
+#include <engine/comp/sprite.h>
 #include <engine/sys/input.h>
 #include <cmath>
 

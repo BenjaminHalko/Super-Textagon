@@ -1,7 +1,7 @@
 #include <engine/sys/collisionSystem.h>
 #include <engine/sys/transformSystem.h>
-#include <engine/comp/colliderComponent.h>
-#include <engine/comp/transformComponent.h>
+#include <engine/comp/collider.h>
+#include <engine/comp/transform.h>
 
 float sign(Point p1, Point p2, Point p3) {
     return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);

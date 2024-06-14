@@ -1,7 +1,7 @@
 #pragma once
 
 #include <engine/sys/_system.h>
-#include <engine/comp/spriteComponent.h>
+#include <engine/comp/sprite.h>
 #include <string>
 #include <algorithm>
 #include <iostream>

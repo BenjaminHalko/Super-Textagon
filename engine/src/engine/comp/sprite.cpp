@@ -1,4 +1,4 @@
-#include <engine/comp/spriteComponent.h>
+#include <engine/comp/sprite.h>
 
 SpriteComponent::SpriteComponent(std::initializer_list<ColoredPoint> sprite) {
     std::copy(sprite.begin(), sprite.end(), std::back_inserter(_sprite));
