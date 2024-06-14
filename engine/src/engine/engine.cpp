@@ -3,6 +3,7 @@
 #include <engine/sys/input.h>
 #include <engine/sys/audioSystem.h>
 #include <engine/sys/entityUpdateSystem.h>
+#include "engine/comp/transform.h"
 
 // We need to define the static variables here
 std::multiset<std::unique_ptr<Entity>> Engine::_entities;
@@ -31,11 +32,12 @@ void Engine::GameLoop() {
         TimeSystem::FrameEnd();
 
         // TEMP
+        GetEntities().begin()->get()->GetComponent<Transform>().rotation += 2 * TimeSystem::DeltaTime();
         if (Input::GetKeyPressed(Key::ESCAPE))
             StopGame();
     }
 
-    Input::Clean();
+     Input::Clean();
     AudioSystem::Clean();
 }
 

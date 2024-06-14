@@ -26,7 +26,7 @@ class RenderSystem : public System {
     bool clearScreen = false;
 
     // Draw color
-    bool drawColor = false;
+    bool drawColor = true;
 
     /**
      * @brief Determines the alpha and color of a point
