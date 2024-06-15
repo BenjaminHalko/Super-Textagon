@@ -28,6 +28,9 @@ void TransformSystem::ApplyTransformation(Point &point, Transform &transform) {
 
 Sprite TransformSystem::TransformSprite(Sprite &sprite, Transform &transform) {
     Sprite newSprite;
+    newSprite.tintAlpha = sprite.tintAlpha;
+    newSprite.tint = sprite.tint;
+    newSprite.alpha = sprite.alpha;
     for (auto &point: sprite) {
         ColoredPoint newPoint = point;
         ApplyTransformation(newPoint.point, transform);

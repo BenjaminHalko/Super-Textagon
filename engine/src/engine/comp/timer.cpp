@@ -3,6 +3,6 @@
 
 TimerComponent::TimerComponent(Script onTimerEnd) : _onTimerEnd(onTimerEnd) {}
 
-void TimerComponent::operator()() {
-    _onTimerEnd();
+void TimerComponent::operator()(Entity& self) {
+    _onTimerEnd(self);
 }

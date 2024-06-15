@@ -1,11 +1,11 @@
 #pragma once
 
-#include <engine/comp/_component.h>
+#include <engine/comp/_propertyComponent.h>
 
 /**
  * @brief A component that represents the position, scale, and rotation of an entity.
  */
-class Transform : public Component {
+class Transform : public PropertyComponent {
 public:
     float x, y;
     float x_scale = 1, y_scale = 1;

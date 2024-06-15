@@ -1,11 +1,12 @@
 #pragma once
 
-#include <engine/comp/_component.h>
+#include <engine/comp/_propertyComponent.h>
+#include <engine/entity.h>
 
-class Script : public Component {
+class Script : public PropertyComponent {
 private:
-    void (*_script)();
+    void (*_script)(Entity&);
 public:
-    explicit Script(void (*script)()) : _script(script) {}
-    void operator()();
+    explicit Script(void (*script)(Entity&));
+    void operator()(Entity& self);
 };

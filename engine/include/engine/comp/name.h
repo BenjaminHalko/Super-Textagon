@@ -1,11 +1,13 @@
 #pragma once
 
-#include <engine/comp/_component.h>
+#include <engine/comp/_propertyComponent.h>
 #include <string>
 
-class Name : public Component {
+class Name : public PropertyComponent {
     std::string _name;
 public:
-    Name(std::string name);
+    explicit Name(std::string name);
     std::string Get() const;
 };
+
+

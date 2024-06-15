@@ -15,15 +15,28 @@ public:
      * @tparam Args
      */
     template <typename... Args>
-    static Entity& AddEntity(Args&&... args) {
-        _entities.insert(std::make_unique<Entity>(std::forward<Args>(args)...));
-        return *_entities.begin()->get();
+    static Entity& AddEntity(std::string name, int depth, Args&&... args) {
+        auto entityPtr = std::make_unique<Entity>(std::move(name), depth, std::forward<Args>(args)...);
+        auto entity = entityPtr.get();
+        _entities.insert(std::move(entityPtr));
+        return *entity;
     }
 
     /**
-     * @brief Gets all entities
+     * @brief Gets all the entities with a specific component
      */
-    static std::multiset<std::unique_ptr<Entity>>& GetEntities();
+    template <typename ... ComponentTypes>
+    static std::vector<Entity*> GetEntities() {
+        std::vector<Entity*> entities;
+        for (auto& entity : _entities) {
+            if (entity->HasComponents<ComponentTypes...>()) {
+                entities.push_back(entity.get());
+            }
+        }
+        return entities;
+    }
+
+    static std::vector<Entity*> GetEntities(std::string name);
 
     /**
      * @brief Starts the game loop

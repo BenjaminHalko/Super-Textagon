@@ -1,5 +1,7 @@
 #include <engine/comp/script.h>
 
-void Script::operator()() {
-    _script();
+Script::Script(void (*script)(Entity&)) : _script(script) {}
+
+void Script::operator()(Entity& self) {
+    _script(self);
 }

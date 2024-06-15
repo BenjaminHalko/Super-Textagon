@@ -47,9 +47,10 @@ std::pair<char, Color> RenderSystem::AlphaColorOfPoint(Sprite &sprite, int x, in
 
     // Calculate the alpha
     float alpha = lambda1 * sprite[0].alpha + lambda2 * sprite[1].alpha + lambda3 * sprite[2].alpha;
+    alpha *= sprite.alpha;
 
-    if (alpha <= 0.0f || alpha >= 1.0f)
-        return {' ', 0};
+    // Clamp the alpha
+    alpha = (float)fmax(0, fmin(1, alpha));
 
     // Calculate the character
     char character = alphaChars.at((int)((float)(alphaCharsCount-1) * alpha));
@@ -71,6 +72,19 @@ std::pair<char, Color> RenderSystem::AlphaColorOfPoint(Sprite &sprite, int x, in
 
         Color color = ((r << 16) | (g << 8) | b);
 
+        // Merge the colour
+        if (sprite.tintAlpha != 0) {
+            float tintR = (float(sprite.tint >> 16 & 0xFF) * sprite.tintAlpha);
+            float tintG = (float(sprite.tint >> 8 & 0xFF) * sprite.tintAlpha);
+            float tintB = (float(sprite.tint & 0xFF) * sprite.tintAlpha);
+
+            r = (int) (float(r) * (1 - sprite.tintAlpha) + tintR);
+            g = (int) (float(g) * (1 - sprite.tintAlpha) + tintG);
+            b = (int) (float(b) * (1 - sprite.tintAlpha) + tintB);
+
+            color = ((r << 16) | (g << 8) | b);
+        }
+
         // Return the character based on the luminance & color
         return {character, color};
     }
@@ -87,6 +101,9 @@ void RenderSystem::SetConsoleCharacter(int x, int y, std::pair<char, Color> char
 void RenderSystem::DrawTriangle(Sprite& sprite, int index) {
     // Create a copy of the points
     Sprite points(3);
+    points.alpha = sprite.alpha;
+    points.tint = sprite.tint;
+    points.tintAlpha = sprite.tintAlpha;
 
     // Convert the points to screen space, from 0 to dwSize
     const float fontAspectRatio = 0.5f; // The x to y ratio of the font
@@ -158,19 +175,14 @@ void RenderSystem::Update() {
     consoleBuffer = std::vector<std::pair<char, Color>>(charCount, {' ', 0});
 
     // Loop over all the entities
-    for (auto &entity: Engine::GetEntities()) {
+    for (auto entity: Engine::GetEntities<Sprite, Transform>()) {
+        auto entityTransformedSprite = TransformSystem::TransformSprite(
+            entity->GetComponent<Sprite>(),
+            entity->GetComponent<Transform>()
+        );
 
-        // Check if the entity has a sprite component
-        if (entity->HasComponents<Sprite, Transform>()) {
-
-            auto entityTransformedSprite = TransformSystem::TransformSprite(
-                entity->GetComponent<Sprite>(),
-                entity->GetComponent<Transform>()
-            );
-
-            for (int i = 0; i < entityTransformedSprite.Size(); i += 3) {
-                DrawTriangle(entityTransformedSprite, i);
-            }
+        for (int i = 0; i < entityTransformedSprite.Size(); i += 3) {
+            DrawTriangle(entityTransformedSprite, i);
         }
     }
 
@@ -185,7 +197,7 @@ void RenderSystem::Update() {
     }
 
     // Disable color
-    if (Input::GetKeyPressed('q')) {
+    if (Input::GetKeyPressed(VK_F12)) {
         drawColor = !drawColor;
     }
 
