@@ -1,26 +1,13 @@
 #include <engine/sys/input.h>
 #ifdef _WIN32
+#define NOVIRTUALKEYCODES
 #include <windows.h>
 #else
 #include <ncurses.h>
 #endif
 
 // Define the static variable
-std::unordered_map<Key, Input::KeyState> Input::_keys;
-
-#ifdef _WIN32
-std::unordered_map<Key, int> Input::_keyMap = {
-    {Key::LEFT, VK_LEFT},
-    {Key::RIGHT, VK_RIGHT},
-    {Key::ESCAPE, VK_ESCAPE}
-};
-#else
-std::unordered_map<Key, int> Input::_keyMap {
-    {Key::LEFT, KEY_LEFT},
-    {Key::RIGHT, KEY_RIGHT},
-    {Key::ESCAPE, 27}
-};
-#endif
+std::unordered_map<int, Input::KeyState> Input::_keys;
 
 void Input::Init() {
 #ifndef _WIN32
@@ -39,35 +26,43 @@ void Input::Clean() {
 }
 
 void Input::Update() {
-    for(int i = 0; i <= (int)Key::ESCAPE; i++) {
-        bool held;
-
-        // Cast the integer to a key
-        Key key = static_cast<Key>(i);
-
-
-
-        // Check the key
 #ifdef _WIN32
-        held = GetAsyncKeyState(_keyMap[key]);
-#else
-        held = getch() == _keyMap[key];
-#endif
-
-        // Update the key state
-        if (!held)
-            _keys[key] = KeyState::UP;
-        else if (_keys[key] == KeyState::UP)
-            _keys[key] = KeyState::PRESSED;
-        else
-            _keys[key] = KeyState::HELD;
+    for(int i = 0; i < 256; i++) {
+        if(GetAsyncKeyState(i) & 0x8000) {
+            if(_keys[i] == KeyState::UP)
+                _keys[i] = KeyState::PRESSED;
+            else
+                _keys[i] = KeyState::HELD;
+        } else {
+            _keys[i] = KeyState::UP;
+        }
     }
+#else
+    std::unordered_map<unsigned int, KeyState> tempKeys;
+    while(int key = getch() != ERR) {
+        if(_keys[key] == KeyState::UP)
+            tempKeys[key] = KeyState::PRESSED;
+        else
+            tempKeys[key] = KeyState::HELD;
+
+    }
+    for(auto &key : _keys) {
+        if(tempKeys.find(key.first) == tempKeys.end())
+            key.second = KeyState::UP;
+        else
+            key.second = tempKeys[key.first];
+    }
+#endif
 }
 
-bool Input::GetKeyDown(Key key) {
+bool Input::GetKeyDown(int key) {
+    if (key >= 'a' && key <= 'z')
+        key -= 32;
     return _keys[key] != KeyState::UP;
 }
 
-bool Input::GetKeyPressed(Key key) {
+bool Input::GetKeyPressed(int key) {
+    if (key >= 'a' && key <= 'z')
+        key -= 32;
     return _keys[key] == KeyState::PRESSED;
 }

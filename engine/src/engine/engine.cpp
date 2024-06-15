@@ -33,11 +33,11 @@ void Engine::GameLoop() {
 
         // TEMP
         GetEntities().begin()->get()->GetComponent<Transform>().rotation += 2 * TimeSystem::DeltaTime();
-        if (Input::GetKeyPressed(Key::ESCAPE))
+        if (Input::GetKeyPressed(VK_ESCAPE))
             StopGame();
     }
 
-     Input::Clean();
+    Input::Clean();
     AudioSystem::Clean();
 }
 
