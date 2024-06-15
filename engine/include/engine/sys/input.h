@@ -55,6 +55,9 @@ class Input : public System {
     enum KeyState {UP, PRESSED, HELD};
     static std::unordered_map<int, KeyState> _keys;
 
+    static void Init();
+    static void Clean();
+
     /**
      * @brief Loops over all the keys and tracks their state
      * @note This function should be called once per frame

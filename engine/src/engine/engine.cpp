@@ -18,6 +18,7 @@ std::multiset<std::unique_ptr<Entity>>& Engine::GetEntities() {
 }
 
 void Engine::GameLoop() {
+    Input::Init();
     AudioSystem::Init();
 
     while(_isRunning) {
@@ -36,6 +37,7 @@ void Engine::GameLoop() {
             StopGame();
     }
 
+    Input::Clean();
     AudioSystem::Clean();
 }
 

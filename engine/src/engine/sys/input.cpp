@@ -3,15 +3,27 @@
 #define NOVIRTUALKEYCODES
 #include <windows.h>
 #else
-#include <linux/input.h>
-#include <fcntl.h>
-#include <csignal>
-#include <cstdlib>
-
+#include <ncurses.h>
 #endif
 
 // Define the static variable
 std::unordered_map<int, Input::KeyState> Input::_keys;
+
+void Input::Init() {
+#ifndef _WIN32
+    initscr();
+    cbreak();
+    noecho();
+    nodelay(stdscr, TRUE);
+    keypad(stdscr, TRUE);
+#endif
+}
+
+void Input::Clean() {
+#ifndef _WIN32
+    endwin();
+#endif
+}
 
 void Input::Update() {
 #ifdef _WIN32
@@ -26,35 +38,31 @@ void Input::Update() {
         }
     }
 #else
-    struct input_event ev{};
-    int fd = open("/dev/input/eventX", O_RDONLY);
-    if (fd == -1) {
-        // Handle error
-        exit(1);
-        return;
-    }
+    std::unordered_map<unsigned int, KeyState> tempKeys;
+    while(int key = getch() != ERR) {
+        if(_keys[key] == KeyState::UP)
+            tempKeys[key] = KeyState::PRESSED;
+        else
+            tempKeys[key] = KeyState::HELD;
 
-    while (read(fd, &ev, sizeof(struct input_event)) > 0) {
-        if (ev.type == EV_KEY) {
-            if (ev.value == 1) { // Key press
-                if (_keys[ev.code] == KeyState::UP)
-                    _keys[ev.code] = KeyState::PRESSED;
-                else
-                    _keys[ev.code] = KeyState::HELD;
-            } else if (ev.value == 0) { // Key release
-                _keys[ev.code] = KeyState::UP;
-            }
-        }
     }
-
-    close(fd);
+    for(auto &key : _keys) {
+        if(tempKeys.find(key.first) == tempKeys.end())
+            key.second = KeyState::UP;
+        else
+            key.second = tempKeys[key.first];
+    }
 #endif
 }
 
 bool Input::GetKeyDown(int key) {
+    if (key >= 'a' && key <= 'z')
+        key -= 32;
     return _keys[key] != KeyState::UP;
 }
 
 bool Input::GetKeyPressed(int key) {
+    if (key >= 'a' && key <= 'z')
+        key -= 32;
     return _keys[key] == KeyState::PRESSED;
 }
