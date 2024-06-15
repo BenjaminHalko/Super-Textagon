@@ -185,7 +185,7 @@ void RenderSystem::Update() {
     }
 
     // Disable color
-    if (Input::GetKeyPressed(Key::LEFT)) {
+    if (Input::GetKeyPressed('q')) {
         drawColor = !drawColor;
     }
 

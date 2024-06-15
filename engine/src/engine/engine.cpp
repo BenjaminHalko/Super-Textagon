@@ -18,7 +18,6 @@ std::multiset<std::unique_ptr<Entity>>& Engine::GetEntities() {
 }
 
 void Engine::GameLoop() {
-    Input::Init();
     AudioSystem::Init();
 
     while(_isRunning) {
@@ -33,11 +32,10 @@ void Engine::GameLoop() {
 
         // TEMP
         GetEntities().begin()->get()->GetComponent<Transform>().rotation += 2 * TimeSystem::DeltaTime();
-        if (Input::GetKeyPressed(Key::ESCAPE))
+        if (Input::GetKeyPressed(VK_ESCAPE))
             StopGame();
     }
 
-     Input::Clean();
     AudioSystem::Clean();
 }
 

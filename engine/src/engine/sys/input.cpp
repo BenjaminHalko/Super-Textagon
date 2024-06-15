@@ -1,73 +1,60 @@
 #include <engine/sys/input.h>
 #ifdef _WIN32
+#define NOVIRTUALKEYCODES
 #include <windows.h>
 #else
-#include <ncurses.h>
+#include <linux/input.h>
+#include <fcntl.h>
+#include <csignal>
+#include <cstdlib>
+
 #endif
 
 // Define the static variable
-std::unordered_map<Key, Input::KeyState> Input::_keys;
-
-#ifdef _WIN32
-std::unordered_map<Key, int> Input::_keyMap = {
-    {Key::LEFT, VK_LEFT},
-    {Key::RIGHT, VK_RIGHT},
-    {Key::ESCAPE, VK_ESCAPE}
-};
-#else
-std::unordered_map<Key, int> Input::_keyMap {
-    {Key::LEFT, KEY_LEFT},
-    {Key::RIGHT, KEY_RIGHT},
-    {Key::ESCAPE, 27}
-};
-#endif
-
-void Input::Init() {
-#ifndef _WIN32
-    initscr();
-    cbreak();
-    noecho();
-    nodelay(stdscr, TRUE);
-    keypad(stdscr, TRUE);
-#endif
-}
-
-void Input::Clean() {
-#ifndef _WIN32
-    endwin();
-#endif
-}
+std::unordered_map<int, Input::KeyState> Input::_keys;
 
 void Input::Update() {
-    for(int i = 0; i <= (int)Key::ESCAPE; i++) {
-        bool held;
-
-        // Cast the integer to a key
-        Key key = static_cast<Key>(i);
-
-
-
-        // Check the key
 #ifdef _WIN32
-        held = GetAsyncKeyState(_keyMap[key]);
-#else
-        held = getch() == _keyMap[key];
-#endif
-
-        // Update the key state
-        if (!held)
-            _keys[key] = KeyState::UP;
-        else if (_keys[key] == KeyState::UP)
-            _keys[key] = KeyState::PRESSED;
-        else
-            _keys[key] = KeyState::HELD;
+    for(int i = 0; i < 256; i++) {
+        if(GetAsyncKeyState(i) & 0x8000) {
+            if(_keys[i] == KeyState::UP)
+                _keys[i] = KeyState::PRESSED;
+            else
+                _keys[i] = KeyState::HELD;
+        } else {
+            _keys[i] = KeyState::UP;
+        }
     }
+#else
+    struct input_event ev{};
+    int fd = open("/dev/input/eventX", O_RDONLY);
+    if (fd == -1) {
+        // Handle error
+        exit(1);
+        return;
+    }
+
+    while (read(fd, &ev, sizeof(struct input_event)) > 0) {
+        if (ev.type == EV_KEY) {
+            if (ev.value == 1) { // Key press
+                if (_keys[ev.code] == KeyState::UP)
+                    _keys[ev.code] = KeyState::PRESSED;
+                else
+                    _keys[ev.code] = KeyState::HELD;
+            } else if (ev.value == 0) { // Key release
+                _keys[ev.code] = KeyState::UP;
+            }
+        }
+    }
+
+    close(fd);
+#endif
 }
 
-bool Input::GetKeyDown(Key key) {
+bool Input::GetKeyDown(int key) {
     return _keys[key] != KeyState::UP;
 }
 
-bool Input::GetKeyPressed(Key key) {
+bool Input::GetKeyPressed(int key) {
     return _keys[key] == KeyState::PRESSED;
 }
