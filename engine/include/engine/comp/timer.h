@@ -11,5 +11,5 @@ public:
 
     explicit TimerComponent(Script onTimerEnd);
 
-    void operator()();
+    void operator()(Entity& self);
 };

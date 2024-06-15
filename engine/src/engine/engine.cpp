@@ -10,11 +10,14 @@ std::multiset<std::unique_ptr<Entity>> Engine::_entities;
 bool Engine::_isRunning = true;
 RenderSystem Engine::_renderSystem;
 
-/**
- * @brief Gets the entities
- */
-std::multiset<std::unique_ptr<Entity>>& Engine::GetEntities() {
-    return _entities;
+std::vector<Entity*> Engine::GetEntities(std::string name) {
+    std::vector<Entity*> entities;
+    for (auto& entity : _entities) {
+        if (entity->GetName() == name) {
+            entities.push_back(entity.get());
+        }
+    }
+    return entities;
 }
 
 void Engine::GameLoop() {
@@ -32,7 +35,6 @@ void Engine::GameLoop() {
         TimeSystem::FrameEnd();
 
         // TEMP
-        GetEntities().begin()->get()->GetComponent<Transform>().rotation += 2 * TimeSystem::DeltaTime();
         if (Input::GetKeyPressed(VK_ESCAPE))
             StopGame();
     }

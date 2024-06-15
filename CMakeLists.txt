@@ -13,5 +13,5 @@ add_executable(Super_Textagon ${SOURCES})
 add_subdirectory(engine)
 target_link_libraries(Super_Textagon Engine)
 
-# Copy resources
+# Copy assets
 file(COPY assets/ DESTINATION ${CMAKE_BINARY_DIR})

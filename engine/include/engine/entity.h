@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine/comp/_component.h>
+#include <engine/comp/_propertyComponent.h>
 #include <memory>
 #include <typeindex>
 #include <unordered_map>
@@ -20,14 +20,24 @@ class Entity {
      * The value is a unique pointer to the component.
      * This is a map so that we can easily access the component by its type.
      */
-    std::unordered_map<std::type_index, std::unique_ptr<Component>> _components;
+    std::unordered_map<std::type_index, std::unique_ptr<PropertyComponent>> _components;
+
+    /**
+     * @brief The name of the entity
+     */
+    std::string _name;
 
     /**
      * @brief The depth of a component
      * @details This is used to order the entities in a set.
      * @note This might be turned into a component in the future.
      */
-    int _depth;
+    const int _depth;
+
+    /**
+     * @brief Flags the enemy for deletion
+     */
+    bool _delete = false;
 public:
     /**
      * @brief Constructs an entity with a list of components
@@ -35,7 +45,7 @@ public:
      * @param depth The depth of the entity
      */
     template <typename... ComponentTypes>
-    explicit Entity(ComponentTypes&&... components) : _depth(0) {
+    explicit Entity(std::string name, int depth, ComponentTypes&&... components) : _name(std::move(name)), _depth(depth) {
         ((_components[typeid(components)] = std::make_unique<ComponentTypes>(std::forward<ComponentTypes>(components))), ...);
     }
 
@@ -59,6 +69,15 @@ public:
         return ((_components.find(typeid(ComponentTypes)) != _components.end()) && ...);
     }
 
+    // Gets the name of the entity
+    [[nodiscard]] std::string GetName() const;
+
     // Orders the entity inside of sets
     bool operator<(const Entity &other) const;
+
+    // Flags the entity for deletion
+    void Delete();
+
+    // Checks if the entity is flagged for deletion
+    [[nodiscard]] bool IsDeleted() const;
 };
