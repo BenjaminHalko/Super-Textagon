@@ -5,6 +5,7 @@
 #include "engine/sys/timeSystem.h"
 #include "engine/comp/transform.h"
 #include "../helper.h"
+#include "engine/sys/cameraSystem.h"
 
 void UpdateTestEntity(Entity& self) {
     // Define Variables
@@ -29,7 +30,7 @@ void UpdateTestEntity(Entity& self) {
 void CreateTestEntity() {
     Engine::AddEntity(
         "test", 0,
-        Transform(0.5f, 0.5f),
+        Transform(0, 0),
         Sprite(0.2f, 3, 0xFFFFFF, 1, 0xFF0000, 0.5f),
         Script(UpdateTestEntity)
     );

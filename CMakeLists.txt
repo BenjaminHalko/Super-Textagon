@@ -3,7 +3,7 @@ project(Super_Textagon)
 
 # Set compiler flags
 enable_language(CXX)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 # Add source files
 file(GLOB_RECURSE SOURCES src/*)
