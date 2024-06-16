@@ -6,7 +6,7 @@
 
 void UpdateMusicController(Entity& self) {
     // Define Variables
-    static auto music = AudioSystem::PlayAudio("audio/music_temp.ogg", true, 0.4f);
+    static auto music = AudioSystem::PlayAudio("audio/music.ogg", true, 0.4f);
     static int lastBeat = 0;
     static const int BPM = 130;
 
