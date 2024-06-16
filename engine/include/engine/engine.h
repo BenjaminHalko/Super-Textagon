@@ -8,7 +8,6 @@
 class Engine {
     static std::multiset<std::unique_ptr<Entity>> _entities;
     static bool _isRunning;
-    static RenderSystem _renderSystem;
 public:
     /**
      * @brief Adds an entity to the Engine

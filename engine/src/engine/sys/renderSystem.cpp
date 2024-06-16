@@ -1,9 +1,9 @@
 #include <engine/sys/renderSystem.h>
 #include <engine/engine.h>
 #include <engine/sys/transformSystem.h>
+#include <engine/sys/cameraSystem.h>
 #include <limits>
 #include <cmath>
-
 #ifndef _WIN32
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -11,8 +11,21 @@
 
 // TEMP
 #include "engine/sys/input.h"
+#include "engine/sys/timeSystem.h"
 
-RenderSystem::RenderSystem() {
+// Define the static variables
+#ifdef _WIN32
+HANDLE RenderSystem::hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+CONSOLE_SCREEN_BUFFER_INFO RenderSystem::consoleInfo;
+#endif
+oof::screen<std::string> RenderSystem::consoleBuffer{0, 0, ' '};
+int RenderSystem::charCount = 0;
+int RenderSystem::width = 0;
+int RenderSystem::height = 0;
+bool RenderSystem::clearScreen = true;
+bool RenderSystem::drawColor = true;
+
+void RenderSystem::Init() {
 #ifdef _WIN32
     // Disable scroll bars
     SetConsoleMode(hStdOut, ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
@@ -94,8 +107,15 @@ std::pair<char, Color> RenderSystem::AlphaColorOfPoint(Sprite &sprite, int x, in
 }
 
 void RenderSystem::SetConsoleCharacter(int x, int y, std::pair<char, Color> character) {
-    if (x >= 0 && x < width && y >= 0 && y < height)
-        consoleBuffer[y * width + x] = character;
+    if (consoleBuffer.is_inside(x, y)) {
+        auto &cell = consoleBuffer.get_cell(x, y);
+        cell.m_letter = character.first;
+        cell.m_format.m_fg_color = {
+            (character.second >> 16) & 0xFF,
+            (character.second >> 8) & 0xFF,
+            character.second & 0xFF
+        };
+    }
 }
 
 void RenderSystem::DrawTriangle(Sprite& sprite, int index) {
@@ -131,8 +151,8 @@ void RenderSystem::DrawTriangle(Sprite& sprite, int index) {
 
     // Draw the upper part of the triangle (from A to B)
     for (int y = (int)std::ceil(points[0].point.y); y <= (int)(points[1].point.y); y++) {
-        float x1 = points[0].point.x + slopeAC * ((float)y - points[0].point.y);
-        float x2 = points[0].point.x + slopeAB * ((float)y - points[0].point.y);
+        auto x1 = (float)fmax(0, fmin(width-1, points[0].point.x + slopeAC * ((float)y - points[0].point.y)));
+        auto x2 = (float)fmax(0, fmin(width-1, points[0].point.x + slopeAB * ((float)y - points[0].point.y)));
         if (x1 > x2) std::swap(x1, x2); // Ensure x1 is always less than x2
         for (int x = (int)std::ceil(x1); x <= (int)(x2); x++) {
             SetConsoleCharacter(x, y, AlphaColorOfPoint(points, x, y));
@@ -141,8 +161,8 @@ void RenderSystem::DrawTriangle(Sprite& sprite, int index) {
 
     // Draw the lower part of the triangle (from B to C)
     for (int y = (int)std::ceil(points[1].point.y); y <= (int)(points[2].point.y); y++) {
-        float x1 = points[0].point.x + slopeAC * ((float)y - points[0].point.y);
-        float x2 = points[1].point.x + slopeBC * ((float)y - points[1].point.y);
+        auto x1 = (float)fmax(0, fmin(width-1, points[0].point.x + slopeAC * ((float)y - points[0].point.y)));
+        auto x2 = (float)fmax(0, fmin(width-1, points[1].point.x + slopeBC * ((float)y - points[1].point.y)));
         if (x1 > x2) std::swap(x1, x2); // Ensure x1 is always less than x2
         for (int x = (int)std::ceil(x1); x <= (int)(x2); x++) {
             SetConsoleCharacter(x, y, AlphaColorOfPoint(points, x, y));
@@ -164,21 +184,28 @@ void RenderSystem::Update() {
     width = w.ws_col;
     height = w.ws_row;
 #endif
-
     // If the size of the console has changed, clear the console
     if (width * height != charCount) {
         charCount = width * height;
         clearScreen = true;
+        consoleBuffer = oof::screen(width, height, ' ');
+    } else {
+        // Clear the console buffer
+        consoleBuffer.clear();
     }
 
-    // Resize the console buffer
-    consoleBuffer = std::vector<std::pair<char, Color>>(charCount, {' ', 0});
-
     // Loop over all the entities
+    auto camera = CameraSystem::GetTransform();
     for (auto entity: Engine::GetEntities<Sprite, Transform>()) {
         auto entityTransformedSprite = TransformSystem::TransformSprite(
-            entity->GetComponent<Sprite>(),
-            entity->GetComponent<Transform>()
+                entity->GetComponent<Sprite>(),
+                entity->GetComponent<Transform>()
+        );
+
+        // Camera transform
+        entityTransformedSprite = TransformSystem::TransformSprite(
+            entityTransformedSprite,
+            camera
         );
 
         for (int i = 0; i < entityTransformedSprite.Size(); i += 3) {
@@ -186,7 +213,7 @@ void RenderSystem::Update() {
         }
     }
 
-    // Clear the console
+    // Clear the screen
     if (clearScreen) {
 #ifdef _WIN32
         system("cls");
@@ -201,28 +228,17 @@ void RenderSystem::Update() {
         drawColor = !drawColor;
     }
 
-    // Draw the console buffer
-    std::string stringToPrint;
-    Color lastColor = 0;
-    for(auto &character : consoleBuffer) {
-        if (character.first == ' ') {
-            stringToPrint += " ";
-        } else {
-            // The color code is in the format \033[38;2;r;g;bm
-            if (drawColor && character.second != lastColor) {
-                auto r = (character.second >> 16) & 0xFF;
-                auto g = (character.second >> 8) & 0xFF;
-                auto b = character.second & 0xFF;
-                stringToPrint += "\033[38;2;" + std::to_string(r) + ";" + std::to_string(g) + ";" + std::to_string(b) + "m";
-                lastColor = character.second;
-            }
-            stringToPrint += character.first;
-        }
+    // Draw FPS
+    std::string fps = std::to_string(TimeSystem::TimeRunning());
+    for (int i = 0; i < (int)fps.size(); i++) {
+        SetConsoleCharacter(i, 0, {fps[i], 0xFFFFFF});
     }
 
-    // Move the cursor to the top left
-    stringToPrint += "\033[H\033[0m";
-
-    // Print the string
-    std::cout << stringToPrint;
+    // Draw the console buffer
+#ifdef _WIN32
+    auto const str = consoleBuffer.get_string();
+    WriteConsoleA(hStdOut, str.c_str(), str.size(), nullptr, nullptr);
+#else
+    std::cout << consoleBuffer.get_string();
+#endif
 }

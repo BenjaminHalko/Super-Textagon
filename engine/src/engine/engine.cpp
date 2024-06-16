@@ -3,12 +3,10 @@
 #include <engine/sys/input.h>
 #include <engine/sys/audioSystem.h>
 #include <engine/sys/entityUpdateSystem.h>
-#include "engine/comp/transform.h"
 
 // We need to define the static variables here
 std::multiset<std::unique_ptr<Entity>> Engine::_entities;
 bool Engine::_isRunning = true;
-RenderSystem Engine::_renderSystem;
 
 std::vector<Entity*> Engine::GetEntities(std::string name) {
     std::vector<Entity*> entities;
@@ -23,6 +21,7 @@ std::vector<Entity*> Engine::GetEntities(std::string name) {
 void Engine::GameLoop() {
     Input::Init();
     AudioSystem::Init();
+    RenderSystem::Init();
 
     while(_isRunning) {
         TimeSystem::FrameStart();
@@ -30,7 +29,7 @@ void Engine::GameLoop() {
         Input::Update();
         AudioSystem::Update();
         EntityUpdateSystem::Update();
-        _renderSystem.Update();
+        RenderSystem::Update();
 
         TimeSystem::FrameEnd();
 

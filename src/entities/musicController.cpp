@@ -18,7 +18,7 @@ void UpdateMusicController(Entity& self) {
 
 void CreateMusicController() {
     Engine::AddEntity(
-        "musicController", -10,
+        "musicController", -1000,
         Script(UpdateMusicController)
     );
 }

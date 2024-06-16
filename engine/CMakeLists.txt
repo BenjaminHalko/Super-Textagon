@@ -3,7 +3,7 @@ project(Engine)
 
 # Set C++ standard
 enable_language(CXX)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 # Download SoLoud
 include(FetchContent)
