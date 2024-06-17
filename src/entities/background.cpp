@@ -15,9 +15,9 @@ void BackgroundUpdate(Entity& self) {
 
     // Pulse Background
     if (Global::beatPulse) {
-        CameraSystem::zoom = 1.4f;
+        //CameraSystem::zoom = 1.4f;
     }
-    CameraSystem::zoom = Approach(CameraSystem::zoom, 1.0f, 0.03f);
+    //CameraSystem::zoom = Approach(CameraSystem::zoom, 1.0f, 0.03f);
 
     // Update Hue Based on Time
     Global::hue = Wave(0, 54, 5, 0);
