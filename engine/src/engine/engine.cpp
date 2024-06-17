@@ -1,18 +1,25 @@
 #include <engine/engine.h>
+#include <engine/comp/depth.h>
+#include <engine/comp/tag.h>
 #include <engine/sys/timeSystem.h>
 #include <engine/sys/input.h>
 #include <engine/sys/audioSystem.h>
 #include <engine/sys/entityUpdateSystem.h>
 
 // We need to define the static variables here
-std::multiset<std::unique_ptr<Entity>> Engine::_entities;
+std::vector<std::unique_ptr<Entity>> Engine::_entities;
 bool Engine::_isRunning = true;
 
-std::vector<Entity*> Engine::GetEntities(std::string name) {
+bool Engine::CompareEntityDepth(const std::unique_ptr<Entity>& a, const std::unique_ptr<Entity>& b) {
+    return a->GetComponent<Depth>().Get() > b->GetComponent<Depth>().Get();
+}
+
+
+std::vector<Entity*> Engine::GetEntities(std::string tag) {
     std::vector<Entity*> entities;
-    for (auto& entity : _entities) {
-        if (entity->GetName() == name) {
-            entities.push_back(entity.get());
+    for (auto entity : GetEntities<Tag>()) {
+        if (entity->GetComponent<Tag>().Get() == tag) {
+            entities.push_back(entity);
         }
     }
     return entities;

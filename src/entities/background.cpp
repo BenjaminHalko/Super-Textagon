@@ -1,19 +1,39 @@
 #include "background.h"
+#include "../helper.h"
+#include "../global.h"
 #include <engine/engine.h>
+#include <engine/comp/depth.h>
 #include <engine/comp/sprite.h>
 #include <engine/comp/transform.h>
 #include <engine/comp/script.h>
 #include <engine/sys/cameraSystem.h>
 #include <engine/sys/timeSystem.h>
-#include "../helper.h"
 
 void BackgroundUpdate(Entity& self) {
-    CameraSystem::rotation += 1 * TimeSystem::DeltaTime();
+    // Rotate Background
+    CameraSystem::rotation -= 1.9f * TimeSystem::DeltaTime();
+
+    // Pulse Background
+    if (Global::beatPulse) {
+        CameraSystem::zoom = 1.4f;
+    }
+    CameraSystem::zoom = Approach(CameraSystem::zoom, 1.0f, 0.03f);
+
+    // Update Hue Based on Time
+    Global::hue = Wave(0, 54, 5, 0);
+
+    // Update Colors of All Entities
+    for (auto entity : Engine::GetEntities<Sprite>()) {
+        auto &sprite = entity->GetComponent<Sprite>();
+        for(auto &point : sprite) {
+            point.color = MakeColor(Global::hue, 1.0f, point.alpha);
+        }
+    }
 }
 
 void CreateBackground() {
     // Generate Sprite
-    const float size = 1.0f;
+    const float size = 1.2f;
     const int angle = 60;
 
     auto sprite = Sprite(3 * 6);
@@ -33,7 +53,7 @@ void CreateBackground() {
 
     // Add Entity
     Engine::AddEntity(
-        "background", -100,
+        Depth(100),
         Sprite(sprite),
         Transform(0, 0),
         Script(BackgroundUpdate)

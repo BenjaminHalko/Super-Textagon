@@ -1,9 +1,9 @@
 #pragma once
 
-#include <engine/comp/_propertyComponent.h>
+#include <engine/comp/_component.h>
 #include <engine/entity.h>
 
-class Script : public PropertyComponent {
+class Script : public Component {
 private:
     void (*_script)(Entity&);
 public:

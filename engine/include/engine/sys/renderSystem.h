@@ -26,9 +26,6 @@ class RenderSystem : public System {
     // Queue screen clear
     static bool clearScreen;
 
-    // Draw color
-    static bool drawColor;
-
     /**
      * @brief Determines the alpha and color of a point
      * @details The alpha is calculated using the barycentric coordinates method

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <engine/comp/_propertyComponent.h>
+#include <engine/comp/_component.h>
 
-class Depth : public PropertyComponent {
+class Depth : public Component {
     int _depth;
 public:
     explicit Depth(int depth);
-    int Get() const;
+    [[nodiscard]] int Get() const;
 };

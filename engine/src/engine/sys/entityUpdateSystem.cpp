@@ -3,6 +3,7 @@
 #include <engine/comp/script.h>
 
 void EntityUpdateSystem::Update() {
-    for (auto entity: Engine::GetEntities<Script>())
+    for (auto entity: Engine::GetEntities<Script>()) {
         entity->GetComponent<Script>()(*entity);
+    }
 }

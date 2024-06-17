@@ -1,8 +1,9 @@
 #include "musicController.h"
+#include "../global.h"
 #include <engine/engine.h>
+#include <engine/comp/depth.h>
 #include <engine/comp/script.h>
 #include <engine/sys/audioSystem.h>
-#include "../global.h"
 
 void UpdateMusicController(Entity& self) {
     // Define Variables
@@ -18,7 +19,7 @@ void UpdateMusicController(Entity& self) {
 
 void CreateMusicController() {
     Engine::AddEntity(
-        "musicController", -1000,
+        Depth(1000),
         Script(UpdateMusicController)
     );
 }

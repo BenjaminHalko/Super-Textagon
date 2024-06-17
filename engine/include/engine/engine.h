@@ -6,7 +6,8 @@
 #include <set>
 
 class Engine {
-    static std::multiset<std::unique_ptr<Entity>> _entities;
+    static bool CompareEntityDepth(const std::unique_ptr<Entity>& a, const std::unique_ptr<Entity>& b);
+    static std::vector<std::unique_ptr<Entity>> _entities;
     static bool _isRunning;
 public:
     /**
@@ -14,10 +15,11 @@ public:
      * @tparam Args
      */
     template <typename... Args>
-    static Entity& AddEntity(std::string name, int depth, Args&&... args) {
-        auto entityPtr = std::make_unique<Entity>(std::move(name), depth, std::forward<Args>(args)...);
+    static Entity& AddEntity(Args&&... args) {
+        auto entityPtr = std::make_unique<Entity>(std::forward<Args>(args)...);
         auto entity = entityPtr.get();
-        _entities.insert(std::move(entityPtr));
+        _entities.push_back(std::move(entityPtr));
+        std::sort(_entities.begin(), _entities.end(), CompareEntityDepth);
         return *entity;
     }
 
@@ -35,7 +37,7 @@ public:
         return entities;
     }
 
-    static std::vector<Entity*> GetEntities(std::string name);
+    static std::vector<Entity*> GetEntities(std::string tag);
 
     /**
      * @brief Starts the game loop
