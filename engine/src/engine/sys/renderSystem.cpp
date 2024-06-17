@@ -9,10 +9,6 @@
 #include <unistd.h>
 #endif
 
-// TEMP
-#include "engine/sys/input.h"
-#include "engine/sys/timeSystem.h"
-
 // Define the static variables
 #ifdef _WIN32
 HANDLE RenderSystem::hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -23,7 +19,6 @@ int RenderSystem::charCount = 0;
 int RenderSystem::width = 0;
 int RenderSystem::height = 0;
 bool RenderSystem::clearScreen = true;
-bool RenderSystem::drawColor = true;
 
 void RenderSystem::Init() {
 #ifdef _WIN32
@@ -68,42 +63,37 @@ std::pair<char, Color> RenderSystem::AlphaColorOfPoint(Sprite &sprite, int x, in
     // Calculate the character
     char character = alphaChars.at((int)((float)(alphaCharsCount-1) * alpha));
 
-    if (drawColor) {
-        // Calculate the color
-        Color r = (int) (
-                lambda1 * float(sprite[0].color >> 16 & 0xFF) +
-                lambda2 * float(sprite[1].color >> 16 & 0xFF) +
-                lambda3 * float(sprite[2].color >> 16 & 0xFF));
-        Color g = (int) (
-                lambda1 * float(sprite[0].color >> 8 & 0xFF) +
-                lambda2 * float(sprite[1].color >> 8 & 0xFF) +
-                lambda3 * float(sprite[2].color >> 8 & 0xFF));
-        Color b = (int) (
-                lambda1 * float(sprite[0].color & 0xFF) +
-                lambda2 * float(sprite[1].color & 0xFF) +
-                lambda3 * float(sprite[2].color & 0xFF));
+    // Calculate the color
+    Color r = (int) (
+            lambda1 * float(sprite[0].color >> 16 & 0xFF) +
+            lambda2 * float(sprite[1].color >> 16 & 0xFF) +
+            lambda3 * float(sprite[2].color >> 16 & 0xFF));
+    Color g = (int) (
+            lambda1 * float(sprite[0].color >> 8 & 0xFF) +
+            lambda2 * float(sprite[1].color >> 8 & 0xFF) +
+            lambda3 * float(sprite[2].color >> 8 & 0xFF));
+    Color b = (int) (
+            lambda1 * float(sprite[0].color & 0xFF) +
+            lambda2 * float(sprite[1].color & 0xFF) +
+            lambda3 * float(sprite[2].color & 0xFF));
 
-        Color color = ((r << 16) | (g << 8) | b);
+    Color color = ((r << 16) | (g << 8) | b);
 
-        // Merge the colour
-        if (sprite.tintAlpha != 0) {
-            float tintR = (float(sprite.tint >> 16 & 0xFF) * sprite.tintAlpha);
-            float tintG = (float(sprite.tint >> 8 & 0xFF) * sprite.tintAlpha);
-            float tintB = (float(sprite.tint & 0xFF) * sprite.tintAlpha);
+    // Merge the colour
+    if (sprite.tintAlpha != 0) {
+        float tintR = (float(sprite.tint >> 16 & 0xFF) * sprite.tintAlpha);
+        float tintG = (float(sprite.tint >> 8 & 0xFF) * sprite.tintAlpha);
+        float tintB = (float(sprite.tint & 0xFF) * sprite.tintAlpha);
 
-            r = (int) (float(r) * (1 - sprite.tintAlpha) + tintR);
-            g = (int) (float(g) * (1 - sprite.tintAlpha) + tintG);
-            b = (int) (float(b) * (1 - sprite.tintAlpha) + tintB);
+        r = (int) (float(r) * (1 - sprite.tintAlpha) + tintR);
+        g = (int) (float(g) * (1 - sprite.tintAlpha) + tintG);
+        b = (int) (float(b) * (1 - sprite.tintAlpha) + tintB);
 
-            color = ((r << 16) | (g << 8) | b);
-        }
-
-        // Return the character based on the luminance & color
-        return {character, color};
+        color = ((r << 16) | (g << 8) | b);
     }
 
-    // Return the character based on the alpha & color
-    return {character, 0};
+    // Return the character based on the luminance & color
+    return {character, color};
 }
 
 void RenderSystem::SetConsoleCharacter(int x, int y, std::pair<char, Color> character) {
@@ -151,8 +141,8 @@ void RenderSystem::DrawTriangle(Sprite& sprite, int index) {
 
     // Draw the upper part of the triangle (from A to B)
     for (int y = (int)std::ceil(points[0].point.y); y <= (int)(points[1].point.y); y++) {
-        auto x1 = (float)fmax(0, fmin(width-1, points[0].point.x + slopeAC * ((float)y - points[0].point.y)));
-        auto x2 = (float)fmax(0, fmin(width-1, points[0].point.x + slopeAB * ((float)y - points[0].point.y)));
+        auto x1 = (float)fmax(0, fmin(width, points[0].point.x + slopeAC * ((float)y - points[0].point.y)));
+        auto x2 = (float)fmax(0, fmin(width, points[0].point.x + slopeAB * ((float)y - points[0].point.y)));
         if (x1 > x2) std::swap(x1, x2); // Ensure x1 is always less than x2
         for (int x = (int)std::ceil(x1); x <= (int)(x2); x++) {
             SetConsoleCharacter(x, y, AlphaColorOfPoint(points, x, y));
@@ -161,8 +151,8 @@ void RenderSystem::DrawTriangle(Sprite& sprite, int index) {
 
     // Draw the lower part of the triangle (from B to C)
     for (int y = (int)std::ceil(points[1].point.y); y <= (int)(points[2].point.y); y++) {
-        auto x1 = (float)fmax(0, fmin(width-1, points[0].point.x + slopeAC * ((float)y - points[0].point.y)));
-        auto x2 = (float)fmax(0, fmin(width-1, points[1].point.x + slopeBC * ((float)y - points[1].point.y)));
+        auto x1 = (float)fmax(0, fmin(width, points[0].point.x + slopeAC * ((float)y - points[0].point.y)));
+        auto x2 = (float)fmax(0, fmin(width, points[1].point.x + slopeBC * ((float)y - points[1].point.y)));
         if (x1 > x2) std::swap(x1, x2); // Ensure x1 is always less than x2
         for (int x = (int)std::ceil(x1); x <= (int)(x2); x++) {
             SetConsoleCharacter(x, y, AlphaColorOfPoint(points, x, y));
@@ -197,6 +187,8 @@ void RenderSystem::Update() {
     // Loop over all the entities
     auto camera = CameraSystem::GetTransform();
     for (auto entity: Engine::GetEntities<Sprite, Transform>()) {
+        auto sprite = entity->GetComponent<Sprite>();
+
         auto entityTransformedSprite = TransformSystem::TransformSprite(
                 entity->GetComponent<Sprite>(),
                 entity->GetComponent<Transform>()
@@ -223,21 +215,10 @@ void RenderSystem::Update() {
         clearScreen = false;
     }
 
-    // Disable color
-    if (Input::GetKeyPressed(VK_F12)) {
-        drawColor = !drawColor;
-    }
-
-    // Draw FPS
-    std::string fps = std::to_string(TimeSystem::TimeRunning());
-    for (int i = 0; i < (int)fps.size(); i++) {
-        SetConsoleCharacter(i, 0, {fps[i], 0xFFFFFF});
-    }
-
     // Draw the console buffer
 #ifdef _WIN32
     auto const str = consoleBuffer.get_string();
-    WriteConsoleA(hStdOut, str.c_str(), str.size(), nullptr, nullptr);
+    WriteConsoleA(hStdOut, str.c_str(), (DWORD)str.size(), nullptr, nullptr);
 #else
     std::cout << consoleBuffer.get_string();
 #endif
