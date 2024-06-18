@@ -39,6 +39,8 @@ public:
 
     static std::vector<Entity*> GetEntities(std::string tag);
 
+    static void RemoveDeletedEntities();
+
     /**
      * @brief Starts the game loop
      */

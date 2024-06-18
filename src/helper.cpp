@@ -1,7 +1,32 @@
 #include "helper.h"
+#include "global.h"
 #include <engine/sys/timeSystem.h>
 #include <engine/common.h>
 #include <cmath>
+
+// Wrap between two values
+float Wrap(float value, float min, float max) {
+    if (fmod(value, 1) == 0) {
+	    while (value > max || value < min) {
+	        if (value > max)
+	            value += min - max - 1;
+	        else if (value < min)
+	            value += max - min + 1;
+	    }
+	    return value;
+	} else {
+	    float valueOld = value + 1;
+	    while (value != valueOld) {
+	        valueOld = value;
+	        if (value < min)
+	            value = max - (min - value);
+	        else if (value > max)
+	            value = min + (value - max);
+	    }
+	    return value;
+	}
+
+}
 
 // Clamp between two values
 float Clamp(float value, float min, float max) {
@@ -123,4 +148,17 @@ Color MakeColor(float hue, float sat, float val) {
 // Waves between min and max
 float Wave(float min, float max, float duration, float offset) {
     return (min + max) / 2 + (max - min) / 2 * sin((TimeSystem::TimeRunning() + offset) * 2 * PI / duration);
+}
+
+// Transform a sprite using global zoom
+void ZoomSprite(Sprite& sprite, Sprite& originalSprite) {
+    for (int i = 0; i < sprite.Size(); i++) {
+        float dir = PointDirection(0, 0, originalSprite[i].point.x, originalSprite[i].point.y);
+
+        if (originalSprite[i].point.x != 0)
+            sprite[i].point.x = originalSprite[i].point.x + LengthDir_x(Global::zoom/abs(originalSprite[i].point.x*2.0f+1.0f)*0.02f, dir);
+
+        if (originalSprite[i].point.y != 0)
+            sprite[i].point.y = originalSprite[i].point.y + LengthDir_y(Global::zoom/abs(originalSprite[i].point.y*2.0f+1.0f)*0.02f, dir);
+    }
 }

@@ -23,6 +23,8 @@ public:
 
     size_t Size();
 
+    void Update(Sprite& sprite);
+
     std::vector<Point>::iterator begin();
 
     std::vector<Point>::iterator end();

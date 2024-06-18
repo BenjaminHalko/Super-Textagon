@@ -141,8 +141,8 @@ void RenderSystem::DrawTriangle(Sprite& sprite, int index) {
 
     // Draw the upper part of the triangle (from A to B)
     for (int y = (int)std::ceil(points[0].point.y); y <= (int)(points[1].point.y); y++) {
-        auto x1 = (float)fmax(0, fmin(width, points[0].point.x + slopeAC * ((float)y - points[0].point.y)));
-        auto x2 = (float)fmax(0, fmin(width, points[0].point.x + slopeAB * ((float)y - points[0].point.y)));
+        auto x1 = (float)fmax(-1, fmin(width, points[0].point.x + slopeAC * ((float)y - points[0].point.y)));
+        auto x2 = (float)fmax(-1, fmin(width, points[0].point.x + slopeAB * ((float)y - points[0].point.y)));
         if (x1 > x2) std::swap(x1, x2); // Ensure x1 is always less than x2
         for (int x = (int)std::ceil(x1); x <= (int)(x2); x++) {
             SetConsoleCharacter(x, y, AlphaColorOfPoint(points, x, y));
@@ -151,8 +151,8 @@ void RenderSystem::DrawTriangle(Sprite& sprite, int index) {
 
     // Draw the lower part of the triangle (from B to C)
     for (int y = (int)std::ceil(points[1].point.y); y <= (int)(points[2].point.y); y++) {
-        auto x1 = (float)fmax(0, fmin(width, points[0].point.x + slopeAC * ((float)y - points[0].point.y)));
-        auto x2 = (float)fmax(0, fmin(width, points[1].point.x + slopeBC * ((float)y - points[1].point.y)));
+        auto x1 = (float)fmax(-1, fmin(width, points[0].point.x + slopeAC * ((float)y - points[0].point.y)));
+        auto x2 = (float)fmax(-1, fmin(width, points[1].point.x + slopeBC * ((float)y - points[1].point.y)));
         if (x1 > x2) std::swap(x1, x2); // Ensure x1 is always less than x2
         for (int x = (int)std::ceil(x1); x <= (int)(x2); x++) {
             SetConsoleCharacter(x, y, AlphaColorOfPoint(points, x, y));

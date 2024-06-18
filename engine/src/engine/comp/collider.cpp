@@ -2,13 +2,12 @@
 #include <iterator>
 
 Collider::Collider(std::initializer_list<Point> points) {
-    std::copy(_points.begin(), _points.end(), std::back_inserter(_points));
+    _points.resize(points.size());
+    std::copy(points.begin(), points.end(), _points.begin());
 }
 
 Collider::Collider(Sprite& sprite) {
-    for (auto& point : sprite) {
-        _points.push_back(point.point);
-    }
+    Update(sprite);
 }
 
 Collider::Collider(int size) {
@@ -25,6 +24,12 @@ void Collider::AddPoint(Point point) {
 
 size_t Collider::Size() {
     return _points.size();
+}
+
+void Collider::Update(Sprite &sprite) {
+    for (auto& point : sprite) {
+        _points.push_back(point.point);
+    }
 }
 
 std::vector<Point>::iterator Collider::begin() {

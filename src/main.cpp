@@ -10,8 +10,8 @@ int main() {
     CreateBackground();
     CreateCore();
     CreatePlayer();
-    CreateWall(0);
-    CreateWall(1);
+    CreateWall(0, 0.5f);
+    CreateWall(1, 0.8f);
 
     Engine::GameLoop();
     return 0;
