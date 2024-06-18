@@ -27,7 +27,7 @@ void TimeSystem::SetFrameRate(std::chrono::milliseconds frameRate) {
 }
 
 float TimeSystem::DeltaTime() {
-    return _deltaTime;
+    return 1;
 }
 
 float TimeSystem::TimeRunning() {
