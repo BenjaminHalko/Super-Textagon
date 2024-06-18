@@ -20,12 +20,27 @@ float WallRing(int rotation, float dist) {
     return StandardDistanceBetweenSets;
 }
 
+float WallGaps(int rotation, float dist) {
+    CreateWall(rotation, dist);
+    CreateWall(rotation + 2, dist);
+    CreateWall(rotation + 4, dist);
+    return StandardDistanceBetweenSets;
+}
+
 // Wall patterns
 float MultiWallRing(int rotation, float dist) {
     dist += WallRing(rotation, dist);
     dist += WallRing(rotation + 3, dist);
     dist += WallRing(rotation + 1, dist);
     return dist;
+}
+
+float MultiWallGaps(int rotation, float dist) {
+    dist += WallGaps(rotation, dist);
+    dist += WallGaps(rotation + 1, dist);
+    dist += WallGaps(rotation, dist);
+    return dist;
+
 }
 
 // Wall Generator
