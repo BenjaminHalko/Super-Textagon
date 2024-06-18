@@ -4,26 +4,46 @@
 #include <engine/sys/renderSystem.h>
 #include <memory>
 #include <set>
-#include <engine/sys/entityUpdateSystem.h>
 
 class Engine {
-    static std::multiset<std::unique_ptr<Entity>> _entities;
+    static bool CompareEntityDepth(const std::unique_ptr<Entity>& a, const std::unique_ptr<Entity>& b);
+    static std::vector<std::unique_ptr<Entity>> _entities;
     static bool _isRunning;
-    static RenderSystem _renderSystem;
 public:
     /**
-     * @brief Adds an entity to the ECS
-     * @tparam EntityType
+     * @brief Adds an entity to the Engine
      * @tparam Args
-     * @param args
      */
-    template <typename EntityType, typename... Args>
-    static void AddEntity(Args&&... args) {
-        _entities.insert(std::make_unique<EntityType>(std::forward<Args>(args)...));
+    template <typename... Args>
+    static Entity& AddEntity(Args&&... args) {
+        auto entityPtr = std::make_unique<Entity>(std::forward<Args>(args)...);
+        auto entity = entityPtr.get();
+        _entities.push_back(std::move(entityPtr));
+        std::sort(_entities.begin(), _entities.end(), CompareEntityDepth);
+        return *entity;
     }
 
-    static std::multiset<std::unique_ptr<Entity>>& GetEntities();
+    /**
+     * @brief Gets all the entities with a specific component
+     */
+    template <typename ... ComponentTypes>
+    static std::vector<Entity*> GetEntities() {
+        std::vector<Entity*> entities;
+        for (auto& entity : _entities) {
+            if (entity->HasComponents<ComponentTypes...>()) {
+                entities.push_back(entity.get());
+            }
+        }
+        return entities;
+    }
 
+    static std::vector<Entity*> GetEntities(std::string tag);
+
+    static void RemoveDeletedEntities();
+
+    /**
+     * @brief Starts the game loop
+     */
     static void GameLoop();
 
     /**

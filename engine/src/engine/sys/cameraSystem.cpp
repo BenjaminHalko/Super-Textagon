@@ -1,8 +1,11 @@
 #include <engine/sys/cameraSystem.h>
 
 // Define the static variables
-TransformComponent CameraSystem::_cameraTransform(0.0f, 0.0f);
+float CameraSystem::x = 0.5f;
+float CameraSystem::y = 0.5f;
+float CameraSystem::zoom = 1;
+float CameraSystem::rotation = 0;
 
-TransformComponent& CameraSystem::GetCameraTransform() {
-    return _cameraTransform;
+Transform CameraSystem::GetTransform() {
+    return {x, y, zoom, zoom, rotation};
 }

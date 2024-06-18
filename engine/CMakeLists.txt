@@ -3,13 +3,14 @@ project(Engine)
 
 # Set C++ standard
 enable_language(CXX)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 # Download SoLoud
 include(FetchContent)
 FetchContent_Declare(
     so_loud
     URL https://solhsa.com/soloud/soloud_20200207_lite.zip
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(so_loud)
 
@@ -30,7 +31,15 @@ target_include_directories(so_loud PUBLIC ${so_loud_SOURCE_DIR}/include)
 # Add source files
 file(GLOB_RECURSE ENGINE_SOURCES src/*)
 add_library(Engine ${ENGINE_SOURCES})
-target_link_libraries(Engine so_loud)
 
 # Include Dependencies
 target_include_directories(Engine PUBLIC include)
+
+# Link Ncurses
+if (UNIX)
+    find_package(Curses REQUIRED)
+    target_link_libraries(Engine PUBLIC ${CURSES_LIBRARIES} so_loud)
+    target_include_directories(Engine PUBLIC ${CURSES_INCLUDE_DIR})
+else()
+    target_link_libraries(Engine so_loud)
+endif()

@@ -1,20 +1,26 @@
 #include <engine/sys/renderSystem.h>
 #include <engine/engine.h>
 #include <engine/sys/transformSystem.h>
-#include <engine/sys/spriteSystem.h>
+#include <engine/sys/cameraSystem.h>
 #include <limits>
 #include <cmath>
-#include <engine/sys/cameraSystem.h>
-
 #ifndef _WIN32
 #include <sys/ioctl.h>
 #include <unistd.h>
 #endif
 
-// TEMP
-#include "engine/sys/input.h"
+// Define the static variables
+#ifdef _WIN32
+HANDLE RenderSystem::hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+CONSOLE_SCREEN_BUFFER_INFO RenderSystem::consoleInfo;
+#endif
+oof::screen<std::string> RenderSystem::consoleBuffer{0, 0, ' '};
+int RenderSystem::charCount = 0;
+int RenderSystem::width = 0;
+int RenderSystem::height = 0;
+bool RenderSystem::clearScreen = true;
 
-RenderSystem::RenderSystem() {
+void RenderSystem::Init() {
 #ifdef _WIN32
     // Disable scroll bars
     SetConsoleMode(hStdOut, ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
@@ -32,7 +38,7 @@ RenderSystem::RenderSystem() {
 
 // Private
 
-std::pair<char, Color> RenderSystem::AlphaColorOfPoint(SpriteComponent &sprite, int x, int y) {
+std::pair<char, Color> RenderSystem::AlphaColorOfPoint(Sprite &sprite, int x, int y) {
     // Characters to use for alpha
     static const std::string alphaChars = ".`'^\",:;Il!i~+_-?][}{1)(|\\/*tjfrjxnvuczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@";
     static const int alphaCharsCount = (int)alphaChars.size();
@@ -49,46 +55,65 @@ std::pair<char, Color> RenderSystem::AlphaColorOfPoint(SpriteComponent &sprite, 
 
     // Calculate the alpha
     float alpha = lambda1 * sprite[0].alpha + lambda2 * sprite[1].alpha + lambda3 * sprite[2].alpha;
+    alpha *= sprite.alpha;
 
-    if (alpha <= 0.0f || alpha >= 1.0f)
-        return {' ', 0};
+    // Clamp the alpha
+    alpha = (float)fmax(0, fmin(1, alpha));
 
     // Calculate the character
     char character = alphaChars.at((int)((float)(alphaCharsCount-1) * alpha));
 
-    if (drawColor) {
-        // Calculate the color
-        Color r = (int) (
-                lambda1 * float(sprite[0].color >> 16 & 0xFF) +
-                lambda2 * float(sprite[1].color >> 16 & 0xFF) +
-                lambda3 * float(sprite[2].color >> 16 & 0xFF));
-        Color g = (int) (
-                lambda1 * float(sprite[0].color >> 8 & 0xFF) +
-                lambda2 * float(sprite[1].color >> 8 & 0xFF) +
-                lambda3 * float(sprite[2].color >> 8 & 0xFF));
-        Color b = (int) (
-                lambda1 * float(sprite[0].color & 0xFF) +
-                lambda2 * float(sprite[1].color & 0xFF) +
-                lambda3 * float(sprite[2].color & 0xFF));
+    // Calculate the color
+    Color r = (int) (
+            lambda1 * float(sprite[0].color >> 16 & 0xFF) +
+            lambda2 * float(sprite[1].color >> 16 & 0xFF) +
+            lambda3 * float(sprite[2].color >> 16 & 0xFF));
+    Color g = (int) (
+            lambda1 * float(sprite[0].color >> 8 & 0xFF) +
+            lambda2 * float(sprite[1].color >> 8 & 0xFF) +
+            lambda3 * float(sprite[2].color >> 8 & 0xFF));
+    Color b = (int) (
+            lambda1 * float(sprite[0].color & 0xFF) +
+            lambda2 * float(sprite[1].color & 0xFF) +
+            lambda3 * float(sprite[2].color & 0xFF));
 
-        Color color = ((r << 16) | (g << 8) | b);
+    Color color = ((r << 16) | (g << 8) | b);
 
-        // Return the character based on the luminance & color
-        return {character, color};
+    // Merge the colour
+    if (sprite.tintAlpha != 0) {
+        float tintR = (float(sprite.tint >> 16 & 0xFF) * sprite.tintAlpha);
+        float tintG = (float(sprite.tint >> 8 & 0xFF) * sprite.tintAlpha);
+        float tintB = (float(sprite.tint & 0xFF) * sprite.tintAlpha);
+
+        r = (int) (float(r) * (1 - sprite.tintAlpha) + tintR);
+        g = (int) (float(g) * (1 - sprite.tintAlpha) + tintG);
+        b = (int) (float(b) * (1 - sprite.tintAlpha) + tintB);
+
+        color = ((r << 16) | (g << 8) | b);
     }
 
-    // Return the character based on the alpha & color
-    return {character, 0};
+    // Return the character based on the luminance & color
+    return {character, color};
 }
 
 void RenderSystem::SetConsoleCharacter(int x, int y, std::pair<char, Color> character) {
-    if (x >= 0 && x < width && y >= 0 && y < height)
-        consoleBuffer[y * width + x] = character;
+    if (consoleBuffer.is_inside(x, y)) {
+        auto &cell = consoleBuffer.get_cell(x, y);
+        cell.m_letter = character.first;
+        cell.m_format.m_fg_color = {
+            (character.second >> 16) & 0xFF,
+            (character.second >> 8) & 0xFF,
+            character.second & 0xFF
+        };
+    }
 }
 
-void RenderSystem::DrawTriangle(SpriteComponent& sprite, int index) {
+void RenderSystem::DrawTriangle(Sprite& sprite, int index) {
     // Create a copy of the points
-    SpriteComponent points(3);
+    Sprite points(3);
+    points.alpha = sprite.alpha;
+    points.tint = sprite.tint;
+    points.tintAlpha = sprite.tintAlpha;
 
     // Convert the points to screen space, from 0 to dwSize
     const float fontAspectRatio = 0.5f; // The x to y ratio of the font
@@ -116,8 +141,8 @@ void RenderSystem::DrawTriangle(SpriteComponent& sprite, int index) {
 
     // Draw the upper part of the triangle (from A to B)
     for (int y = (int)std::ceil(points[0].point.y); y <= (int)(points[1].point.y); y++) {
-        float x1 = points[0].point.x + slopeAC * ((float)y - points[0].point.y);
-        float x2 = points[0].point.x + slopeAB * ((float)y - points[0].point.y);
+        auto x1 = (float)fmax(-1, fmin(width, points[0].point.x + slopeAC * ((float)y - points[0].point.y)));
+        auto x2 = (float)fmax(-1, fmin(width, points[0].point.x + slopeAB * ((float)y - points[0].point.y)));
         if (x1 > x2) std::swap(x1, x2); // Ensure x1 is always less than x2
         for (int x = (int)std::ceil(x1); x <= (int)(x2); x++) {
             SetConsoleCharacter(x, y, AlphaColorOfPoint(points, x, y));
@@ -126,8 +151,8 @@ void RenderSystem::DrawTriangle(SpriteComponent& sprite, int index) {
 
     // Draw the lower part of the triangle (from B to C)
     for (int y = (int)std::ceil(points[1].point.y); y <= (int)(points[2].point.y); y++) {
-        float x1 = points[0].point.x + slopeAC * ((float)y - points[0].point.y);
-        float x2 = points[1].point.x + slopeBC * ((float)y - points[1].point.y);
+        auto x1 = (float)fmax(-1, fmin(width, points[0].point.x + slopeAC * ((float)y - points[0].point.y)));
+        auto x2 = (float)fmax(-1, fmin(width, points[1].point.x + slopeBC * ((float)y - points[1].point.y)));
         if (x1 > x2) std::swap(x1, x2); // Ensure x1 is always less than x2
         for (int x = (int)std::ceil(x1); x <= (int)(x2); x++) {
             SetConsoleCharacter(x, y, AlphaColorOfPoint(points, x, y));
@@ -149,40 +174,38 @@ void RenderSystem::Update() {
     width = w.ws_col;
     height = w.ws_row;
 #endif
-
     // If the size of the console has changed, clear the console
     if (width * height != charCount) {
         charCount = width * height;
         clearScreen = true;
+        consoleBuffer = oof::screen(width, height, ' ');
+    } else {
+        // Clear the console buffer
+        consoleBuffer.clear();
     }
 
-    // Resize the console buffer
-    consoleBuffer = std::vector<std::pair<char, Color>>(charCount, {' ', 0});
-
     // Loop over all the entities
-    for (auto &entity: Engine::GetEntities()) {
+    auto camera = CameraSystem::GetTransform();
+    for (auto entity: Engine::GetEntities<Sprite, Transform>()) {
+        auto sprite = entity->GetComponent<Sprite>();
 
-        // Check if the entity has a sprite component
-        if (entity->HasComponents<SpriteComponent, TransformComponent>()) {
+        auto entityTransformedSprite = TransformSystem::TransformSprite(
+                entity->GetComponent<Sprite>(),
+                entity->GetComponent<Transform>()
+        );
 
-            auto entityTransformedSprite = TransformSystem::TransformSprite(
-                entity->GetComponent<SpriteComponent>(),
-                entity->GetComponent<TransformComponent>()
-            );
+        // Camera transform
+        entityTransformedSprite = TransformSystem::TransformSprite(
+            entityTransformedSprite,
+            camera
+        );
 
-            // Move the sprite to camera space
-            entityTransformedSprite = TransformSystem::TransformSprite(
-                entityTransformedSprite,
-                CameraSystem::GetCameraTransform()
-            );
-
-            for (int i = 0; i < entityTransformedSprite.Size(); i += 3) {
-                DrawTriangle(entityTransformedSprite, i);
-            }
+        for (int i = 0; i < entityTransformedSprite.Size(); i += 3) {
+            DrawTriangle(entityTransformedSprite, i);
         }
     }
 
-    // Clear the console
+    // Clear the screen
     if (clearScreen) {
 #ifdef _WIN32
         system("cls");
@@ -192,33 +215,11 @@ void RenderSystem::Update() {
         clearScreen = false;
     }
 
-    // Disable color
-    if (Input::GetKeyPressed(Key::LEFT)) {
-        drawColor = !drawColor;
-    }
-
     // Draw the console buffer
-    std::string stringToPrint;
-    Color lastColor = 0;
-    for(auto &character : consoleBuffer) {
-        if (character.first == ' ') {
-            stringToPrint += " ";
-        } else {
-            // The color code is in the format \033[38;2;r;g;bm
-            if (drawColor && character.second != lastColor) {
-                auto r = (character.second >> 16) & 0xFF;
-                auto g = (character.second >> 8) & 0xFF;
-                auto b = character.second & 0xFF;
-                stringToPrint += "\033[38;2;" + std::to_string(r) + ";" + std::to_string(g) + ";" + std::to_string(b) + "m";
-                lastColor = character.second;
-            }
-            stringToPrint += character.first;
-        }
-    }
-
-    // Move the cursor to the top left
-    stringToPrint += "\033[H\033[0m";
-
-    // Print the string
-    std::cout << stringToPrint;
+#ifdef _WIN32
+    auto const str = consoleBuffer.get_string();
+    WriteConsoleA(hStdOut, str.c_str(), (DWORD)str.size(), nullptr, nullptr);
+#else
+    std::cout << consoleBuffer.get_string();
+#endif
 }

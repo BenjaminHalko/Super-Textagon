@@ -20,14 +20,17 @@ void TransformSystem::ScalePoint(Point &point, float x_scale, float y_scale) {
     point.y *= y_scale;
 }
 
-void TransformSystem::ApplyTransformation(Point &point, TransformComponent &transform) {
+void TransformSystem::ApplyTransformation(Point &point, Transform &transform) {
     ScalePoint(point, transform.x_scale, transform.y_scale);
     RotatePoint(point, transform.rotation);
     TranslatePoint(point, transform.x, transform.y);
 }
 
-SpriteComponent TransformSystem::TransformSprite(SpriteComponent &sprite, TransformComponent &transform) {
-    SpriteComponent newSprite;
+Sprite TransformSystem::TransformSprite(Sprite &sprite, Transform &transform) {
+    Sprite newSprite;
+    newSprite.tintAlpha = sprite.tintAlpha;
+    newSprite.tint = sprite.tint;
+    newSprite.alpha = sprite.alpha;
     for (auto &point: sprite) {
         ColoredPoint newPoint = point;
         ApplyTransformation(newPoint.point, transform);
@@ -36,8 +39,8 @@ SpriteComponent TransformSystem::TransformSprite(SpriteComponent &sprite, Transf
     return newSprite;
 }
 
-ColliderComponent TransformSystem::TransformCollider(ColliderComponent &collider, TransformComponent &transform) {
-    ColliderComponent newCollider;
+Collider TransformSystem::TransformCollider(Collider &collider, Transform &transform) {
+    Collider newCollider;
     for (auto &point : collider) {
         Point newPoint = point;
         ApplyTransformation(newPoint, transform);
