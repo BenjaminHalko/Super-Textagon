@@ -1,5 +1,6 @@
 #include "player.h"
 #include "../helper.h"
+#include "../global.h"
 #include <engine/engine.h>
 #include <engine/comp/depth.h>
 #include <engine/comp/transform.h>
@@ -12,9 +13,6 @@
 #include <engine/sys/collisionSystem.h>
 
 void PlayerUpdate(Entity& self) {
-    // Config
-    const float speed = 12;
-
     // Static variables
     static auto originalSprite = self.GetComponent<Sprite>();
     static auto &collider = self.GetComponent<Collider>();
@@ -28,7 +26,7 @@ void PlayerUpdate(Entity& self) {
 
     // Move Based on Input
     auto startRotation = transform.rotation;
-    auto rotationSpd = (float)dir * speed * TimeSystem::DeltaTime();
+    auto rotationSpd = (float)dir * BaseWallSpd * Global::gameSpeed * TimeSystem::DeltaTime();
     transform.rotation += rotationSpd;
 
     // Keep rotation between 0 and 360

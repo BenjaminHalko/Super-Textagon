@@ -1,5 +1,6 @@
 #include "wall.h"
 #include "../helper.h"
+#include "../global.h"
 #include <engine/engine.h>
 #include <engine/comp/depth.h>
 #include <engine/comp/transform.h>
@@ -10,22 +11,18 @@
 #include <engine/sys/timeSystem.h>
 
 void UpdateWall(Entity& self) {
-    // Config
-    const float speed = 0.01f;
-
     // Define variables
     auto& scriptData = self.GetComponent<Script>();
     if (!scriptData.DataExists("baseSprite"))
         scriptData.SetData("baseSprite", Sprite(self.GetComponent<Sprite>()));
     auto& baseSprite = scriptData.GetData<Sprite>("baseSprite");
-    auto& transform = self.GetComponent<Transform>();
     auto& sprite = self.GetComponent<Sprite>();
 
     // Update sprite
     for (auto& colouredPoint : baseSprite) {
         auto& point = colouredPoint.point;
         float dir = PointDirection(0, 0, point.x, point.y);
-        float dist = PointDistance(0, 0, point.x, point.y) - speed * TimeSystem::DeltaTime();
+        float dist = PointDistance(0, 0, point.x, point.y) - BaseWallSpd * Global::gameSpeed * TimeSystem::DeltaTime();
         dist = (float)fmax(dist, 0.01f);
 
         point.x = LengthDir_x(dist, dir);
@@ -38,12 +35,6 @@ void UpdateWall(Entity& self) {
     // Update Collider
     auto& collider = self.GetComponent<Collider>();
     collider.Update(baseSprite);
-
-    // Temp Create new wall
-    if ((baseSprite.begin()+2)->point.x == 0.01f) {
-        self.Delete();
-        CreateWall((int) RandomRange(0, 5), 1.0f, RandomRange(0.3, 1));
-    }
 }
 
 void CreateWall(int dir, float startDist, float size) {

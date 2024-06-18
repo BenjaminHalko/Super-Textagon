@@ -3,15 +3,14 @@
 #include "entities/background.h"
 #include "entities/player.h"
 #include "entities/core.h"
-#include "entities/wall.h"
+#include "entities/wallGenerator.h"
 
 int main() {
     CreateMusicController();
     CreateBackground();
     CreateCore();
     CreatePlayer();
-    CreateWall(0, 0.5f);
-    CreateWall(1, 0.8f);
+    CreateWallGenerator();
 
     Engine::GameLoop();
     return 0;
