@@ -30,15 +30,15 @@ float WallGaps(int rotation, float dist) {
 // Wall patterns
 float MultiWallRing(int rotation, float dist) {
     dist += WallRing(rotation, dist);
-    dist += WallRing(rotation + 3, dist);
-    dist += WallRing(rotation + 1, dist);
+    //dist += WallRing(rotation + 3, dist);
+    //dist += WallRing(rotation + 1, dist);
     return dist;
 }
 
 float MultiWallGaps(int rotation, float dist) {
     dist += WallGaps(rotation, dist);
-    dist += WallGaps(rotation + 1, dist);
-    dist += WallGaps(rotation, dist);
+    //dist += WallGaps(rotation + 1, dist);
+    //dist += WallGaps(rotation, dist);
     return dist;
 
 }
@@ -48,7 +48,8 @@ typedef float (*WallPatternFunc)(int, float);
 void UpdateWallGenerator(Entity& self) {
     // Create array of functions
     static const std::vector<WallPatternFunc> wallSets = {
-        MultiWallRing
+        MultiWallRing,
+        MultiWallGaps
     };
 
     // Config
@@ -61,7 +62,7 @@ void UpdateWallGenerator(Entity& self) {
     if (delayTillNextSet <= 0) {
         int pattern = (int)RandomRange(0, (float)wallSets.size());
         int rotation = (int)RandomRange(0, 6);
-        delayTillNextSet = wallSets[pattern](rotation, startDistance + delayTillNextSet);
+        delayTillNextSet = wallSets[pattern](rotation, startDistance + delayTillNextSet) - startDistance;
     }
 }
 

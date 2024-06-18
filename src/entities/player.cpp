@@ -26,7 +26,7 @@ void PlayerUpdate(Entity& self) {
 
     // Move Based on Input
     auto startRotation = transform.rotation;
-    auto rotationSpd = (float)dir * BaseWallSpd * Global::gameSpeed * TimeSystem::DeltaTime();
+    auto rotationSpd = (float)dir * BasePlayerSpd * Global::gameSpeed * TimeSystem::DeltaTime();
     transform.rotation += rotationSpd;
 
     // Keep rotation between 0 and 360
@@ -58,7 +58,7 @@ void PlayerUpdate(Entity& self) {
             // DIE!!!
             if (a == b && a2 == b) {
                 transform.rotation = startRotation + rotationSpd*(float)dir;
-                Engine::StopGame();
+                //Engine::StopGame();
             }
         }
     }

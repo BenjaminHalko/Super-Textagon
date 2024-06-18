@@ -12,18 +12,18 @@
 
 void UpdateWall(Entity& self) {
     // Define variables
-    auto& scriptData = self.GetComponent<Script>();
+    auto &scriptData = self.GetComponent<Script>();
     if (!scriptData.DataExists("baseSprite"))
         scriptData.SetData("baseSprite", Sprite(self.GetComponent<Sprite>()));
-    auto& baseSprite = scriptData.GetData<Sprite>("baseSprite");
-    auto& sprite = self.GetComponent<Sprite>();
+    auto &baseSprite = scriptData.GetData<Sprite>("baseSprite");
+    auto &sprite = self.GetComponent<Sprite>();
 
     // Update sprite
-    for (auto& colouredPoint : baseSprite) {
-        auto& point = colouredPoint.point;
+    for (auto &colouredPoint: baseSprite) {
+        auto &point = colouredPoint.point;
         float dir = PointDirection(0, 0, point.x, point.y);
         float dist = PointDistance(0, 0, point.x, point.y) - BaseWallSpd * Global::gameSpeed * TimeSystem::DeltaTime();
-        dist = (float)fmax(dist, 0.01f);
+        dist = (float) fmax(dist, 0.01f);
 
         point.x = LengthDir_x(dist, dir);
         point.y = LengthDir_y(dist, dir);
@@ -33,8 +33,13 @@ void UpdateWall(Entity& self) {
     ZoomSprite(sprite, baseSprite);
 
     // Update Collider
-    auto& collider = self.GetComponent<Collider>();
+    auto &collider = self.GetComponent<Collider>();
     collider.Update(baseSprite);
+
+    // Delete wall
+    if ((baseSprite.begin() + 2)->point.x == 0.01f) {
+        self.Delete();
+    }
 }
 
 void CreateWall(int dir, float startDist, float size) {
@@ -55,7 +60,7 @@ void CreateWall(int dir, float startDist, float size) {
 
     Engine::AddEntity(
         Tag("wall"),
-        Depth(-50),
+        Depth(50),
         Script(UpdateWall),
         Transform(0, 0, 1, 1, (float)dir),
         Sprite(sprite),
