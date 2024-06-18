@@ -2,6 +2,7 @@
 #include <engine/sys/transformSystem.h>
 #include <engine/comp/collider.h>
 #include <engine/comp/transform.h>
+#include "engine/comp/tag.h"
 
 float sign(Point p1, Point p2, Point p3) {
     return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
@@ -50,6 +51,16 @@ bool EdgeIntersection(Point p1, Point q1, Point p2, Point q2) {
 
 
 bool CollisionSystem::CheckTriangleCollision(Collider& collider1, Collider& collider2, int start1, int start2) {
+    // Check if using any of the special colliders
+    if (collider1.Size() == 1) {
+
+
+        return PointInTriangle(collider1[0], collider2[start2], collider2[start2+1], collider2[start2+2]);
+    } else if (collider2.Size() == 1) {
+        return PointInTriangle(collider2[0], collider1[start1], collider1[start1+1], collider1[start1+2]);
+    }
+
+    // Get the triangles
     Point tri1[3] = {
         collider1[start1],
         collider1[start1+1],
@@ -93,7 +104,7 @@ bool CollisionSystem::CheckTriangleCollision(Collider& collider1, Collider& coll
 bool CollisionSystem::CheckCollision(Entity& entity1, Entity& entity2) {
     // Get the original colliders and positions
     auto originalCollider1 = entity1.GetComponent<Collider>();
-    auto originalCollider2 = entity1.GetComponent<Collider>();
+    auto originalCollider2 = entity2.GetComponent<Collider>();
     auto position1 = entity1.GetComponent<Transform>();
     auto position2 = entity2.GetComponent<Transform>();
 

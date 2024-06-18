@@ -8,12 +8,16 @@
 #include <engine/comp/script.h>
 
 void CoreUpdate(Entity& self) {
+    static auto originalSprite = self.GetComponent<Sprite>();
     static auto &sprite = self.GetComponent<Sprite>();
+    static auto &transform = self.GetComponent<Transform>();
 
     if (Global::beatPulse) {
         sprite.tintAlpha = 0.4f;
     }
     sprite.tintAlpha = Approach(sprite.tintAlpha, 0, 0.1f);
+
+    ZoomSprite(sprite, originalSprite);
 }
 
 void CreateCore() {

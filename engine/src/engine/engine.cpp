@@ -14,7 +14,6 @@ bool Engine::CompareEntityDepth(const std::unique_ptr<Entity>& a, const std::uni
     return a->GetComponent<Depth>().Get() > b->GetComponent<Depth>().Get();
 }
 
-
 std::vector<Entity*> Engine::GetEntities(std::string tag) {
     std::vector<Entity*> entities;
     for (auto entity : GetEntities<Tag>()) {
@@ -23,6 +22,15 @@ std::vector<Entity*> Engine::GetEntities(std::string tag) {
         }
     }
     return entities;
+}
+
+void Engine::RemoveDeletedEntities() {
+    _entities.erase(
+        std::remove_if(_entities.begin(), _entities.end(), [](const std::unique_ptr<Entity>& entity) {
+            return entity->IsDeleted();
+        }),
+        _entities.end()
+    );
 }
 
 void Engine::GameLoop() {
@@ -36,13 +44,10 @@ void Engine::GameLoop() {
         Input::Update();
         AudioSystem::Update();
         EntityUpdateSystem::Update();
+        RemoveDeletedEntities();
         RenderSystem::Update();
 
         TimeSystem::FrameEnd();
-
-        // TEMP
-        if (Input::GetKeyPressed(VK_ESCAPE))
-            StopGame();
     }
 
     Input::Clean();

@@ -1,6 +1,7 @@
 #pragma once
 #include <engine/comp/sprite.h>
 
+float Wrap(float value, float min, float max);
 float Clamp(float value, float min, float max);
 float Approach(float a, float b, float amount);
 float AngleDifference(float a, float b);
@@ -14,3 +15,4 @@ float RandomRange(float min, float max);
 Color MergeColors(Color col1, Color col2, float percent);
 Color MakeColor(float hue, float sat, float val);
 float Wave(float min, float max, float duration, float offset);
+void ZoomSprite(Sprite& sprite, Sprite& originalSprite);
