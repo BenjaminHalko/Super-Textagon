@@ -1,5 +1,6 @@
-#include <engine/sys/renderSystem.h>
 #include <engine/engine.h>
+#include <engine/comp/transform.h>
+#include <engine/sys/renderSystem.h>
 #include <engine/sys/transformSystem.h>
 #include <engine/sys/cameraSystem.h>
 #include <limits>
@@ -38,7 +39,7 @@ void RenderSystem::Init() {
 
 // Private
 
-std::pair<char, Color> RenderSystem::AlphaColorOfPoint(Sprite &sprite, int x, int y) {
+ColoredText RenderSystem::AlphaColorOfPoint(Sprite &sprite, int x, int y) {
     // Characters to use for alpha
     static const std::string alphaChars = ".`'^\",:;Il!i~+_-?][}{1)(|\\/*tjfrjxnvuczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@";
     static const int alphaCharsCount = (int)alphaChars.size();
@@ -96,14 +97,14 @@ std::pair<char, Color> RenderSystem::AlphaColorOfPoint(Sprite &sprite, int x, in
     return {character, color};
 }
 
-void RenderSystem::SetConsoleCharacter(int x, int y, std::pair<char, Color> character) {
+void RenderSystem::SetConsoleCharacter(int x, int y, ColoredText character) {
     if (consoleBuffer.is_inside(x, y)) {
         auto &cell = consoleBuffer.get_cell(x, y);
-        cell.m_letter = character.first;
+        cell.m_letter = character.character;
         cell.m_format.m_fg_color = {
-            (character.second >> 16) & 0xFF,
-            (character.second >> 8) & 0xFF,
-            character.second & 0xFF
+            (character.color >> 16) & 0xFF,
+            (character.color >> 8) & 0xFF,
+            character.color & 0xFF
         };
     }
 }
@@ -166,6 +167,60 @@ void RenderSystem::DrawTriangle(Sprite& sprite, int index) {
     }
 }
 
+void RenderSystem::DrawTextToScreen(Text &text, int x, int y) {
+    auto &textStr = text.GetString();
+
+    // Get size of the text
+    int stringHeight = (int) textStr.size();
+    int stringWidth = 0;
+    for (auto &str: textStr)
+        stringWidth = (int) fmax(stringWidth, str.size());
+    stringWidth += text.leftMargin + text.rightMargin;
+    stringHeight += text.topMargin + text.bottomMargin;
+
+    // Draw the black background
+    int xLeft, yTop;
+    switch (text.hAlign) {
+        case HAlign::Left:
+            xLeft = x;
+            break;
+        case HAlign::Center:
+            xLeft = x - stringWidth / 2;
+            break;
+        case HAlign::Right:
+            xLeft = x - stringWidth;
+            break;
+    }
+    switch (text.vAlign) {
+        case VAlign::Top:
+            yTop = y;
+            break;
+        case VAlign::Center:
+            yTop = y - stringHeight / 2;
+            break;
+        case VAlign::Bottom:
+            yTop = y - stringHeight;
+            break;
+    }
+
+    // Draw Black Rectangle
+    for (int i = xLeft; i < xLeft + stringWidth; i++)
+        for (int j = yTop; j < yTop + stringHeight; j++)
+            SetConsoleCharacter(i, j, {' ', 0});
+
+    // Draw the text
+    Color textColor = 0xFFFFFF;
+    for (int i = 0; i < (int) textStr.size(); i++) {
+        int size = (int)textStr[i].size();
+        int xOffset = xLeft + (int)((stringWidth - text.leftMargin - text.rightMargin - size) / 2.0 * ((int)text.hAlign + 1));
+        for (int j = 0; j < (int)textStr[i].size(); j++) {
+            if (text.HasColor(j, i))
+                textColor = text.GetColor(j, i);
+            SetConsoleCharacter(xOffset + j + text.leftMargin, yTop + i + text.topMargin, {textStr[i][j], textColor});
+        }
+    }
+}
+
 // Public
 
 void RenderSystem::Update() {
@@ -192,7 +247,7 @@ void RenderSystem::Update() {
 
     // Loop over all the entities
     auto camera = CameraSystem::GetTransform();
-    for (auto entity: Engine::GetEntities<Sprite, Transform>()) {
+    for (auto entity: Engine::GetEntities<Sprite>()) {
         auto sprite = entity->GetComponent<Sprite>();
 
         auto entityTransformedSprite = TransformSystem::TransformSprite(
@@ -206,9 +261,17 @@ void RenderSystem::Update() {
             camera
         );
 
+        // Draw the sprite
         for (int i = 0; i < entityTransformedSprite.Size(); i += 3) {
             DrawTriangle(entityTransformedSprite, i);
         }
+    }
+
+    // Draw all text based elements
+    for (auto entity: Engine::GetEntities<Text>()) {
+        auto &text = entity->GetComponent<Text>();
+        auto &transform = entity->GetComponent<Transform>();
+        DrawTextToScreen(text, (int)transform.x * width, (int)transform.y * height);
     }
 
     // Clear the screen

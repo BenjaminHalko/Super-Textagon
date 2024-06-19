@@ -8,7 +8,6 @@
 #include <engine/sys/timeSystem.h>
 #include <engine/sys/cameraSystem.h>
 #include <engine/sys/audioSystem.h>
-#include <chrono>
 
 void UpdateScoreTracker(Entity &self) {
     // Define static variables

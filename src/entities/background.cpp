@@ -22,12 +22,12 @@ void BackgroundUpdate(Entity& self) {
     // Decide Phase
     if (!Global::gameOver) {
         runtime = RoundRunning();
-        if (runtime < 10.0f)
+        if (runtime < 20.0f)
             phase = 0;
-        else if (runtime < 20.0f)
+        else if (runtime < 40.0f)
             phase = 1;
-        //else
-            //phase = 2;
+        else
+            phase = 2;
     }
 
     // Decide Speed
