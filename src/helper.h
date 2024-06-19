@@ -1,5 +1,6 @@
 #pragma once
 #include <engine/comp/sprite.h>
+#include <string>
 
 float Wrap(float value, float min, float max);
 float Clamp(float value, float min, float max);
@@ -17,3 +18,4 @@ Color MakeColor(float hue, float sat, float val);
 float Wave(float min, float max, float duration, float offset);
 void ZoomSprite(Sprite& sprite, Sprite& originalSprite, float zoom = -1);
 float RoundRunning();
+std::string FormatTime(float time);

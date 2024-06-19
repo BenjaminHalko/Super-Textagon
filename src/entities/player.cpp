@@ -57,8 +57,9 @@ void PlayerUpdate(Entity& self) {
                 auto b = (int) floor(entity->GetComponent<Transform>().rotation / 60);
 
                 // DIE!!!
-                if (a == b) {
+                if (a == b && !CHEATS) {
                     transform.rotation = startRotation + rotationSpd * (float) dir;
+                    Global::finalScore = RoundRunning();
                     Global::gameOver = true;
                     AudioSystem::PlayAudio("audio/death.wav", false, 0.4f);
                 }

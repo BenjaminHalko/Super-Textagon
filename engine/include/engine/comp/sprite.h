@@ -5,8 +5,6 @@
 #include <vector>
 #include <iterator>
 
-#define Color unsigned int
-
 /**
  * @brief Structure representing a point with color and alpha value.
  */

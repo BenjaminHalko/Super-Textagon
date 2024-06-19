@@ -169,5 +169,23 @@ void ZoomSprite(Sprite& sprite, Sprite& originalSprite, float zoom) {
 
 // Gets the amount of time the game has been running for
 float RoundRunning() {
+    if (Global::gameOver)
+        return Global::finalScore;
     return TimeSystem::TimeRunning() - Global::roundStart;
+}
+
+// Formats time
+std::string FormatTime(float time) {
+    int minutes = (int)time / 60;
+    int seconds = (int)time % 60;
+    std::string secondsStr = std::to_string(seconds);
+    if (minutes > 0 && seconds < 10)
+        secondsStr = "0" + secondsStr;
+    int milliseconds = (int)(time * 100) % 100;
+    std::string millisecondsStr = std::to_string(milliseconds);
+    if (milliseconds < 10)
+        millisecondsStr = "0" + millisecondsStr;
+    if (minutes == 0)
+        return secondsStr + "." + millisecondsStr;
+    return std::to_string(minutes) + ":" + secondsStr + "." + millisecondsStr;
 }
