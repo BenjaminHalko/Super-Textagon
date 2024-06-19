@@ -9,8 +9,10 @@
 #include <engine/comp/collider.h>
 #include <engine/comp/tag.h>
 #include <engine/sys/timeSystem.h>
+#include <engine/sys/cameraSystem.h>
 
 void UpdateWall(Entity& self) {
+
     // Define variables
     auto &scriptData = self.GetComponent<Script>();
     if (!scriptData.DataExists("baseSprite"))
@@ -19,18 +21,28 @@ void UpdateWall(Entity& self) {
     auto &sprite = self.GetComponent<Sprite>();
 
     // Update sprite
-    for (auto &colouredPoint: baseSprite) {
-        auto &point = colouredPoint.point;
-        float dir = PointDirection(0, 0, point.x, point.y);
-        float dist = PointDistance(0, 0, point.x, point.y) - BaseWallSpd * Global::gameSpeed * TimeSystem::DeltaTime();
-        dist = (float) fmax(dist, 0.01f);
+    if (!Global::gameOver) {
+        for (auto &colouredPoint: baseSprite) {
+            auto &point = colouredPoint.point;
+            float dir = PointDirection(0, 0, point.x, point.y);
+            float dist =
+                    PointDistance(0, 0, point.x, point.y) - BaseWallSpd * Global::gameSpeed * TimeSystem::DeltaTime();
+            dist = (float) fmax(dist, 0.01f);
 
-        point.x = LengthDir_x(dist, dir);
-        point.y = LengthDir_y(dist, dir);
+            point.x = LengthDir_x(dist, dir);
+            point.y = LengthDir_y(dist, dir);
+        }
     }
 
+    // Update Sprite Color
+    for(auto &point : sprite)
+        point.color = MakeColor(Global::hue, 1.0f, point.alpha);
+
     // Update Zoom
-    ZoomSprite(sprite, baseSprite);
+    if (Global::gameOver)
+        ZoomSprite(sprite, baseSprite, Global::zoom + CameraSystem::zoom - 1.0f);
+    else
+        ZoomSprite(sprite, baseSprite);
 
     // Update Collider
     auto &collider = self.GetComponent<Collider>();
@@ -46,6 +58,11 @@ void CreateWall(int dir, float startDist, float size) {
     float alpha = (dir % 2 == 0) ? 1 : 0.9f;
 
     dir *= 60;
+
+    while (dir < 0)
+        dir += 360;
+    while (dir >= 360)
+        dir -= 360;
 
     Sprite sprite = {
         {{startDist, 0}, 0, alpha},

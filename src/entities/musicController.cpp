@@ -10,11 +10,23 @@ void UpdateMusicController(Entity& self) {
     static auto music = AudioSystem::PlayAudio("audio/music.ogg", true, 0.4f);
     static int lastBeat = 0;
     static const int BPM = 130;
+    static bool paused = false;
 
     // Update Beats
-    int beat = (int)(AudioSystem::GetAudioPosition(music) * BPM / 60);
-    Global::beatPulse = (beat != lastBeat);
-    lastBeat = beat;
+    Global::musicTime = (AudioSystem::GetAudioPosition(music) * BPM / 60.0f);
+    Global::beatPulse = ((int)Global::musicTime != lastBeat);
+    lastBeat = (int)Global::musicTime;
+
+    // Pause Music
+    if (Global::gameOver) {
+        if (!paused) {
+            AudioSystem::PauseAudio(music);
+            paused = true;
+        }
+    } else if (paused) {
+        AudioSystem::ResumeAudio(music);
+        paused = false;
+    }
 }
 
 void CreateMusicController() {

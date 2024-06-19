@@ -126,6 +126,12 @@ void RenderSystem::DrawTriangle(Sprite& sprite, int index) {
         points[i].alpha = sprite[i + index].alpha;
     }
 
+    // Check if any of the points are on the screen
+    if (points[0].point.x < 0 && points[1].point.x < 0 && points[2].point.x < 0) return;
+    if (points[0].point.y < 0 && points[1].point.y < 0 && points[2].point.y < 0) return;
+    if (points[0].point.x >= (float)width && points[1].point.x >= (float)width && points[2].point.x >= (float)width) return;
+    if (points[0].point.y >= (float)height && points[1].point.y >= (float)height && points[2].point.y >= (float)height) return;
+
     // Sort the points by y-coordinate
     std::sort(points.begin(), points.end(), [](const ColoredPoint &a, const ColoredPoint &b) {
         return a.point.y < b.point.y;
@@ -140,7 +146,7 @@ void RenderSystem::DrawTriangle(Sprite& sprite, int index) {
             std::numeric_limits<float>::infinity() : (points[1].point.x - points[0].point.x) / (points[1].point.y - points[0].point.y);
 
     // Draw the upper part of the triangle (from A to B)
-    for (int y = (int)std::ceil(points[0].point.y); y <= (int)(points[1].point.y); y++) {
+    for (int y = (int)fmax(-1, fmin(height, std::ceil(points[0].point.y))); y <= (int)fmax(-1, fmin(height, (points[1].point.y))); y++) {
         auto x1 = (float)fmax(-1, fmin(width, points[0].point.x + slopeAC * ((float)y - points[0].point.y)));
         auto x2 = (float)fmax(-1, fmin(width, points[0].point.x + slopeAB * ((float)y - points[0].point.y)));
         if (x1 > x2) std::swap(x1, x2); // Ensure x1 is always less than x2
@@ -150,7 +156,7 @@ void RenderSystem::DrawTriangle(Sprite& sprite, int index) {
     }
 
     // Draw the lower part of the triangle (from B to C)
-    for (int y = (int)std::ceil(points[1].point.y); y <= (int)(points[2].point.y); y++) {
+    for (int y = (int)fmax(-1, fmin(height, std::ceil(points[1].point.y))); y <= (int)fmax(-1, fmin(height, (points[2].point.y))); y++) {
         auto x1 = (float)fmax(-1, fmin(width, points[0].point.x + slopeAC * ((float)y - points[0].point.y)));
         auto x2 = (float)fmax(-1, fmin(width, points[1].point.x + slopeBC * ((float)y - points[1].point.y)));
         if (x1 > x2) std::swap(x1, x2); // Ensure x1 is always less than x2

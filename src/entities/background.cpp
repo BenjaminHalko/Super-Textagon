@@ -6,32 +6,76 @@
 #include <engine/comp/sprite.h>
 #include <engine/comp/transform.h>
 #include <engine/comp/script.h>
-#include <engine/comp/tag.h>
 #include <engine/sys/cameraSystem.h>
 #include <engine/sys/timeSystem.h>
 
 void BackgroundUpdate(Entity& self) {
     static float zoom = 0.0;
+    static float rotationSpeed = 0;
+    static float phaseShift = 0;
+    static auto& sprite = self.GetComponent<Sprite>();
+    static bool phase2Dir = true;
+    static float phase2Amount = 0;
+    static int phase = 0;
+    static float runtime = 0;
+
+    // Decide Phase
+    if (!Global::gameOver) {
+        runtime = RoundRunning();
+        if (runtime < 10.0f)
+            phase = 0;
+        else if (runtime < 20.0f)
+            phase = 1;
+        //else
+            //phase = 2;
+    }
+
+    // Decide Speed
+    if (Global::showGameOverUI)
+        rotationSpeed = -1.0f;
+    else if (phase == 0)
+        rotationSpeed = 1.0f;
+    else if (phase == 1)
+        rotationSpeed = -1.0f;
+    else
+        rotationSpeed = 1.9f;
 
     // Rotate Background
-    CameraSystem::rotation -= 1.9f * TimeSystem::DeltaTime();
+    CameraSystem::rotation += rotationSpeed * TimeSystem::DeltaTime();
 
     // Pulse
-    if (Global::beatPulse) {
+    if (!Global::gameOver && Global::beatPulse)
         zoom = 1.0f;
-    }
     zoom = ApproachEase(zoom, 0.0f, 0.2f, 0.8f);
     Global::zoom = sinf(zoom * PI);
 
-    // Update Hue Based on Time
-    Global::hue = Wave(0, 54, 5, 0);
+    // Phase 2 Hue Shift
+    if (phase == 1) {
+        phase2Amount = Approach(phase2Amount, phase2Dir, 0.02f);
+        if (phase2Amount == (float)phase2Dir)
+            phase2Dir = !phase2Dir;
+    }
 
-    // Update Colors of All Entities
-    for (auto entity : Engine::GetEntities<Sprite>()) {
-        if (entity->HasComponents<Tag>() && entity->GetComponent<Tag>().Get() == "player")
-            continue;
-        auto &sprite = entity->GetComponent<Sprite>();
-        for(auto &point : sprite) {
+    // Update Hue
+    float phase1Hue = Wave(0, 54, 5, 0);
+    auto phase2Hue = (float)std::lerp(30, 140, std::abs(fmod(runtime, 4) - 2) / 2.0f);
+    phaseShift = Approach(phaseShift, (float)phase, 0.1f);
+    Global::hue = (float)std::lerp(phase1Hue, phase2Hue, fmin(1, phaseShift));
+
+    // Update Color
+    if (phase == 1) {
+        for(int i = 0; i < sprite.Size(); i++) {
+            auto &point = sprite[i];
+            point.alpha = 0.3f;
+            if ((i % 6 >= 3) == (fmod(Global::musicTime, 4) >= 2))
+                point.color = MakeColor(Global::hue, 1.0f, point.alpha);
+            else
+                point.color = 0;
+        }
+    } else {
+        for(int i = 0; i < sprite.Size(); i++) {
+            auto &point = sprite[i];
+            point.alpha = (i % 6 >= 3) ? 0.4f : 0.2f;
             point.color = MakeColor(Global::hue, 1.0f, point.alpha);
         }
     }

@@ -5,6 +5,7 @@
 
 #define VK_BACK           0x08
 #define VK_TAB            0x09
+#define VK_ENTER          0x0D
 #define VK_ESCAPE         0x1B
 #define VK_SPACE          0x20
 #define VK_PRIOR          0x21

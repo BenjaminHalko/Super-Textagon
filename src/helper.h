@@ -15,4 +15,5 @@ float RandomRange(float min, float max);
 Color MergeColors(Color col1, Color col2, float percent);
 Color MakeColor(float hue, float sat, float val);
 float Wave(float min, float max, float duration, float offset);
-void ZoomSprite(Sprite& sprite, Sprite& originalSprite);
+void ZoomSprite(Sprite& sprite, Sprite& originalSprite, float zoom = -1);
+float RoundRunning();
