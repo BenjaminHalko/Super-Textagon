@@ -1,6 +1,7 @@
 #include "helper.h"
 #include "global.h"
 #include <engine/sys/timeSystem.h>
+#include <engine/sys/cameraSystem.h>
 #include <engine/common.h>
 #include <cmath>
 
@@ -151,14 +152,22 @@ float Wave(float min, float max, float duration, float offset) {
 }
 
 // Transform a sprite using global zoom
-void ZoomSprite(Sprite& sprite, Sprite& originalSprite) {
+void ZoomSprite(Sprite& sprite, Sprite& originalSprite, float zoom) {
+    if (zoom == -1)
+        zoom = Global::zoom + CameraSystem::zoom - 1.0f;
+
     for (int i = 0; i < sprite.Size(); i++) {
         float dir = PointDirection(0, 0, originalSprite[i].point.x, originalSprite[i].point.y);
 
         if (originalSprite[i].point.x != 0)
-            sprite[i].point.x = originalSprite[i].point.x + LengthDir_x(Global::zoom/abs(originalSprite[i].point.x*2.0f+1.0f)*0.02f, dir);
+            sprite[i].point.x = originalSprite[i].point.x + LengthDir_x(zoom/abs(originalSprite[i].point.x*2.0f+1.0f)*0.02f, dir);
 
         if (originalSprite[i].point.y != 0)
-            sprite[i].point.y = originalSprite[i].point.y + LengthDir_y(Global::zoom/abs(originalSprite[i].point.y*2.0f+1.0f)*0.02f, dir);
+            sprite[i].point.y = originalSprite[i].point.y + LengthDir_y(zoom/abs(originalSprite[i].point.y*2.0f+1.0f)*0.02f, dir);
     }
+}
+
+// Gets the amount of time the game has been running for
+float RoundRunning() {
+    return TimeSystem::TimeRunning() - Global::roundStart;
 }

@@ -1,15 +1,16 @@
 #pragma once
 
-#include <chrono>
-
-#define BaseWallSpd 0.01f
-#define BasePlayerSpd 12
+#define BaseWallSpd 0.005f
+#define BasePlayerSpd 9
 
 class Global {
 public:
     static bool beatPulse;
+    static float musicTime;
     static float hue;
     static float zoom;
-    static std::chrono::time_point<std::chrono::steady_clock> roundStart;
+    static float roundStart;
     static float gameSpeed;
+    static bool gameOver;
+    static bool showGameOverUI;
 };

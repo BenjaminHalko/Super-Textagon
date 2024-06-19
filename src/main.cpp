@@ -4,6 +4,7 @@
 #include "entities/player.h"
 #include "entities/core.h"
 #include "entities/wallGenerator.h"
+#include "entities/scoreTracker.h"
 
 int main() {
     CreateMusicController();
@@ -11,6 +12,7 @@ int main() {
     CreateCore();
     CreatePlayer();
     CreateWallGenerator();
+    CreateScoreTracker();
 
     Engine::GameLoop();
     return 0;

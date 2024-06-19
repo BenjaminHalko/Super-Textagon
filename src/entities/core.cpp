@@ -6,18 +6,23 @@
 #include <engine/comp/sprite.h>
 #include <engine/comp/transform.h>
 #include <engine/comp/script.h>
+#include <engine/sys/cameraSystem.h>
 
 void CoreUpdate(Entity& self) {
     static auto originalSprite = self.GetComponent<Sprite>();
     static auto &sprite = self.GetComponent<Sprite>();
     static auto &transform = self.GetComponent<Transform>();
 
-    if (Global::beatPulse) {
+    if (Global::beatPulse && !Global::gameOver && CameraSystem::zoom < 1.1f) {
         sprite.tintAlpha = 0.4f;
     }
     sprite.tintAlpha = Approach(sprite.tintAlpha, 0, 0.1f);
 
-    ZoomSprite(sprite, originalSprite);
+    ZoomSprite(sprite, originalSprite, Global::zoom);
+
+    // Update Sprite
+    for(auto &point : sprite)
+        point.color = MakeColor(Global::hue, 1.0f, point.alpha);
 }
 
 void CreateCore() {
