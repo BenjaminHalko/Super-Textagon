@@ -26,10 +26,12 @@ void CoreUpdate(Entity& self) {
 }
 
 void CreateCore() {
-    Engine::AddEntity(
+    auto& core = Engine::AddEntity(
         Depth(-100),
         Transform(0, 0),
-        Sprite(0.04f, 6, 0xFF0000, 0, 0xFFFFFF, 0.8f),
+        Sprite(0.04f, 6, 0x000000, 0, MakeColor(Global::hue, 1.0f, 0.8f), 0.8f),
         Script(CoreUpdate)
     );
+
+    CoreUpdate(core);
 }

@@ -2,7 +2,7 @@
 
 // Declare the static variables
 SoLoud::Soloud AudioSystem::_soLoud;
-std::vector<std::pair<std::unique_ptr<SoLoud::Wav>, unsigned int>> AudioSystem::_audioClips;
+std::vector<std::pair<std::unique_ptr<SoLoud::WavStream>, unsigned int>> AudioSystem::_audioClips;
 
 void AudioSystem::Init() {
     _soLoud.init();
@@ -20,8 +20,8 @@ void AudioSystem::Clean() {
 }
 
 AudioComponent AudioSystem::PlayAudio(std::string audioPath, bool loop, float volume) {
-    std::pair<std::unique_ptr<SoLoud::Wav>, unsigned int> audioClip;
-    audioClip.first = std::make_unique<SoLoud::Wav>();
+    std::pair<std::unique_ptr<SoLoud::WavStream>, unsigned int> audioClip;
+    audioClip.first = std::make_unique<SoLoud::WavStream>();
     audioClip.first->load(audioPath.c_str());
     audioClip.first->setLooping(loop);
     audioClip.first->setVolume(volume);

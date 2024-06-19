@@ -271,7 +271,7 @@ void RenderSystem::Update() {
     for (auto entity: Engine::GetEntities<Text>()) {
         auto &text = entity->GetComponent<Text>();
         auto &transform = entity->GetComponent<Transform>();
-        DrawTextToScreen(text, (int)transform.x * width, (int)transform.y * height);
+        DrawTextToScreen(text, (int)(transform.x * (float)width), (int)(transform.y * (float)height));
     }
 
     // Clear the screen
