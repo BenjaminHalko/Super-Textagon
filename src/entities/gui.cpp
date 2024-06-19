@@ -8,7 +8,7 @@
 #include <engine/comp/tag.h>
 
 void UpdateProgress(Entity& self) {
-    static auto& text = self.GetComponent<Text>();
+    auto& text = self.GetComponent<Text>();
     static const int progressSize = (int)text.GetString()[1].size();
     static const std::vector<std::string> shapes = {
         "POINT", "LINE", "TRIANGLE", "SQUARE", "PENTAGON", "HEXAGON"
@@ -28,11 +28,10 @@ void UpdateProgress(Entity& self) {
         float alpha = Clamp((float)progressSize * progress - (float)i, 0, 1);
         text.SetColor(i, 1, MergeColors(0x222222, 0xFFFFFF, alpha));
     }
-
 }
 
 void UpdateTopRightScore(Entity& self) {
-    static auto& text = self.GetComponent<Text>();
+    auto& text = self.GetComponent<Text>();
     text.GetString()[1] = FormatTime(RoundRunning());
 }
 

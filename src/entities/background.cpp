@@ -42,7 +42,7 @@ void BackgroundUpdate(Entity& self) {
 
     // Decide Speed
     if (Global::intro) {
-        if (TimeSystem::TimeRunning() > 3.0f)
+        if (TimeSystem::TimeRunning() > 3.5f)
             rotationSpeed = Approach(rotationSpeed, -0.5f, 0.005f);
     } else if (Global::showGameOverUI)
         rotationSpeed = -1.0f;
