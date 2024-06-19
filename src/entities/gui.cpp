@@ -5,6 +5,7 @@
 #include <engine/comp/depth.h>
 #include <engine/comp/transform.h>
 #include <engine/comp/script.h>
+#include <engine/comp/tag.h>
 
 void UpdateProgress(Entity& self) {
     static auto& text = self.GetComponent<Text>();
@@ -37,6 +38,7 @@ void UpdateTopRightScore(Entity& self) {
 
 void CreateGUI() {
     Engine::AddEntity(
+        Tag("GUI"),
         Depth(-500),
         Text({"Pentagon", "----------"}, HAlign::Left, VAlign::Top, 1, 1, 0, 0),
         Transform(0, 0),
@@ -44,9 +46,19 @@ void CreateGUI() {
     );
 
     Engine::AddEntity(
+        Tag("GUI"),
         Depth(-500),
         Text({"TIME", "0"}, HAlign::Right, VAlign::Top, 1, 1, 0, 0),
         Transform(1, 0),
         Script(UpdateTopRightScore)
+    );
+}
+
+void CreateIntroGUI() {
+    Engine::AddEntity(
+        Tag("GUI"),
+        Depth(-500),
+        Text({"Super", "Textagon"}, HAlign::Center, VAlign::Center, 1, 1, 0, 0),
+        Transform(0.5f, 0.5f)
     );
 }

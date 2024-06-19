@@ -3,7 +3,7 @@
 #define BaseWallSpd 0.005f
 #define BasePlayerSpd 9
 
-#define CHEATS true
+#define CHEATS false
 
 class Global {
 public:
@@ -16,4 +16,5 @@ public:
     static float gameSpeed;
     static bool gameOver;
     static bool showGameOverUI;
+    static bool intro;
 };

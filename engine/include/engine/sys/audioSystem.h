@@ -2,7 +2,7 @@
 
 #include <engine/sys/_system.h>
 #include <engine/comp/audio.h>
-#include <soloud_wav.h>
+#include <soloud_wavstream.h>
 #include <string>
 #include <vector>
 
@@ -12,7 +12,7 @@
 class AudioSystem : public System {
     friend class Engine;
     static SoLoud::Soloud _soLoud; // External engine for audio playback.
-    static std::vector<std::pair<std::unique_ptr<SoLoud::Wav>, unsigned int>> _audioClips; // List of audio clips and their handles.
+    static std::vector<std::pair<std::unique_ptr<SoLoud::WavStream>, unsigned int>> _audioClips; // List of audio clips and their handles.
 
     /**
      * @brief Initializes SoLoud.
