@@ -12,4 +12,4 @@ bool Global::gameOver = true;
 bool Global::showGameOverUI = false;
 bool Global::intro = true;
 float Global::playerSpd = 9;
-float Global::wallSpd = 0.005f;
+float Global::wallSpd = 0.007f;

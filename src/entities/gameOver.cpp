@@ -56,6 +56,8 @@ void UpdateGameOverManager(Entity &self) {
     if (Global::gameOver && Input::GetKeyPressed(VK_ENTER)) {
         for(auto &entity : Engine::GetEntities("GUI"))
             entity->Delete();
+        for(auto &entity : Engine::GetEntities("wall"))
+            entity->Delete();
         Global::gameOver = false;
         Global::showGameOverUI = false;
         gotHighScore = false;
@@ -78,6 +80,7 @@ void UpdateGameOverManager(Entity &self) {
         gotHighScore = true;
         if (highScore != 0) {
             AudioSystem::PlayAudio("audio/excellent.ogg", false, 1.0f);
+            CreateNewRecord();
         }
     }
 
