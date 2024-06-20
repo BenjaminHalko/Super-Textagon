@@ -21,3 +21,4 @@ float RoundRunning();
 std::string FormatTime(float time);
 void Save(float score);
 float Load();
+int GetShapePhase();
