@@ -7,6 +7,7 @@
 #include <engine/sys/cameraSystem.h>
 #include <engine/sys/timeSystem.h>
 
+// Perform flash action (brighten screen)
 void UpdateFlash(Entity& self) {
     auto &script = self.GetComponent<Script>();
     if (!script.DataExists("time"))
@@ -16,6 +17,7 @@ void UpdateFlash(Entity& self) {
         self.Delete();
 }
 
+// Create flash effect (upon death)
 void FlashScreen() {
     Engine::AddEntity(
         Depth(-1000),

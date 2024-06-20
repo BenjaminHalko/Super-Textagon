@@ -8,6 +8,7 @@
 #include <engine/comp/script.h>
 #include <engine/sys/cameraSystem.h>
 
+// Update the corse size/colors
 void CoreUpdate(Entity& self) {
     static auto originalSprite = self.GetComponent<Sprite>();
     static auto &sprite = self.GetComponent<Sprite>();
@@ -29,6 +30,7 @@ void CoreUpdate(Entity& self) {
         );
 }
 
+// Creates a core entity (middle you rotate around)
 void CreateCore() {
     auto& core = Engine::AddEntity(
         Depth(-100),

@@ -15,6 +15,7 @@
 #include <engine/sys/cameraSystem.h>
 #include <engine/sys/audioSystem.h>
 
+// Updates player entity
 void PlayerUpdate(Entity& self) {
     // Static variables
     static auto originalSprite = self.GetComponent<Sprite>();
@@ -22,8 +23,9 @@ void PlayerUpdate(Entity& self) {
     static auto &sprite = self.GetComponent<Sprite>();
     static auto &transform = self.GetComponent<Transform>();
 
+    // While the game is still running...
     if (!Global::gameOver) {
-        // Input
+        // Check for inputs, and apply to player direction
         bool left = Input::GetKeyDown(VK_LEFT) || Input::GetKeyDown('A');
         bool right = Input::GetKeyDown(VK_RIGHT) || Input::GetKeyDown('D');
         int dir = right - left;
@@ -39,7 +41,7 @@ void PlayerUpdate(Entity& self) {
         while (transform.rotation >= 360)
             transform.rotation -= 360;
 
-        // Collision
+        // Check for collision
         for (auto &entity: Engine::GetEntities("wall")) {
             if (CollisionSystem::CheckCollision(self, *entity)) {
                 // Really complicated calculation for colliding with walls
@@ -53,11 +55,11 @@ void PlayerUpdate(Entity& self) {
                 }
 
                 // Check for death :(
-                // Check if the player is in the same 6th as the wall
+                // Check if the player is in the same sextant as the wall at time of collision
                 auto a = (int) floor(startRotation / 60);
                 auto b = (int) floor(entity->GetComponent<Transform>().rotation / 60);
 
-                // DIE!!!
+                // Kill the player (clashing screen)
                 if (a == b) {
                     transform.rotation = startRotation + rotationSpd * (float) dir;
                     Global::finalScore = RoundRunning();
@@ -79,6 +81,7 @@ void PlayerUpdate(Entity& self) {
     ZoomSprite(sprite, originalSprite, Global::zoom);
 }
 
+// Create Player entity
 void CreatePlayer() {
     const float xOffset = 0.055f;
     const float size = 0.015f;

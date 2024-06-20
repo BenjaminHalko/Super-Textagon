@@ -5,6 +5,7 @@
 #include <engine/comp/script.h>
 #include <engine/sys/audioSystem.h>
 
+// Updates the music controller
 void UpdateMusicController(Entity& self) {
     // Define Variables
     static auto music = AudioSystem::PlayAudio("audio/music.ogg", true, 0.6f);
