@@ -16,6 +16,7 @@
 #define VK_UP             0x26
 #define VK_RIGHT          0x27
 #define VK_DOWN           0x28
+#define VK_DELETE         0x2E
 #define VK_NUMPAD0        0x60
 #define VK_NUMPAD1        0x61
 #define VK_NUMPAD2        0x62

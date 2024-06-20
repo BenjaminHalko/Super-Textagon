@@ -2,3 +2,4 @@
 .vs/
 cmake-*/
 out/
+enc_temp_folder/

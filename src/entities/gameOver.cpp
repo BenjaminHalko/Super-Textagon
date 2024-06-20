@@ -3,6 +3,7 @@
 #include "gui.h"
 #include "player.h"
 #include "core.h"
+#include "musicController.h"
 #include "../global.h"
 #include "../helper.h"
 #include <engine/engine.h>
@@ -53,7 +54,7 @@ void UpdateGameOverManager(Entity &self) {
     else
         CameraSystem::zoom = ApproachEase(CameraSystem::zoom, (deathZoomWaitTimer <= 0) ? 5.0f : 1.0f, 0.5f, 0.8f);
 
-    if (Global::gameOver && Input::GetKeyPressed(VK_ENTER)) {
+    if (Global::gameOver && (Input::GetKeyPressed(VK_ENTER) || Input::GetKeyPressed(VK_SHIFT) || Input::GetKeyPressed(VK_SPACE)) && TimeSystem::TimeRunning() > 0.5f) {
         for(auto &entity : Engine::GetEntities("GUI"))
             entity->Delete();
         for(auto &entity : Engine::GetEntities("wall"))
@@ -69,6 +70,7 @@ void UpdateGameOverManager(Entity &self) {
 
         if (Global::intro) {
             Global::intro = false;
+            CreateMusicController();
             CreateCore();
             CreatePlayer();
             CameraSystem::zoom = 10.0f;

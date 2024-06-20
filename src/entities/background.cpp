@@ -21,9 +21,9 @@ void BackgroundUpdate(Entity& self) {
     static bool playedIntroAudio = false;
 
     // Play Intro Audio
-    if (Global::intro && !playedIntroAudio && TimeSystem::TimeRunning() > 0.5f) {
+    if (Global::intro && !playedIntroAudio && TimeSystem::TimeRunning() > 0.8f) {
         playedIntroAudio = true;
-        AudioSystem::PlayAudio("audio/super_textagon.ogg", false, 1.0f);
+        AudioSystem::PlayAudio("audio/super_textagon.ogg", false, 0.8f);
     }
 
     // Wall Spd

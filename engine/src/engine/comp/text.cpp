@@ -33,16 +33,16 @@ std::vector<std::string>& Text::GetString() {
 }
 
 void Text::SetColor(int x, int y, Color color) {
-    auto key = (size_t) x << 32 | (unsigned int) y;
+    auto key = (size_t) x << 8 | (unsigned int) y;
     _color[key] = color;
 }
 
 Color Text::GetColor(int x, int y) {
-    auto key = (size_t) x << 32 | (unsigned int) y;
+    auto key = (size_t) x << 8 | (unsigned int) y;
     return _color[key];
 }
 
 bool Text::HasColor(int x, int y) {
-    auto key = (size_t) x << 32 | (unsigned int) y;
+    auto key = (size_t) x << 8 | (unsigned int) y;
     return _color.find(key) != _color.end();
 }
