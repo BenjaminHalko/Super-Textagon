@@ -17,6 +17,7 @@ void UpdateGameOverManager(Entity &self) {
     // Define static variables
     static float deathZoomWaitTimer = 0;
     static float highScore = Load();
+    static bool gotHighScore = false;
 
     // Game Over
     if (Global::gameOver) {
@@ -43,6 +44,7 @@ void UpdateGameOverManager(Entity &self) {
             entity->Delete();
 
         CreateGameOverGUI(highScore);
+        AudioSystem::PlayAudio("audio/game_over.ogg", false, 1.0f);
     }
 
     // Update Camera Zoom
@@ -56,8 +58,10 @@ void UpdateGameOverManager(Entity &self) {
             entity->Delete();
         Global::gameOver = false;
         Global::showGameOverUI = false;
+        gotHighScore = false;
         Global::roundStart = TimeSystem::TimeRunning();
-        AudioSystem::PlayAudio("audio/roundStart.wav", false, 0.1f);
+        AudioSystem::PlayAudio("audio/roundStart.wav", false, 0.07f);
+        AudioSystem::PlayAudio("audio/begin.ogg", false, 1.0f);
         deathZoomWaitTimer = 60;
         CreateGUI();
 
@@ -66,6 +70,14 @@ void UpdateGameOverManager(Entity &self) {
             CreateCore();
             CreatePlayer();
             CameraSystem::zoom = 10.0f;
+        }
+    }
+
+    // Check for high score
+    if (RoundRunning() > highScore && !gotHighScore) {
+        gotHighScore = true;
+        if (highScore != 0) {
+            AudioSystem::PlayAudio("audio/excellent.ogg", false, 1.0f);
         }
     }
 
@@ -79,6 +91,13 @@ void UpdateGameOverManager(Entity &self) {
         } else {
             Engine::StopGame();
         }
+    }
+
+    // Erase high score
+    if (Input::GetKeyPressed(VK_DELETE)) {
+        highScore = 0;
+        Save(highScore);
+        AudioSystem::PlayAudio("audio/death.wav", false, 0.4f);
     }
 }
 
