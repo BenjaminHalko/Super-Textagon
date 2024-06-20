@@ -42,8 +42,7 @@ void BackgroundUpdate(Entity& self) {
 
     // Decide Speed
     if (Global::intro) {
-        if (TimeSystem::TimeRunning() > 3.5f)
-            rotationSpeed = Approach(rotationSpeed, -0.5f, 0.005f);
+        rotationSpeed = -0.5f;
     } else if (Global::showGameOverUI)
         rotationSpeed = -1.0f;
     else if (runtime < 9.0f)
@@ -75,7 +74,7 @@ void BackgroundUpdate(Entity& self) {
     Global::hue = (float)std::lerp(phase1Hue, phase2Hue, Clamp(phaseShift - 1.0f, 0, 1));
     float brightness = 1;
     if (Global::intro)
-        brightness = Clamp(floor(((TimeSystem::TimeRunning() - 1) / 2.0f) * 5.0f) / 5.0f, 0, 1);
+        brightness = Clamp(floor((TimeSystem::TimeRunning() / 2.0f) * 5.0f) / 5.0f, 0, 1);
 
     // Update Color
     if (phase == 2) {

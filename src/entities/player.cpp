@@ -1,4 +1,5 @@
 #include "player.h"
+#include "flash.h"
 #include "../helper.h"
 #include "../global.h"
 #include <engine/engine.h>
@@ -57,10 +58,11 @@ void PlayerUpdate(Entity& self) {
                 auto b = (int) floor(entity->GetComponent<Transform>().rotation / 60);
 
                 // DIE!!!
-                if (a == b && !CHEATS) {
+                if (a == b) {
                     transform.rotation = startRotation + rotationSpd * (float) dir;
                     Global::finalScore = RoundRunning();
                     Global::gameOver = true;
+                    FlashScreen();
                     AudioSystem::PlayAudio("audio/death.wav", false, 0.4f);
                 }
             }
@@ -75,10 +77,6 @@ void PlayerUpdate(Entity& self) {
 
     // Update Zoom
     ZoomSprite(sprite, originalSprite, Global::zoom);
-
-    // Quit the game
-    if (Input::GetKeyPressed(VK_ESCAPE))
-        Engine::StopGame();
 }
 
 void CreatePlayer() {
