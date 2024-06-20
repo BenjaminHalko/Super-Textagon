@@ -120,6 +120,7 @@ void UpdateWallGenerator(Entity& self) {
     static float delayTillNextSet = -0.2f;
     static int lastShapePhase = 0;
 
+    // Return if game over
     if (Global::gameOver) {
         delayTillNextSet = -0.2f;
         return;
