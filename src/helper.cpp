@@ -237,3 +237,18 @@ float Load() {
 	}
 	return 0;
 }
+
+int GetShapePhase() {
+    float time = RoundRunning();
+    if (time < 10.0f)
+        return 0;
+    if (time < 20.0f)
+        return 1;
+    if (time < 30.0f)
+        return 2;
+    if (time < 45.0f)
+        return 3;
+    if (time < 60.0f)
+        return 4;
+    return 5;
+}

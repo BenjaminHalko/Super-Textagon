@@ -88,7 +88,7 @@ void UpdateWallGenerator(Entity& self) {
     static float delayTillNextSet = 0.5f;
 
     // Create new set
-    delayTillNextSet -= TimeSystem::DeltaTime() * Global::gameSpeed * BaseWallSpd;
+    delayTillNextSet -= TimeSystem::DeltaTime() * Global::wallSpd;
 
     if (delayTillNextSet <= 0) {
         int pattern = (int)RandomRange(0, (float)wallSets.size());

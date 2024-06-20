@@ -30,7 +30,7 @@ void PlayerUpdate(Entity& self) {
 
         // Move Based on Input
         auto startRotation = transform.rotation;
-        auto rotationSpd = (float) dir * BasePlayerSpd * Global::gameSpeed * TimeSystem::DeltaTime();
+        auto rotationSpd = (float) dir * Global::playerSpd * TimeSystem::DeltaTime();
         transform.rotation += rotationSpd;
 
         // Keep rotation between 0 and 360

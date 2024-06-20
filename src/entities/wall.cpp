@@ -26,7 +26,7 @@ void UpdateWall(Entity& self) {
             auto &point = colouredPoint.point;
             float dir = PointDirection(0, 0, point.x, point.y);
             float dist =
-                    PointDistance(0, 0, point.x, point.y) - BaseWallSpd * Global::gameSpeed * TimeSystem::DeltaTime();
+                    PointDistance(0, 0, point.x, point.y) - Global::wallSpd * TimeSystem::DeltaTime();
             dist = (float) fmax(dist, 0.01f);
 
             point.x = LengthDir_x(dist, dir);
@@ -36,7 +36,11 @@ void UpdateWall(Entity& self) {
 
     // Update Sprite Color
     for(auto &point : sprite)
-        point.color = MakeColor(Global::hue, 1.0f, point.alpha);
+        point.color = MergeColors(
+            MakeColor(Global::lastHue, 1.0, point.alpha),
+            MakeColor(Global::hue, 1.0, point.alpha),
+            Global::hueShift
+        );
 
     // Update Zoom
     if (Global::gameOver)

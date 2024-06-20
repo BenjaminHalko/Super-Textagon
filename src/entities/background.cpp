@@ -12,11 +12,8 @@
 void BackgroundUpdate(Entity& self) {
     static float zoom = 0.0;
     static float rotationSpeed = 0;
-    static float phaseShift = 0;
     static auto& sprite = self.GetComponent<Sprite>();
     static auto& transform = self.GetComponent<Transform>();
-    static bool phase2Dir = true;
-    static float phase2Amount = 0;
     static int phase = 0;
     static float runtime = 0;
 
@@ -32,12 +29,25 @@ void BackgroundUpdate(Entity& self) {
     // Decide Phase
     if (!Global::gameOver) {
         runtime = RoundRunning();
-        if (runtime < 20.0f)
+        if (runtime < 20.0f) {
+            if (phase != 1) {
+                Global::hueShift = 0;
+                Global::lastHue = Global::hue;
+            }
             phase = 1;
-        else if (runtime < 40.0f)
+        } else if (runtime < 40.0f) {
+            if (phase != 2) {
+                Global::hueShift = 0;
+                Global::lastHue = Global::hue;
+            }
             phase = 2;
-        else
+        } else {
+            if (phase != 3) {
+                Global::hueShift = 0;
+                Global::lastHue = Global::hue;
+            }
             phase = 3;
+        }
     }
 
     // Decide Speed
@@ -50,7 +60,7 @@ void BackgroundUpdate(Entity& self) {
     else if (runtime < 12.0f)
         rotationSpeed = -1.0f;
     else
-        rotationSpeed = 1.9f;
+        rotationSpeed = (1.4f + 0.4f * (float)GetShapePhase()) * float(fmod(runtime, 16) < 8 ? -1 : 1);
 
     // Pulse
     if (!Global::intro) {
@@ -60,29 +70,46 @@ void BackgroundUpdate(Entity& self) {
         Global::zoom = sinf(zoom * PI);
     }
 
-    // Phase 2 Hue Shift
-    if (phase == 2) {
-        phase2Amount = Approach(phase2Amount, phase2Dir, 0.02f);
-        if (phase2Amount == (float)phase2Dir)
-            phase2Dir = !phase2Dir;
-    }
-
     // Update Hue
-    float phase1Hue = Wave(0, 54, 5, 0);
-    auto phase2Hue = (float)std::lerp(30, 140, std::abs(fmod(runtime, 4) - 2) / 2.0f);
-    phaseShift = Approach(phaseShift, (float)phase, 0.1f);
-    Global::hue = (float)std::lerp(phase1Hue, phase2Hue, Clamp(phaseShift - 1.0f, 0, 1));
+    if (phase == 1)
+        Global::hue = Wave(0, 54, 5, 0);
+    else if (phase == 2)
+        Global::hue = (float)std::lerp(30, 140, std::abs(fmod(runtime, 4) - 2) / 2.0f);
+    else {
+        const float hues[6] = {106, 264, 14, 189, 309, 62};
+        float hue = hues[int(runtime / 2) % 6];
+        if (Global::hue != hue) {
+            Global::hueShift = 0;
+            Global::lastHue = Global::hue;
+            Global::hue = hue;
+        }
+    }
+    Global::hueShift = Approach(Global::hueShift, 1, 0.02f);
     float brightness = 1;
     if (Global::intro)
         brightness = Clamp(floor((TimeSystem::TimeRunning() / 2.0f) * 5.0f) / 5.0f, 0, 1);
 
     // Update Color
-    if (phase == 2) {
+    if (phase == 3) {
+        for(int i = 0; i < sprite.Size(); i++) {
+            auto &point = sprite[i];
+            point.alpha = ((i % 6 >= 3) == (fmod(Global::musicTime, 4) >= 2)) ? 0.4f : 0.2f;
+            point.color = MergeColors(
+                MakeColor(Global::lastHue, 1.0, point.alpha),
+                MakeColor(Global::hue, 1.0, point.alpha),
+                Global::hueShift
+            );
+        }
+    } else if (phase == 2) {
         for(int i = 0; i < sprite.Size(); i++) {
             auto &point = sprite[i];
             point.alpha = 0.3f;
             if ((i % 6 >= 3) == (fmod(Global::musicTime, 4) >= 2))
-                point.color = MakeColor(Global::hue, 1.0f, point.alpha);
+                point.color = MergeColors(
+                    MakeColor(Global::lastHue, 1.0, point.alpha),
+                    MakeColor(Global::hue, 1.0, point.alpha),
+                    Global::hueShift
+                );
             else
                 point.color = 0;
         }
@@ -90,7 +117,11 @@ void BackgroundUpdate(Entity& self) {
         for(int i = 0; i < sprite.Size(); i++) {
             auto &point = sprite[i];
             point.alpha = (i % 6 >= 3) ? 0.4f : 0.2f;
-            point.color = MakeColor(Global::hue, fmin(phaseShift, 1.0f), point.alpha * brightness);
+            point.color = MergeColors(
+                MakeColor(Global::lastHue, float(phase != 0), point.alpha * brightness),
+                MakeColor(Global::hue, float(phase != 0), point.alpha * brightness),
+                Global::hueShift
+            );
         }
     }
 

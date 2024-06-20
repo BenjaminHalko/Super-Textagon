@@ -22,7 +22,11 @@ void CoreUpdate(Entity& self) {
 
     // Update Sprite
     for(auto &point : sprite)
-        point.color = MakeColor(Global::hue, 1.0f, point.alpha);
+        point.color = MergeColors(
+            MakeColor(Global::lastHue, 1.0, point.alpha),
+            MakeColor(Global::hue, 1.0, point.alpha),
+            Global::hueShift
+        );
 }
 
 void CreateCore() {
