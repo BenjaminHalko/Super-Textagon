@@ -53,7 +53,7 @@ float MultiWallGaps(int rotation, float dist) {
 float SpinAround(int rotation, float dist) {
     const float distBetween = WallStandardSize * 0.5f;
     int dir = (RandomRange(0, 2) > 1) ? 1 : -1;
-    const float hallwaySize = WallStandardSize * 4.0f;
+    const float hallwaySize = WallStandardSize * 5.0f;
 
     CreateWall(rotation + 1 * dir, dist, WallStandardSize);
     CreateWall(rotation + 2 * dir, dist, WallStandardSize + hallwaySize / 4.0f);
@@ -129,7 +129,9 @@ void UpdateWallGenerator(Entity& self) {
     if (lastShapePhase != GetShapePhase()) {
         lastShapePhase = GetShapePhase();
         if (lastShapePhase != 0)
-            delayTillNextSet += 0.1f;
+            delayTillNextSet *= 1.5;
+        else
+            delayTillNextSet = -0.2f;
     }
 
     // Create array of functions
