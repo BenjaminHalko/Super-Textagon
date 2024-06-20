@@ -102,6 +102,10 @@ bool CollisionSystem::CheckTriangleCollision(Collider& collider1, Collider& coll
 }
 
 bool CollisionSystem::CheckCollision(Entity& entity1, Entity& entity2) {
+    // Check if either entity is deleted
+    if (entity1.IsDeleted() || entity2.IsDeleted())
+        return false;
+
     // Get the original colliders and positions
     auto originalCollider1 = entity1.GetComponent<Collider>();
     auto originalCollider2 = entity2.GetComponent<Collider>();

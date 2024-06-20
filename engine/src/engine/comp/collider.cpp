@@ -27,6 +27,7 @@ size_t Collider::Size() {
 }
 
 void Collider::Update(Sprite &sprite) {
+    _points.clear();
     for (auto& point : sprite) {
         _points.push_back(point.point);
     }

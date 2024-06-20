@@ -15,15 +15,19 @@ void BackgroundUpdate(Entity& self) {
     static float rotationSpeed = 0;
     static auto& sprite = self.GetComponent<Sprite>();
     static auto& transform = self.GetComponent<Transform>();
-    static int phase = -1;
+    static int phase = 0;
     static float runtime = 0;
     static int lastShapePhase = 0;
+    static bool playedIntroAudio = false;
 
-    // Play Audio
-    if (phase == -1) {
-        AudioSystem::PlayAudio("audio/super_textagon.ogg", false, 0.8f);
-        phase = 0;
+    // Play Intro Audio
+    if (Global::intro && !playedIntroAudio && TimeSystem::TimeRunning() > 0.5f) {
+        playedIntroAudio = true;
+        AudioSystem::PlayAudio("audio/super_textagon.ogg", false, 1.0f);
     }
+
+    // Wall Spd
+    Global::wallSpd = 0.005f + 0.0005f * (float)GetShapePhase();
 
     // Rotate Background
     if (!Global::intro) {
@@ -68,7 +72,7 @@ void BackgroundUpdate(Entity& self) {
     else if (runtime < 12.0f)
         rotationSpeed = -1.0f;
     else
-        rotationSpeed = (1.4f + 0.4f * (float)GetShapePhase()) * float(fmod(runtime, 16) < 8 ? -1 : 1);
+        rotationSpeed = (1.4f + 0.2f * (float)GetShapePhase()) * float(fmod(runtime, 16) < 8 ? -1 : 1);
 
     // Pulse
     if (!Global::intro) {

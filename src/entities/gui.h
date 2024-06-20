@@ -3,3 +3,4 @@
 void CreateGUI();
 void CreateIntroGUI();
 void CreateGameOverGUI(float highScore);
+void CreateNewRecord();

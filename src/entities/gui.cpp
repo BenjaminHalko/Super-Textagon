@@ -6,6 +6,7 @@
 #include <engine/comp/transform.h>
 #include <engine/comp/script.h>
 #include <engine/comp/tag.h>
+#include <engine/sys/timeSystem.h>
 
 void UpdateProgress(Entity& self) {
     auto& text = self.GetComponent<Text>();
@@ -39,6 +40,24 @@ void UpdateGameOverGUI(Entity& self) {
     auto& text = self.GetComponent<Text>();
     auto& transform = self.GetComponent<Transform>();
     transform.x = ApproachEase(transform.x, 0.5f + 0.5f * float(text.hAlign), 0.1f, 0.8f);
+}
+
+void UpdateNewRecord(Entity &self) {
+    auto &script = self.GetComponent<Script>();
+    auto &transform = self.GetComponent<Transform>();
+    if (!script.DataExists("time"))
+        script.SetData("time", 3.0f);
+
+    script.SetData("time", script.GetData<float>("time") - 1.0f/60.0f * TimeSystem::DeltaTime());
+    auto time = script.GetData<float>("time");
+
+    if (fmod(time, 0.25) > 0.12)
+        transform.y = 0.1f;
+    else
+        transform.y = -0.2f;
+
+    if (time <= 0)
+        self.Delete();
 }
 
 void CreateGUI() {
@@ -97,7 +116,7 @@ void CreateGameOverGUI(float highScore) {
             "| |__| _| \\ V /| _|| |__   / / ",
             "|____|___| \\_/ |___|____| /___|",
             "",
-            "                        LINE"
+            "                           LINE"
         };
     } else if(highScore < 30) {
         text = {
@@ -106,7 +125,7 @@ void CreateGameOverGUI(float highScore) {
             "| |__| _| \\ V /| _|| |__   |_ \\",
             "|____|___| \\_/ |___|____| |___/",
             "",
-            "                        TRIANGLE"
+            "                       TRIANGLE"
         };
     } else if(highScore < 45) {
         text = {
@@ -115,7 +134,7 @@ void CreateGameOverGUI(float highScore) {
             "| |__| _| \\ V /| _|| |__  |_  _|",
             "|____|___| \\_/ |___|____|   |_| ",
             "",
-            "                        SQUARE"
+            "                          SQUARE"
         };
     } else if(highScore < 60) {
         text = {
@@ -124,7 +143,7 @@ void CreateGameOverGUI(float highScore) {
             "| |__| _| \\ V /| _|| |__  |__ \\",
             "|____|___| \\_/ |___|____| |___/",
             "",
-            "                        PENTAGON"
+            "                       PENTAGON"
         };
     } else {
         text = {
@@ -133,7 +152,7 @@ void CreateGameOverGUI(float highScore) {
             "| |__| _| \\ V /| _|| |__  / _ \\",
             "|____|___| \\_/ |___|____| \\___/",
             "",
-            "                          TEXTAGON"
+            "                       TEXTAGON"
         };
     }
 
@@ -189,4 +208,14 @@ void CreateGameOverGUI(float highScore) {
             Script(UpdateGameOverGUI)
         );
     }
+}
+
+void CreateNewRecord() {
+    Engine::AddEntity(
+        Tag("GUI"),
+        Depth(-500),
+        Text({"NEW RECORD"}, HAlign::Left, VAlign::Top, 1, 1, 0, 0),
+        Transform(0.0f, 0.1f),
+        Script(UpdateNewRecord)
+    );
 }
