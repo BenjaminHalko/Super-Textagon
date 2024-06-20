@@ -129,7 +129,7 @@ void UpdateWallGenerator(Entity& self) {
     if (lastShapePhase != GetShapePhase()) {
         lastShapePhase = GetShapePhase();
         if (lastShapePhase != 0)
-            delayTillNextSet *= 1.5;
+            delayTillNextSet *= 1.4;
         else
             delayTillNextSet = -0.2f;
     }
