@@ -19,7 +19,7 @@ Please note that the game is currently supported **only on Windows** platforms.
 ## How to Play
 Use the left and right arrow keys to navigate through the maze of hexagons. The goal is to avoid colliding with the walls for as long as possible. The game speeds up and the patterns become more complex as you progress. Good luck!
 
-<img src="https://github.com/BenjaminHalko/Super-Textagon/assets/73490201/5a8017c6-7048-4726-81a9-969492e5c5d2" width="300">
-<img src="https://github.com/BenjaminHalko/Super-Textagon/assets/73490201/1e9ee154-05eb-4cd3-b291-9d6db9a9e2a7" width="300">
+<img src="https://github.com/BenjaminHalko/Super-Textagon/assets/73490201/5a8017c6-7048-4726-81a9-969492e5c5d2" width="400">
+<img src="https://github.com/BenjaminHalko/Super-Textagon/assets/73490201/1e9ee154-05eb-4cd3-b291-9d6db9a9e2a7" width="400">
 
 https://github.com/BenjaminHalko/Super-Textagon/assets/73490201/69e34cbf-c9ed-4c23-b8fb-42232a9bd2b8
