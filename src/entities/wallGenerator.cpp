@@ -82,7 +82,7 @@ float TightGaps(int rotation, float dist) {
     dist += WallGaps(rotation, dist) / 1.5f;
     dist += WallGaps(rotation + 1, dist) / 1.5f;
     dist += WallGaps(rotation, dist) / 1.5f;
-    WallGaps(rotation + 1, dist) / 1.5f;
+    WallGaps(rotation + 1, dist);
     return StandardDistanceBetweenSets * 3;
 }
 
@@ -130,7 +130,7 @@ void UpdateWallGenerator(Entity& self) {
     if (lastShapePhase != GetShapePhase()) {
         lastShapePhase = GetShapePhase();
         if (lastShapePhase != 0)
-            delayTillNextSet *= 1.4;
+            delayTillNextSet *= 1.5f;
         else
             delayTillNextSet = -0.2f;
     }

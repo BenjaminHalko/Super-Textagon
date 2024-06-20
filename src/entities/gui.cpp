@@ -7,6 +7,7 @@
 #include <engine/comp/script.h>
 #include <engine/comp/tag.h>
 #include <engine/sys/timeSystem.h>
+#include <cmath>
 
 void UpdateProgress(Entity& self) {
     auto& text = self.GetComponent<Text>();

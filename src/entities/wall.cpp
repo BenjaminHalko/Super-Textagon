@@ -10,6 +10,7 @@
 #include <engine/comp/tag.h>
 #include <engine/sys/timeSystem.h>
 #include <engine/sys/cameraSystem.h>
+#include <cmath>
 
 void UpdateWall(Entity& self) {
 
@@ -27,7 +28,7 @@ void UpdateWall(Entity& self) {
             float dir = PointDirection(0, 0, point.x, point.y);
             float dist =
                     PointDistance(0, 0, point.x, point.y) - Global::wallSpd * TimeSystem::DeltaTime();
-            dist = (float) fmax(dist, 0.01f);
+            dist = (float)fmax(dist, 0.01f);
 
             point.x = LengthDir_x(dist, dir);
             point.y = LengthDir_y(dist, dir);

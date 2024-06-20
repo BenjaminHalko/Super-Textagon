@@ -5,6 +5,8 @@
 #include <engine/common.h>
 #include <cmath>
 #include <fstream>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 // Wrap between two values
 float Wrap(float value, float min, float max) {
