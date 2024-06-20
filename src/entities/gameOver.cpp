@@ -3,6 +3,7 @@
 #include "gui.h"
 #include "player.h"
 #include "core.h"
+#include "musicController.h"
 #include "../global.h"
 #include "../helper.h"
 #include <engine/engine.h>
@@ -69,6 +70,7 @@ void UpdateGameOverManager(Entity &self) {
 
         if (Global::intro) {
             Global::intro = false;
+            CreateMusicController();
             CreateCore();
             CreatePlayer();
             CameraSystem::zoom = 10.0f;
