@@ -19,3 +19,5 @@ float Wave(float min, float max, float duration, float offset);
 void ZoomSprite(Sprite& sprite, Sprite& originalSprite, float zoom = -1);
 float RoundRunning();
 std::string FormatTime(float time);
+void Save(float score);
+float Load();

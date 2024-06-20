@@ -3,8 +3,6 @@
 #define BaseWallSpd 0.005f
 #define BasePlayerSpd 9
 
-#define CHEATS false
-
 class Global {
 public:
     static bool beatPulse;

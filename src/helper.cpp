@@ -4,6 +4,7 @@
 #include <engine/sys/cameraSystem.h>
 #include <engine/common.h>
 #include <cmath>
+#include <fstream>
 
 // Wrap between two values
 float Wrap(float value, float min, float max) {
@@ -188,4 +189,51 @@ std::string FormatTime(float time) {
     if (minutes == 0)
         return secondsStr + "." + millisecondsStr;
     return std::to_string(minutes) + ":" + secondsStr + "." + millisecondsStr;
+}
+
+bool fileExists(const std::string& fileName) {
+	// Returns false if file doesn't exist/can't be opened
+	std::ifstream file(fileName);
+	return file.good();
+}
+
+void Save(float score) {
+    std::string fileName = "save";
+    char* localAppdata = std::getenv("LOCALAPPDATA");
+	if (localAppdata != nullptr) {
+		std::string folder = (std::string)localAppdata + "\\Super_Textagon";
+		struct stat info{};
+		stat(folder.c_str(), &info);
+
+        if (!(info.st_mode & S_IFDIR)) {
+            std::string command = "mkdir " + folder;
+            int createdFolder = system(command.c_str());
+            if (createdFolder == 0)
+                fileName = folder + "\\" + fileName;
+        }
+        else {
+            fileName = folder + "\\" + fileName;
+        }
+	}
+	fileName = fileName + ".sav";
+	std::ofstream outFile(fileName, std::ios::trunc);
+	outFile << score;
+	outFile.close();
+}
+
+float Load() {
+    std::string fileName = "save";
+    char* localAppdata = std::getenv("LOCALAPPDATA");
+	if (localAppdata != nullptr)
+		fileName = (std::string)localAppdata + "\\Super_Textagon\\" + fileName;
+	fileName = fileName + ".sav";
+	float score;
+	std::ifstream inFile;
+	if (fileExists(fileName)) {
+		inFile.open(fileName);
+		if (inFile >> score) {
+			return score;
+		}
+	}
+	return 0;
 }

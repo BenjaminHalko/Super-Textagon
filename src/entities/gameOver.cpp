@@ -1,4 +1,5 @@
 #include "gameOver.h"
+#include "flash.h"
 #include "gui.h"
 #include "player.h"
 #include "core.h"
@@ -15,6 +16,7 @@
 void UpdateGameOverManager(Entity &self) {
     // Define static variables
     static float deathZoomWaitTimer = 0;
+    static float highScore = Load();
 
     // Game Over
     if (Global::gameOver) {
@@ -24,6 +26,12 @@ void UpdateGameOverManager(Entity &self) {
             if (deathZoomWaitTimer <= 0) {
                 for(auto &entity : Engine::GetEntities("GUI"))
                     entity->Delete();
+
+                // Save High Score
+                if (RoundRunning() > highScore) {
+                    highScore = RoundRunning();
+                    Save(highScore);
+                }
             }
         }
     }
@@ -33,6 +41,8 @@ void UpdateGameOverManager(Entity &self) {
         Global::showGameOverUI = true;
         for(auto &entity : Engine::GetEntities("wall"))
             entity->Delete();
+
+        CreateGameOverGUI(highScore);
     }
 
     // Update Camera Zoom
@@ -55,6 +65,19 @@ void UpdateGameOverManager(Entity &self) {
             Global::intro = false;
             CreateCore();
             CreatePlayer();
+            CameraSystem::zoom = 10.0f;
+        }
+    }
+
+    // Quit Game
+    if (Input::GetKeyPressed(VK_ESCAPE)) {
+        if (!Global::gameOver) {
+            Global::finalScore = RoundRunning();
+            Global::gameOver = true;
+            FlashScreen();
+            AudioSystem::PlayAudio("audio/death.wav", false, 0.4f);
+        } else {
+            Engine::StopGame();
         }
     }
 }
