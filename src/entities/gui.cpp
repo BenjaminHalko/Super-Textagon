@@ -9,6 +9,7 @@
 #include <engine/sys/timeSystem.h>
 #include <cmath>
 
+// Updates screen to display the current stage of the game (progress)
 void UpdateProgress(Entity& self) {
     auto& text = self.GetComponent<Text>();
     static const int progressSize = (int)text.GetString()[1].size();
@@ -32,17 +33,20 @@ void UpdateProgress(Entity& self) {
     }
 }
 
+// Updates Score
 void UpdateTopRightScore(Entity& self) {
     auto& text = self.GetComponent<Text>();
     text.GetString()[1] = FormatTime(RoundRunning());
 }
 
+// Updates the GoGUI
 void UpdateGameOverGUI(Entity& self) {
     auto& text = self.GetComponent<Text>();
     auto& transform = self.GetComponent<Transform>();
     transform.x = ApproachEase(transform.x, 0.5f + 0.5f * float(text.hAlign), 0.1f, 0.8f);
 }
 
+// Properly displays current new reccord (if broken)
 void UpdateNewRecord(Entity &self) {
     auto &script = self.GetComponent<Script>();
     auto &transform = self.GetComponent<Transform>();
@@ -52,7 +56,7 @@ void UpdateNewRecord(Entity &self) {
     script.SetData("time", script.GetData<float>("time") - 1.0f/60.0f * TimeSystem::DeltaTime());
     auto time = script.GetData<float>("time");
 
-    if (fmod(time, 0.25) > 0.12)
+    if (fmod(time, 0.25) > 0.12) // Calculate Floating point remainder
         transform.y = 0.1f;
     else
         transform.y = -0.2f;
@@ -61,6 +65,7 @@ void UpdateNewRecord(Entity &self) {
         self.Delete();
 }
 
+// Creates a GUI entity
 void CreateGUI() {
     auto &progress = Engine::AddEntity(
         Tag("GUI"),
@@ -81,6 +86,7 @@ void CreateGUI() {
     UpdateTopRightScore(score);
 }
 
+// Stores text for Intro Text
 void CreateIntroGUI() {
     Engine::AddEntity(
         Tag("GUI"),
@@ -99,6 +105,7 @@ void CreateIntroGUI() {
     );
 }
 
+// Stores text for Game Over text (dependant on current stage of the game)
 void CreateGameOverGUI(float highScore) {
     std::vector<std::string> text;
     if(highScore < 10) {
@@ -211,6 +218,7 @@ void CreateGameOverGUI(float highScore) {
     }
 }
 
+// Creates the new record text (if record is broken)
 void CreateNewRecord() {
     Engine::AddEntity(
         Tag("GUI"),

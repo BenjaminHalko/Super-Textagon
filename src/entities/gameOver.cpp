@@ -14,6 +14,7 @@
 #include <engine/sys/cameraSystem.h>
 #include <engine/sys/audioSystem.h>
 
+// Check forgame over
 void UpdateGameOverManager(Entity &self) {
     // Define static variables
     static float deathZoomWaitTimer = 0;
@@ -54,6 +55,7 @@ void UpdateGameOverManager(Entity &self) {
     else
         CameraSystem::zoom = ApproachEase(CameraSystem::zoom, (deathZoomWaitTimer <= 0) ? 5.0f : 1.0f, 0.5f, 0.8f);
 
+    // Allow restart on shift/enter/space key down
     if (Global::gameOver && (Input::GetKeyPressed(VK_ENTER) || Input::GetKeyPressed(VK_SHIFT) || Input::GetKeyPressed(VK_SPACE)) && TimeSystem::TimeRunning() > 0.5f) {
         for(auto &entity : Engine::GetEntities("GUI"))
             entity->Delete();
@@ -106,6 +108,7 @@ void UpdateGameOverManager(Entity &self) {
     }
 }
 
+// Creates the GameOver Manager Entity
 void CreateGameOverManager() {
     Engine::AddEntity(
         Depth(80),

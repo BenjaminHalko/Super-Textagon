@@ -26,7 +26,7 @@ void BackgroundUpdate(Entity& self) {
         AudioSystem::PlayAudio("audio/super_textagon.ogg", false, 0.8f);
     }
 
-    // Wall Spd
+    // Set Wall Speed
     Global::wallSpd = 0.005f + 0.0005f * (float)GetShapePhase();
 
     // Rotate Background
@@ -38,7 +38,7 @@ void BackgroundUpdate(Entity& self) {
         transform.rotation += rotationSpeed * TimeSystem::DeltaTime();
     }
 
-    // Decide Phase
+    // Determine phase (current screen colors)
     if (!Global::gameOver) {
         runtime = RoundRunning();
         if (runtime < 20.0f) {
@@ -62,7 +62,7 @@ void BackgroundUpdate(Entity& self) {
         }
     }
 
-    // Decide Speed
+    // Determine Speed
     if (Global::intro) {
         rotationSpeed = -0.5f;
     } else if (Global::showGameOverUI)
@@ -74,7 +74,7 @@ void BackgroundUpdate(Entity& self) {
     else
         rotationSpeed = (1.4f + 0.2f * (float)GetShapePhase()) * float(fmod(runtime, 16) < 8 ? -1 : 1);
 
-    // Pulse
+    // Pulse Colors
     if (!Global::intro) {
         if (!Global::gameOver && Global::beatPulse)
             zoom = 1.0f;
@@ -82,7 +82,7 @@ void BackgroundUpdate(Entity& self) {
         Global::zoom = sinf(zoom * PI);
     }
 
-    // Update Hue
+    // Update Current Hue
     if (phase == 1)
         Global::hue = Wave(0, 54, 5, 0);
     else if (phase == 2)
@@ -158,6 +158,7 @@ void BackgroundUpdate(Entity& self) {
     }
 }
 
+// Create background effect
 void CreateBackground() {
     // Generate Sprite
     const float size = 1.2f;

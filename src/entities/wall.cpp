@@ -12,6 +12,7 @@
 #include <engine/sys/cameraSystem.h>
 #include <cmath>
 
+// Update wall eneity
 void UpdateWall(Entity& self) {
 
     // Define variables
@@ -21,7 +22,7 @@ void UpdateWall(Entity& self) {
     auto &baseSprite = scriptData.GetData<Sprite>("baseSprite");
     auto &sprite = self.GetComponent<Sprite>();
 
-    // Update sprite
+    // Update sprite to new position
     if (!Global::gameOver) {
         for (auto &colouredPoint: baseSprite) {
             auto &point = colouredPoint.point;
@@ -49,7 +50,7 @@ void UpdateWall(Entity& self) {
     else
         ZoomSprite(sprite, baseSprite);
 
-    // Update Collider
+    // Update Collider based on current position
     auto &collider = self.GetComponent<Collider>();
     collider.Update(baseSprite);
 
@@ -59,6 +60,7 @@ void UpdateWall(Entity& self) {
     }
 }
 
+// Create a new wall entity
 void CreateWall(int dir, float startDist, float size) {
     float alpha = (dir % 2 == 0) ? 1 : 0.9f;
 

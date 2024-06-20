@@ -10,7 +10,7 @@
 #define StandardDistanceBetweenSets 0.35f
 
 // The return value allows you to define extra spacing between the next set of walls
-// Helper Patterns
+// Helper Patterns 
 float WallRing(int rotation, float dist) {
     CreateWall(rotation + 1, dist);
     CreateWall(rotation + 2, dist);
@@ -35,7 +35,7 @@ float WallRing2Holes(int rotation, float dist) {
     return StandardDistanceBetweenSets;
 }
 
-// Wall patterns
+// Wall patterns (Stores all existing patterns below)
 float MultiWallRing(int rotation, float dist) {
     dist += WallRing(rotation, dist);
     dist += WallRing(rotation + 3, dist);
@@ -50,6 +50,7 @@ float MultiWallGaps(int rotation, float dist) {
     return StandardDistanceBetweenSets * 3;
 }
 
+// Spins wall to match with spinning background
 float SpinAround(int rotation, float dist) {
     const float distBetween = WallStandardSize * 0.5f;
     int dir = (RandomRange(0, 2) > 1) ? 1 : -1;
