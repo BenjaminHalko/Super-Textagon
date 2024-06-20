@@ -8,14 +8,22 @@
 #include <engine/comp/script.h>
 #include <engine/sys/cameraSystem.h>
 #include <engine/sys/timeSystem.h>
+#include <engine/sys/audioSystem.h>
 
 void BackgroundUpdate(Entity& self) {
     static float zoom = 0.0;
     static float rotationSpeed = 0;
     static auto& sprite = self.GetComponent<Sprite>();
     static auto& transform = self.GetComponent<Transform>();
-    static int phase = 0;
+    static int phase = -1;
     static float runtime = 0;
+    static int lastShapePhase = 0;
+
+    // Play Audio
+    if (phase == -1) {
+        AudioSystem::PlayAudio("audio/super_textagon.ogg", false, 0.8f);
+        phase = 0;
+    }
 
     // Rotate Background
     if (!Global::intro) {
@@ -126,10 +134,24 @@ void BackgroundUpdate(Entity& self) {
     }
 
     // Update Position
-   if (Global::intro)
-       transform.y = 0.1f;
-   else
-       transform.y = 0;
+    if (Global::intro)
+        transform.y = 0.1f;
+    else
+        transform.y = 0;
+
+    // Check for audio file
+    if (!Global::gameOver && GetShapePhase() != lastShapePhase) {
+        static const std::vector<std::string> audioFiles = {
+            "audio/line.ogg",
+            "audio/triangle.ogg",
+            "audio/square.ogg",
+            "audio/pentagon.ogg",
+            "audio/textagon.ogg"
+        };
+        lastShapePhase = GetShapePhase();
+        if (lastShapePhase > 0)
+            AudioSystem::PlayAudio(audioFiles[lastShapePhase-1], false, 1.0f);
+    }
 }
 
 void CreateBackground() {

@@ -63,7 +63,7 @@ void PlayerUpdate(Entity& self) {
                     Global::finalScore = RoundRunning();
                     Global::gameOver = true;
                     FlashScreen();
-                    AudioSystem::PlayAudio("audio/death.wav", false, 0.4f);
+                    AudioSystem::PlayAudio("audio/death.wav", false, 0.3f);
                 }
             }
         }
