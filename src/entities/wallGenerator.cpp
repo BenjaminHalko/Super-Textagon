@@ -54,7 +54,7 @@ float MultiWallGaps(int rotation, float dist) {
 float SpinAround(int rotation, float dist) {
     const float distBetween = WallStandardSize * 0.5f;
     int dir = (RandomRange(0, 2) > 1) ? 1 : -1;
-    const float hallwaySize = WallStandardSize * 5.0f;
+    const float hallwaySize = WallStandardSize * 5.5f;
 
     CreateWall(rotation + 1 * dir, dist, WallStandardSize);
     CreateWall(rotation + 2 * dir, dist, WallStandardSize + hallwaySize / 4.0f);
@@ -84,7 +84,7 @@ float TightGaps(int rotation, float dist) {
     dist += WallGaps(rotation + 1, dist) / 1.5f;
     dist += WallGaps(rotation, dist) / 1.5f;
     WallGaps(rotation + 1, dist);
-    return StandardDistanceBetweenSets * 3;
+    return StandardDistanceBetweenSets * 4.5f;;
 }
 
 float SideToSide(int rotation, float dist) {
@@ -110,7 +110,7 @@ float MoveSlowly(int rotation, float dist) {
     dist += WallRing(rotation+3*dir, dist) / 1.5f;
     dist += WallRing(rotation+4*dir, dist) / 1.5f;
     WallRing(rotation+5*dir, dist);
-    return StandardDistanceBetweenSets * 4;
+    return StandardDistanceBetweenSets * 4.5f;
 }
 
 // Wall Generator
@@ -120,6 +120,7 @@ void UpdateWallGenerator(Entity& self) {
     static const float startDistance = 1.0f;
     static float delayTillNextSet = -0.2f;
     static int lastShapePhase = 0;
+    static float spd = Global::wallSpd;
 
     // Return if game over
     if (Global::gameOver) {
@@ -127,28 +128,28 @@ void UpdateWallGenerator(Entity& self) {
         return;
     }
 
-    // Check if the shape phase has changed
+    // Check if the shape phase has changed and add a break
     if (lastShapePhase != GetShapePhase()) {
         lastShapePhase = GetShapePhase();
         if (lastShapePhase != 0)
-            delayTillNextSet *= 1.5f;
-        else
-            delayTillNextSet = -0.2f;
+            delayTillNextSet += 0.1f;
     }
 
     // Create array of functions
     std::vector<WallPatternFunc> wallSets;
     if (RoundRunning() < 10) {
         wallSets = {
-            WallRing,
-            WallGaps,
-            WallRing2Holes,
-            MultiWallGaps,
-            MultiWallRing
+             WallRing,
+             WallRing2Holes,
+             WallGaps,
+             MultiWallRing,
+             MultiWallGaps
         };
     } else if (RoundRunning() < 20) {
         wallSets = {
+            WallRing2Holes,
             WallRing,
+            WallGaps,
             MultiWallRing,
             MultiWallGaps,
             SpinAround,
@@ -158,6 +159,7 @@ void UpdateWallGenerator(Entity& self) {
         wallSets = {
             MultiWallRing,
             MultiWallGaps,
+            SideToSide,
             SpinAround,
             TightGaps,
             MoveSlowly
@@ -165,9 +167,10 @@ void UpdateWallGenerator(Entity& self) {
     }
 
     // Create new set
-    delayTillNextSet -= TimeSystem::DeltaTime() * Global::wallSpd;
+    delayTillNextSet -= TimeSystem::DeltaTime() * spd;
 
     if (delayTillNextSet <= 0) {
+        spd = Global::wallSpd;
         int pattern = (int)RandomRange(0, (float)wallSets.size());
         int rotation = (int)RandomRange(0, 6);
         delayTillNextSet = wallSets[pattern](rotation, startDistance + delayTillNextSet);
