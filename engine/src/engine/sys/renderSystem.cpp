@@ -36,14 +36,16 @@ void RenderSystem::Init() {
             var context = canvas.getContext('2d');
             context.font = '16px Cascadia Mono';
             var fontSize = context.measureText(' ').width;
-            Module.width = Math.round(Module.canvas.offsetWidth / fontSize) - 1;
-            Module.height = Math.round(Module.canvas.offsetHeight / fontSize * 0.5) - 1;
+            console.log(fontSize);
+            Module.width = Math.floor(Module.canvas.offsetWidth / fontSize - 1);
+            Module.height = Math.floor(Module.canvas.offsetHeight / fontSize * 0.5 - 0.5);
             canvas.remove();
         }
         window.addEventListener('resize', setSize);
         setSize();
     });
-#else
+#endif
+
     // Disable the cursor
     std::cout << "\033[?25l";
 
@@ -52,7 +54,6 @@ void RenderSystem::Init() {
 
     // Untie cin and cout
     std::cin.tie(nullptr);
-#endif
 }
 
 // Private
@@ -334,7 +335,6 @@ void RenderSystem::Update() {
     EM_ASM({
         Module.canvas.innerHTML = UTF8ToString($0);
     }, buffer.c_str());
-    buffer.clear();
 #else
     std::cout << consoleBuffer.get_string();
 #endif
