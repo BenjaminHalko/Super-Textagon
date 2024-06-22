@@ -317,13 +317,10 @@ void RenderSystem::Update() {
     for(int y = 0; y < height; y++) {
         for(int x = 0; x < width; x++) {
             auto &cell = consoleBuffer.get_cell(x, y);
-            if (cell.m_format.m_fg_color != lastColor) {
+            if (cell.m_format.m_fg_color != lastColor && false) {
                 buffer += "</span>";
                 lastColor = cell.m_format.m_fg_color;
-                // Convert to hex
-                char hex[8];
-                sprintf(hex, "#%02X%02X%02X", cell.m_format.m_fg_color.red, cell.m_format.m_fg_color.green, cell.m_format.m_fg_color.blue);
-                buffer += "<span style=\"color: " + std::string(hex) + "\">";
+                buffer += "<span style=\"color:rgb(" + std::to_string(cell.m_format.m_fg_color.red) + "," + std::to_string(cell.m_format.m_fg_color.green) + "," + std::to_string(cell.m_format.m_fg_color.blue) + ")\">";
             }
             if (cell.m_letter == ' ')
                 buffer += "&nbsp;";

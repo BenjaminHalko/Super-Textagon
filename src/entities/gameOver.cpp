@@ -73,7 +73,7 @@ void UpdateGameOverManager(Entity &self) {
         if (Global::intro) {
             Global::intro = false;
             CreateMusicController();
-            CreateCore();
+            //CreateCore();
             CreatePlayer();
             CameraSystem::zoom = 10.0f;
         }
