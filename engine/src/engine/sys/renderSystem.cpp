@@ -5,7 +5,10 @@
 #include <engine/sys/cameraSystem.h>
 #include <limits>
 #include <cmath>
-#ifndef _WIN32
+#ifdef EMSCRIPTEN
+#include <emscripten.h>
+#include "engine/sys/timeSystem.h"
+#elif !_WIN32
 #include <sys/ioctl.h>
 #include <unistd.h>
 #endif
@@ -21,12 +24,26 @@ int RenderSystem::width = 0;
 int RenderSystem::height = 0;
 bool RenderSystem::clearScreen = true;
 
+// Render System
 void RenderSystem::Init() {
 #ifdef _WIN32
     // Disable scroll bars
     SetConsoleMode(hStdOut, ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-#endif
-
+#elif EMSCRIPTEN
+    EM_ASM({
+        function setSize() {
+            var canvas = document.createElement('canvas');
+            var context = canvas.getContext('2d');
+            context.font = '16px Cascadia Mono';
+            var fontSize = context.measureText(' ').width;
+            Module.width = Math.round(Module.canvas.offsetWidth / fontSize) - 1;
+            Module.height = Math.round(Module.canvas.offsetHeight / fontSize * 0.5) - 1;
+            canvas.remove();
+        }
+        window.addEventListener('resize', setSize);
+        setSize();
+    });
+#else
     // Disable the cursor
     std::cout << "\033[?25l";
 
@@ -35,6 +52,7 @@ void RenderSystem::Init() {
 
     // Untie cin and cout
     std::cin.tie(nullptr);
+#endif
 }
 
 // Private
@@ -229,6 +247,13 @@ void RenderSystem::Update() {
     GetConsoleScreenBufferInfo(hStdOut, &consoleInfo);
     width = consoleInfo.srWindow.Right - consoleInfo.srWindow.Left + 1;
     height = consoleInfo.srWindow.Bottom - consoleInfo.srWindow.Top + 1;
+#elif EMSCRIPTEN
+    width = EM_ASM_INT({
+        return Module.width;
+    });
+    height = EM_ASM_INT({
+        return Module.height;
+    });
 #else
     struct winsize w{};
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
@@ -240,9 +265,6 @@ void RenderSystem::Update() {
         charCount = width * height;
         clearScreen = true;
         consoleBuffer = oof::screen(width, height, ' ');
-    } else {
-        // Clear the console buffer
-        consoleBuffer.clear();
     }
 
     // Loop over all the entities
@@ -278,7 +300,7 @@ void RenderSystem::Update() {
     if (clearScreen) {
 #ifdef _WIN32
         system("cls");
-#else
+#elif !EMSCRIPTEN
         std::cout << "\033[2J";
 #endif
         clearScreen = false;
@@ -288,6 +310,31 @@ void RenderSystem::Update() {
 #ifdef _WIN32
     auto const str = consoleBuffer.get_string();
     WriteConsoleA(hStdOut, str.c_str(), (DWORD)str.size(), nullptr, nullptr);
+#elif EMSCRIPTEN
+    std::string buffer;
+    oof::color lastColor = 0;
+    for(int y = 0; y < height; y++) {
+        for(int x = 0; x < width; x++) {
+            auto &cell = consoleBuffer.get_cell(x, y);
+            if (cell.m_format.m_fg_color != lastColor) {
+                buffer += "</span>";
+                lastColor = cell.m_format.m_fg_color;
+                // Convert to hex
+                char hex[8];
+                sprintf(hex, "#%02X%02X%02X", cell.m_format.m_fg_color.red, cell.m_format.m_fg_color.green, cell.m_format.m_fg_color.blue);
+                buffer += "<span style=\"color: " + std::string(hex) + "\">";
+            }
+            if (cell.m_letter == ' ')
+                buffer += "&nbsp;";
+            else
+                buffer += cell.m_letter;
+        }
+        buffer += "<br>";
+    }
+    EM_ASM({
+        Module.canvas.innerHTML = UTF8ToString($0);
+    }, buffer.c_str());
+    buffer.clear();
 #else
     std::cout << consoleBuffer.get_string();
 #endif

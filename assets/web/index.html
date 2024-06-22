@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Super Textagon</title>
+    <script src="Super_Textagon.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+        }
+        #output {
+            width: 100%;
+            height: 100%;
+            font-family: Cascadia Mono, monospace;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div id="output"></div>
+    <script>
+        Module.onRuntimeInitialized = _main;
+        Module.canvas = document.getElementById('output');
+        Module.width = 0;
+        Module.height = 0;
+        Module.keysDown = {};
+    </script>
+</body>
+</html>

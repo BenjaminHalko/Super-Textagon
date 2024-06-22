@@ -36,7 +36,7 @@ add_library(Engine ${ENGINE_SOURCES})
 target_include_directories(Engine PUBLIC include)
 
 # Link Ncurses
-if (UNIX)
+if (UNIX AND NOT EMSCRIPTEN)
     find_package(Curses REQUIRED)
     target_link_libraries(Engine PUBLIC ${CURSES_LIBRARIES} so_loud)
     target_include_directories(Engine PUBLIC ${CURSES_INCLUDE_DIR})
