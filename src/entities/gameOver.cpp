@@ -65,15 +65,16 @@ void UpdateGameOverManager(Entity &self) {
         Global::showGameOverUI = false;
         gotHighScore = false;
         Global::roundStart = TimeSystem::TimeRunning();
-        AudioSystem::PlayAudio("audio/roundStart.wav", false, 0.07f);
-        AudioSystem::PlayAudio("audio/begin.ogg", false, 1.0f);
+        //AudioSystem::PlayAudio("audio/roundStart.wav", false, 0.07f);
+        //AudioSystem::PlayAudio("audio/begin.ogg", false, 1.0f);
         deathZoomWaitTimer = 60;
         CreateGUI();
 
         if (Global::intro) {
+            AudioSystem::Init();
             Global::intro = false;
             CreateMusicController();
-            //CreateCore();
+            CreateCore();
             CreatePlayer();
             CameraSystem::zoom = 10.0f;
         }

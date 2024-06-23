@@ -45,9 +45,9 @@ void Engine::GameLoop() {
     RemoveDeletedEntities();
     RenderSystem::Update();
 
+#ifndef EMSCRIPTEN
     TimeSystem::FrameEnd();
-
-#ifdef EMSCRIPTEN
+#else
     if (!_isRunning)
         emscripten_cancel_main_loop();
 #endif
@@ -56,7 +56,6 @@ void Engine::GameLoop() {
 void Engine::RunGame() {
     // Init
     Input::Init();
-    AudioSystem::Init();
     RenderSystem::Init();
 
     // Game loop

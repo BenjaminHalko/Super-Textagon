@@ -32,13 +32,12 @@ void RenderSystem::Init() {
 #elif EMSCRIPTEN
     EM_ASM({
         function setSize() {
-            var canvas = document.createElement('canvas');
-            var context = canvas.getContext('2d');
+            let canvas = document.createElement('canvas');
+            let context = canvas.getContext('2d');
             context.font = '16px Cascadia Mono';
-            var fontSize = context.measureText(' ').width;
-            console.log(fontSize);
-            Module.width = Math.floor(Module.canvas.offsetWidth / fontSize - 1);
-            Module.height = Math.floor(Module.canvas.offsetHeight / fontSize * 0.5 - 0.5);
+            let fontSize = context.measureText(' ').width;
+            Module.width = Math.floor(Module.canvas.offsetWidth / fontSize);
+            Module.height = Math.floor(Module.canvas.offsetHeight / fontSize * 0.5);
             canvas.remove();
         }
         window.addEventListener('resize', setSize);
@@ -63,6 +62,19 @@ ColoredText RenderSystem::AlphaColorOfPoint(Sprite &sprite, int x, int y) {
     static const std::string alphaChars = ".`'^\",:;Il!i~+_-?][}{1)(|\\/*tjfrjxnvuczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@";
     static const int alphaCharsCount = (int)alphaChars.size();
 
+    // Check what needs checking
+    bool gradientColor = sprite[0].color != sprite[1].color || sprite[1].color != sprite[2].color || sprite[0].color != sprite[2].color;
+    bool gradientAlpha = sprite[0].alpha != sprite[1].alpha || sprite[1].alpha != sprite[2].alpha || sprite[0].alpha != sprite[2].alpha;
+
+    // Exit early if no gradient
+    if (!gradientColor && !gradientAlpha) {
+        return {alphaChars.at((int)((float)(alphaCharsCount-1) * sprite[0].alpha)), sprite[0].color};
+    }
+
+    // Default values
+    Color color = sprite[0].color;
+    float alpha = sprite.alpha;
+
     // Calculate the denominators for barycentric coordinates
     float denominator =
             (sprite[1].point.y - sprite[2].point.y) * (sprite[0].point.x - sprite[2].point.x) +
@@ -73,34 +85,42 @@ ColoredText RenderSystem::AlphaColorOfPoint(Sprite &sprite, int x, int y) {
     float lambda2 = ((sprite[2].point.y - sprite[0].point.y) * ((float)x - sprite[2].point.x) + (sprite[0].point.x - sprite[2].point.x) * ((float)y - sprite[2].point.y)) / denominator;
     float lambda3 = 1.0f - lambda1 - lambda2;
 
-    // Calculate the alpha
-    float alpha = lambda1 * sprite[0].alpha + lambda2 * sprite[1].alpha + lambda3 * sprite[2].alpha;
-    alpha *= sprite.alpha;
+    if (gradientAlpha) {
+        // Calculate the alpha
+        alpha = lambda1 * sprite[0].alpha + lambda2 * sprite[1].alpha + lambda3 * sprite[2].alpha;
+        alpha *= sprite.alpha;
 
-    // Clamp the alpha
-    alpha = (float)fmax(0, fmin(1, alpha));
+        // Clamp the alpha
+        alpha = (float) fmax(0, fmin(1, alpha));
+    }
 
     // Calculate the character
-    char character = alphaChars.at((int)((float)(alphaCharsCount-1) * alpha));
+    char character = alphaChars.at((int) ((float) (alphaCharsCount - 1) * alpha));
 
-    // Calculate the color
-    Color r = (int) (
-            lambda1 * float(sprite[0].color >> 16 & 0xFF) +
-            lambda2 * float(sprite[1].color >> 16 & 0xFF) +
-            lambda3 * float(sprite[2].color >> 16 & 0xFF));
-    Color g = (int) (
-            lambda1 * float(sprite[0].color >> 8 & 0xFF) +
-            lambda2 * float(sprite[1].color >> 8 & 0xFF) +
-            lambda3 * float(sprite[2].color >> 8 & 0xFF));
-    Color b = (int) (
-            lambda1 * float(sprite[0].color & 0xFF) +
-            lambda2 * float(sprite[1].color & 0xFF) +
-            lambda3 * float(sprite[2].color & 0xFF));
+    if (gradientColor) {
+        // Calculate the color
+        Color r = (int) (
+                lambda1 * float(sprite[0].color >> 16 & 0xFF) +
+                lambda2 * float(sprite[1].color >> 16 & 0xFF) +
+                lambda3 * float(sprite[2].color >> 16 & 0xFF));
+        Color g = (int) (
+                lambda1 * float(sprite[0].color >> 8 & 0xFF) +
+                lambda2 * float(sprite[1].color >> 8 & 0xFF) +
+                lambda3 * float(sprite[2].color >> 8 & 0xFF));
+        Color b = (int) (
+                lambda1 * float(sprite[0].color & 0xFF) +
+                lambda2 * float(sprite[1].color & 0xFF) +
+                lambda3 * float(sprite[2].color & 0xFF));
 
-    Color color = ((r << 16) | (g << 8) | b);
+        color = ((r << 16) | (g << 8) | b);
+    }
 
     // Merge the colour
     if (sprite.tintAlpha != 0) {
+        Color r = int(float(color >> 16 & 0xFF) * (1 - sprite.tintAlpha));
+        Color g = int(float(color >> 8 & 0xFF) * (1 - sprite.tintAlpha));
+        Color b = int(float(color & 0xFF) * (1 - sprite.tintAlpha));
+
         float tintR = (float(sprite.tint >> 16 & 0xFF) * sprite.tintAlpha);
         float tintG = (float(sprite.tint >> 8 & 0xFF) * sprite.tintAlpha);
         float tintB = (float(sprite.tint & 0xFF) * sprite.tintAlpha);
@@ -317,18 +337,21 @@ void RenderSystem::Update() {
     for(int y = 0; y < height; y++) {
         for(int x = 0; x < width; x++) {
             auto &cell = consoleBuffer.get_cell(x, y);
-            if (cell.m_format.m_fg_color != lastColor && false) {
-                buffer += "</span>";
-                lastColor = cell.m_format.m_fg_color;
-                buffer += "<span style=\"color:rgb(" + std::to_string(cell.m_format.m_fg_color.red) + "," + std::to_string(cell.m_format.m_fg_color.green) + "," + std::to_string(cell.m_format.m_fg_color.blue) + ")\">";
-            }
             if (cell.m_letter == ' ')
                 buffer += "&nbsp;";
-            else
+            else {
+                if (cell.m_format.m_fg_color != lastColor) {
+                    if (!buffer.empty())
+                        buffer += "</span>";
+                    lastColor = cell.m_format.m_fg_color;
+                    buffer += "<span style=\"color:rgb(" + std::to_string(cell.m_format.m_fg_color.red) + "," + std::to_string(cell.m_format.m_fg_color.green) + "," + std::to_string(cell.m_format.m_fg_color.blue) + ")\">";
+                }
                 buffer += cell.m_letter;
+            }
         }
         buffer += "<br>";
     }
+    buffer += "</span>";
     EM_ASM({
         Module.canvas.innerHTML = UTF8ToString($0);
     }, buffer.c_str());

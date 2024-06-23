@@ -15,11 +15,6 @@ class AudioSystem : public System {
     static std::vector<std::pair<std::unique_ptr<SoLoud::WavStream>, unsigned int>> _audioClips; // List of audio clips and their handles.
 
     /**
-     * @brief Initializes SoLoud.
-     */
-    static void Init();
-
-    /**
      * @brief Checks if sounds are still playing.
      */
     static void Update();
@@ -103,4 +98,9 @@ public:
      * @param volume The global volume to set.
      */
     static void SetGlobalVolume(float volume);
+
+/**
+ * @brief Initializes SoLoud.
+ */
+static void Init();
 };
