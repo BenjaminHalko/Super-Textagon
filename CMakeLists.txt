@@ -15,14 +15,15 @@ target_link_libraries(Super_Textagon Engine)
 
 # Copy assets
 set_target_properties(Super_Textagon PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-#file(COPY assets/audio DESTINATION ${CMAKE_BINARY_DIR}/bin)
+file(COPY assets/audio DESTINATION ${CMAKE_BINARY_DIR}/bin)
 if (NOT EMSCRIPTEN)
     file(COPY assets/icon.ico DESTINATION ${CMAKE_BINARY_DIR})
 else()
     file(COPY assets/web/ DESTINATION ${CMAKE_BINARY_DIR}/bin)
+    file(COPY assets/icon.ico DESTINATION ${CMAKE_BINARY_DIR}/bin)
 endif()
 
 # Set Emscripten flags
 if (EMSCRIPTEN)
-    set_target_properties(Super_Textagon PROPERTIES LINK_FLAGS "-sEXPORTED_FUNCTIONS=\"['_main', '_malloc', '_free']\" --embed-file ${CMAKE_SOURCE_DIR}/assets/audio")
+    set_target_properties(Super_Textagon PROPERTIES LINK_FLAGS "-sEXPORTED_FUNCTIONS=\"['_main', '_malloc', '_free']\" --preload-file ${CMAKE_BINARY_DIR}/bin/audio/")
 endif()

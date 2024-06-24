@@ -35,13 +35,18 @@ void RenderSystem::Init() {
             let canvas = document.createElement('canvas');
             let context = canvas.getContext('2d');
             context.font = '16px Cascadia Mono';
-            let fontSize = context.measureText(' ').width;
-            Module.width = Math.floor(Module.canvas.offsetWidth / fontSize);
-            Module.height = Math.floor(Module.canvas.offsetHeight / fontSize * 0.5);
+            let measure = context.measureText('M');
+            let fontWidth = measure.width;
+            let fontHeight = (measure.fontBoundingBoxAscent + measure.fontBoundingBoxDescent);
+            let viewWidth = window.visualViewport.width;
+            let viewHeight = window.visualViewport.height;
+            Module.width = Math.floor(viewWidth / Math.min(fontWidth, fontHeight * 0.5));
+            Module.height = Math.floor(viewHeight / fontHeight);
             canvas.remove();
         }
         window.addEventListener('resize', setSize);
         setSize();
+        setTimeout(setSize, 100);
     });
 #endif
 
@@ -281,6 +286,7 @@ void RenderSystem::Update() {
     width = w.ws_col;
     height = w.ws_row;
 #endif
+
     // If the size of the console has changed, clear the console
     if (width * height != charCount) {
         charCount = width * height;
@@ -291,11 +297,9 @@ void RenderSystem::Update() {
     // Loop over all the entities
     auto camera = CameraSystem::GetTransform();
     for (auto entity: Engine::GetEntities<Sprite>()) {
-        auto sprite = entity->GetComponent<Sprite>();
-
         auto entityTransformedSprite = TransformSystem::TransformSprite(
-                entity->GetComponent<Sprite>(),
-                entity->GetComponent<Transform>()
+            entity->GetComponent<Sprite>(),
+            entity->GetComponent<Transform>()
         );
 
         // Camera transform
