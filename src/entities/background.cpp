@@ -23,7 +23,8 @@ void BackgroundUpdate(Entity& self) {
     // Play Intro Audio
     if (Global::intro && !playedIntroAudio && TimeSystem::TimeRunning() > 0.8f) {
         playedIntroAudio = true;
-        //AudioSystem::PlayAudio("audio/super_textagon.ogg", false, 0.8f);
+        //AudioSystem::SetGlobalVolume(0.6);
+        AudioSystem::PlayAudio("audio/super_textagon.ogg", false, 0.8f);
     }
 
     // Set Wall Speed
@@ -186,4 +187,10 @@ void CreateBackground() {
         Transform(0, 0),
         Script(BackgroundUpdate)
     );
+
+#ifdef EMSCRIPTEN
+    // Change Audio
+    // I know this is a bad place to add this
+    AudioSystem::SetGlobalVolume(0.6f);
+#endif
 }

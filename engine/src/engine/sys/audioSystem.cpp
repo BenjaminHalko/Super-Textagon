@@ -1,5 +1,9 @@
 #include <engine/sys/audioSystem.h>
+#ifdef EMSCRIPTEN
+#include <emscripten.h>
+#endif
 
+#ifndef EMSCRIPTEN
 // Declare the static variables
 SoLoud::Soloud AudioSystem::_soLoud;
 std::vector<std::pair<std::unique_ptr<SoLoud::WavStream>, unsigned int>> AudioSystem::_audioClips;
@@ -67,3 +71,96 @@ void AudioSystem::StopAllAudio() {
 void AudioSystem::SetGlobalVolume(float volume) {
     _soLoud.setGlobalVolume(volume);
 }
+#else
+float AudioSystem::_globalVolume = 1.0f;
+
+void AudioSystem::Init() {}
+
+void AudioSystem::Update() {}
+
+void AudioSystem::Clean() {}
+
+AudioComponent AudioSystem::PlayAudio(std::string audioPath, bool loop, float volume) {
+    int handle = EM_ASM_INT({
+        var audio = new Audio(UTF8ToString($0));
+        audio.loop = $1;
+        audio.volume = $2 * $3;
+        audio.play();
+        var handle = Module.audioHandles.length;
+        Module.audioHandles.push([audio, $2]);
+        return handle;
+    }, audioPath.c_str(), loop, volume, _globalVolume);
+
+    return AudioComponent(handle);
+}
+
+void AudioSystem::StopAudio(AudioComponent& audio) {
+    EM_ASM_({
+        var audio = Module.audioHandles[$0][0];
+        audio.pause();
+        audio.currentTime = 0;
+    }, audio());
+}
+
+float AudioSystem::GetAudioPosition(AudioComponent& audio) {
+    return (float)EM_ASM_DOUBLE({
+        var audio = Module.audioHandles[$0][0];
+        return audio.currentTime;
+    }, audio());
+}
+
+void AudioSystem::SetAudioPosition(AudioComponent& audio, float position) {
+    EM_ASM_({
+        var audio = Module.audioHandles[$0][0];
+        audio.currentTime = $1;
+    }, audio(), position);
+}
+
+float AudioSystem::GetAudioVolume(AudioComponent& audio) {
+    return (float)EM_ASM_DOUBLE({
+        return Module.audioHandles[$0][1];
+    }, audio());
+}
+
+void AudioSystem::SetAudioVolume(AudioComponent& audio, float volume) {
+    EM_ASM_({
+        var audio = Module.audioHandles[$0][0];
+        Module.audioHandles[$0][1] = $1;
+        audio.volume = $1 * $2;
+    }, audio(), volume, _globalVolume);
+}
+
+void AudioSystem::PauseAudio(AudioComponent& audio) {
+    EM_ASM_({
+        var audio = Module.audioHandles[$0][0];
+        audio.pause();
+    }, audio());
+}
+
+void AudioSystem::ResumeAudio(AudioComponent& audio) {
+    EM_ASM_({
+        var audio = Module.audioHandles[$0][0];
+        audio.play();
+    }, audio());
+}
+
+void AudioSystem::StopAllAudio() {
+    EM_ASM({
+        for (var i = 0; i < Module.audioHandles.length; i++) {
+            Module.audioHandles[i][0].pause();
+            Module.audioHandles[i][0].currentTime = 0;
+        }
+    });
+}
+
+void AudioSystem::SetGlobalVolume(float volume) {
+    if (_globalVolume != volume) {
+        _globalVolume = volume;
+        EM_ASM_({
+            for (var i = 0; i < Module.audioHandles.length; i++) {
+                Module.audioHandles[i][0].volume = Module.audioHandles[i][1] * $0;
+            }
+        }, volume);
+    }
+}
+#endif

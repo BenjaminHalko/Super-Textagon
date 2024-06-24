@@ -13,7 +13,7 @@ void TimeSystem::FrameStart() {
     _timeRunning = std::chrono::duration<float>(std::chrono::steady_clock::now() - _engineStart).count();
     _deltaTime = std::chrono::duration<float>(std::chrono::steady_clock::now() - _frameStart).count();
     _deltaTime /= (float)_frameRate.count() / 1000.0f;
-    _deltaTime = (float)fmin(_deltaTime, 100.0f);
+    _deltaTime = (float)fmin(_deltaTime, 10.0f);
     _frameStart = std::chrono::steady_clock::now();
 }
 

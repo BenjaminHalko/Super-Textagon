@@ -56,6 +56,7 @@ void Engine::GameLoop() {
 void Engine::RunGame() {
     // Init
     Input::Init();
+    AudioSystem::Init();
     RenderSystem::Init();
 
     // Game loop
