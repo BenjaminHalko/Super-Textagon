@@ -5,6 +5,7 @@
 #include <engine/common.h>
 #include <cmath>
 #include <fstream>
+#include <random>
 #ifdef EMSCRIPTEN
 #include <emscripten.h>
 #else
@@ -105,7 +106,10 @@ float LengthDir_y(float len, float dir) {
 
 // Returns a random number between min and max
 float RandomRange(float min, float max) {
-	return min + (max - min) * (float)rand() / RAND_MAX;
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dis(min, max);
+    return dis(gen);
 }
 
 // Merges 2 colors
