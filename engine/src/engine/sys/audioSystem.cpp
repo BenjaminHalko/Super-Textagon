@@ -74,20 +74,7 @@ void AudioSystem::SetGlobalVolume(float volume) {
 #else
 float AudioSystem::_globalVolume = 1.0f;
 
-void AudioSystem::Init() {
-    // Preload all audio in the audio folder
-    // There is probably a better way to do this
-    EM_ASM({
-        FS.readdir('/audio').forEach(function(file) {
-            if (FS.analyzePath('/audio/' + file).isFile) {
-                var audio = new Audio('/audio/' + file);
-                audio.volume = 0;
-                audio.play();
-                audio.pause();
-            }
-        });
-    });
-}
+void AudioSystem::Init() {}
 
 void AudioSystem::Update() {}
 

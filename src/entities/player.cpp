@@ -73,6 +73,14 @@ void PlayerUpdate(Entity& self) {
                     break;
             }
         }
+
+        // Safety Kill
+        if (TimeSystem::DeltaTime() >= 100.0f) {
+            Global::finalScore = 0.0f;
+            Global::gameOver = true;
+            FlashScreen();
+            AudioSystem::PlayAudio("audio/death.wav", false, 0.3f);
+        }
     }
 
     // Update Sprite
