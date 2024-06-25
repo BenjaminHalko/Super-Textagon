@@ -25,5 +25,5 @@ endif()
 
 # Set Emscripten flags
 if (EMSCRIPTEN)
-    set_target_properties(Super_Textagon PROPERTIES LINK_FLAGS "-sEXPORTED_FUNCTIONS=\"['_main', '_malloc', '_free']\" --preload-file ${CMAKE_BINARY_DIR}/bin/audio/")
+    set_target_properties(Super_Textagon PROPERTIES LINK_FLAGS "-sEXPORTED_FUNCTIONS=\"['_main', '_malloc', '_free']\" --preload-file ${CMAKE_BINARY_DIR}/bin/audio@/audio")
 endif()

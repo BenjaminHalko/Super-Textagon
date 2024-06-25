@@ -32,17 +32,31 @@ void RenderSystem::Init() {
 #elif EMSCRIPTEN
     EM_ASM({
         function setSize() {
-            let canvas = document.createElement('canvas');
-            let context = canvas.getContext('2d');
-            context.font = '16px Cascadia Mono';
-            let measure = context.measureText('M');
-            let fontWidth = measure.width;
-            let fontHeight = (measure.fontBoundingBoxAscent + measure.fontBoundingBoxDescent);
-            let viewWidth = window.visualViewport.width;
-            let viewHeight = window.visualViewport.height;
-            Module.width = Math.floor(viewWidth / Math.min(fontWidth, fontHeight * 0.5));
-            Module.height = Math.floor(viewHeight / fontHeight);
-            canvas.remove();
+            // Get the width of the viewport in pixels
+            const viewportWidthInPixels = document.documentElement.clientWidth;
+            const viewportHeightInPixels = document.documentElement.clientHeight;
+
+            // Create a temporary element to measure character size
+            const tempElement = document.createElement('span');
+            tempElement.style.font = 'inherit'; // Use the current font
+            tempElement.style.visibility = 'hidden'; // Ensure it doesn't affect the layout
+            tempElement.innerHTML = 'MMMMMMMMMMMMMMMMMMMM'; // Use a typical character
+            for(let i = 1; i < 20; i++)
+                tempElement.innerHTML += '<br>MMMMMMMMMMMMMMMMMMMM'; // Use a typical character
+            document.body.appendChild(tempElement);
+
+            // Get the size of a single character
+            const characterWidthInPixels = tempElement.offsetWidth / 20;
+            const characterHeightInPixels = tempElement.offsetHeight / 20;
+
+            console.log(characterWidthInPixels, characterHeightInPixels);
+
+            // Remove the temporary element
+            document.body.removeChild(tempElement);
+
+            // Calculate the number of characters that fit in the viewport
+            Module.width = Math.floor(viewportWidthInPixels / characterWidthInPixels);
+            Module.height = Math.floor(viewportHeightInPixels / characterHeightInPixels);
         }
         window.addEventListener('resize', setSize);
         setSize();
@@ -50,6 +64,7 @@ void RenderSystem::Init() {
     });
 #endif
 
+#ifndef EMSCRIPTEN
     // Disable the cursor
     std::cout << "\033[?25l";
 
@@ -58,6 +73,7 @@ void RenderSystem::Init() {
 
     // Untie cin and cout
     std::cin.tie(nullptr);
+#endif
 }
 
 // Private
