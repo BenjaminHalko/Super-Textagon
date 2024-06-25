@@ -21,12 +21,6 @@ void CoreUpdate(Entity& self) {
 
     ZoomSprite(sprite, originalSprite, Global::zoom);
 
-    // Update sprite center zoom
-    for(int i = 3 * 6; i < sprite.Size(); i++) {
-        sprite[i].point.x *= fmax(0.01f, CameraSystem::zoom - 1.0f) * 0.2f;
-        sprite[i].point.y *= fmax(0.01f, CameraSystem::zoom - 1.0f) * 0.2f;
-    }
-
     // Update Sprite
     for(auto &point : sprite)
         point.color = MergeColors(
@@ -34,6 +28,17 @@ void CoreUpdate(Entity& self) {
             MakeColor(Global::hue, 1.0, point.alpha),
             Global::hueShift
         );
+
+    // Update sprite center zoom
+    for(int i = 3 * 6; i < sprite.Size(); i++) {
+        sprite[i].point.x *= fmax(0.001f, CameraSystem::zoom - 1.0f) * 0.2f;
+        sprite[i].point.y *= fmax(0.001f, CameraSystem::zoom - 1.0f) * 0.2f;
+        sprite[i].color = MergeColors(
+            MakeColor(Global::lastHue, 1.0, sprite[i].alpha * (float)Clamp((CameraSystem::zoom-1.0f) * 5, 0.0, 1.0)),
+            MakeColor(Global::hue, 1.0, sprite[i].alpha * (float)Clamp((CameraSystem::zoom-1.0f) * 5, 0.0, 1.0)),
+            Global::hueShift
+        );
+    }
 }
 
 // Creates a core entity (middle you rotate around)
