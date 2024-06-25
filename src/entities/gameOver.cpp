@@ -96,7 +96,9 @@ void UpdateGameOverManager(Entity &self) {
             FlashScreen();
             AudioSystem::PlayAudio("audio/death.wav", false, 0.4f);
         } else {
+#ifndef EMSCRIPTEN
             Engine::StopGame();
+#endif
         }
     }
 

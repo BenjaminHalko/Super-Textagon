@@ -2,17 +2,24 @@
 
 #include <engine/sys/_system.h>
 #include <engine/comp/audio.h>
-#include <soloud_wavstream.h>
 #include <string>
 #include <vector>
+#ifndef EMSCRIPTEN
+#include <soloud_wavstream.h>
+#include <memory>
+#endif
 
 /**
  * @brief A system that handles audio playback and management.
  */
 class AudioSystem : public System {
     friend class Engine;
+    #ifndef EMSCRIPTEN
     static SoLoud::Soloud _soLoud; // External engine for audio playback.
     static std::vector<std::pair<std::unique_ptr<SoLoud::WavStream>, unsigned int>> _audioClips; // List of audio clips and their handles.
+    #else
+    static float _globalVolume; // Global volume for all audio playback.
+    #endif
 
     /**
      * @brief Initializes SoLoud.

@@ -5,8 +5,12 @@
 #include <engine/common.h>
 #include <cmath>
 #include <fstream>
+#ifdef EMSCRIPTEN
+#include <emscripten.h>
+#else
 #include <sys/stat.h>
 #include <sys/types.h>
+#endif
 
 // Wrap between two values
 float Wrap(float value, float min, float max) {
@@ -200,6 +204,12 @@ bool fileExists(const std::string& fileName) {
 }
 
 void Save(float score) {
+#ifdef EMSCRIPTEN
+    EM_ASM({
+        var score = $0;
+        localStorage.setItem("score", score);
+    }, score);
+#else
     std::string fileName = "save";
     char* localAppdata = std::getenv("LOCALAPPDATA");
 	if (localAppdata != nullptr) {
@@ -221,9 +231,18 @@ void Save(float score) {
 	std::ofstream outFile(fileName, std::ios::trunc);
 	outFile << score;
 	outFile.close();
+#endif
 }
 
 float Load() {
+#ifdef EMSCRIPTEN
+    return EM_ASM_DOUBLE({
+        var score = localStorage.getItem("score");
+        if (score != null)
+            return parseFloat(score);
+        return 0;
+    });
+#else
     std::string fileName = "save";
     char* localAppdata = std::getenv("LOCALAPPDATA");
 	if (localAppdata != nullptr)
@@ -238,6 +257,7 @@ float Load() {
 		}
 	}
 	return 0;
+#endif
 }
 
 int GetShapePhase() {

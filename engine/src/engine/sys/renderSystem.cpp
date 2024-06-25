@@ -5,7 +5,10 @@
 #include <engine/sys/cameraSystem.h>
 #include <limits>
 #include <cmath>
-#ifndef _WIN32
+#ifdef EMSCRIPTEN
+#include <emscripten.h>
+#include "engine/sys/timeSystem.h"
+#elif !_WIN32
 #include <sys/ioctl.h>
 #include <unistd.h>
 #endif
@@ -21,12 +24,47 @@ int RenderSystem::width = 0;
 int RenderSystem::height = 0;
 bool RenderSystem::clearScreen = true;
 
+// Render System
 void RenderSystem::Init() {
 #ifdef _WIN32
     // Disable scroll bars
     SetConsoleMode(hStdOut, ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+#elif EMSCRIPTEN
+    EM_ASM({
+        function setSize() {
+            // Get the width of the viewport in pixels
+            const viewportWidthInPixels = document.documentElement.clientWidth;
+            const viewportHeightInPixels = document.documentElement.clientHeight;
+
+            // Create a temporary element to measure character size
+            const tempElement = document.createElement('span');
+            tempElement.style.font = 'inherit'; // Use the current font
+            tempElement.style.visibility = 'hidden'; // Ensure it doesn't affect the layout
+            tempElement.innerHTML = 'MMMMMMMMMMMMMMMMMMMM'; // Use a typical character
+            for(let i = 1; i < 20; i++)
+                tempElement.innerHTML += '<br>MMMMMMMMMMMMMMMMMMMM'; // Use a typical character
+            document.body.appendChild(tempElement);
+
+            // Get the size of a single character
+            const characterWidthInPixels = tempElement.offsetWidth / 20;
+            const characterHeightInPixels = tempElement.offsetHeight / 20;
+
+            console.log(characterWidthInPixels, characterHeightInPixels);
+
+            // Remove the temporary element
+            document.body.removeChild(tempElement);
+
+            // Calculate the number of characters that fit in the viewport
+            Module.width = Math.floor(viewportWidthInPixels / characterWidthInPixels);
+            Module.height = Math.floor(viewportHeightInPixels / characterHeightInPixels);
+        }
+        window.addEventListener('resize', setSize);
+        setSize();
+        setTimeout(setSize, 100);
+    });
 #endif
 
+#ifndef EMSCRIPTEN
     // Disable the cursor
     std::cout << "\033[?25l";
 
@@ -35,6 +73,7 @@ void RenderSystem::Init() {
 
     // Untie cin and cout
     std::cin.tie(nullptr);
+#endif
 }
 
 // Private
@@ -43,6 +82,19 @@ ColoredText RenderSystem::AlphaColorOfPoint(Sprite &sprite, int x, int y) {
     // Characters to use for alpha
     static const std::string alphaChars = ".`'^\",:;Il!i~+_-?][}{1)(|\\/*tjfrjxnvuczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@";
     static const int alphaCharsCount = (int)alphaChars.size();
+
+    // Check what needs checking
+    bool gradientColor = sprite[0].color != sprite[1].color || sprite[1].color != sprite[2].color || sprite[0].color != sprite[2].color;
+    bool gradientAlpha = sprite[0].alpha != sprite[1].alpha || sprite[1].alpha != sprite[2].alpha || sprite[0].alpha != sprite[2].alpha;
+
+    // Exit early if no gradient
+    if (!gradientColor && !gradientAlpha) {
+        return {alphaChars.at((int)((float)(alphaCharsCount-1) * sprite[0].alpha)), sprite[0].color};
+    }
+
+    // Default values
+    Color color = sprite[0].color;
+    float alpha = sprite.alpha;
 
     // Calculate the denominators for barycentric coordinates
     float denominator =
@@ -54,34 +106,42 @@ ColoredText RenderSystem::AlphaColorOfPoint(Sprite &sprite, int x, int y) {
     float lambda2 = ((sprite[2].point.y - sprite[0].point.y) * ((float)x - sprite[2].point.x) + (sprite[0].point.x - sprite[2].point.x) * ((float)y - sprite[2].point.y)) / denominator;
     float lambda3 = 1.0f - lambda1 - lambda2;
 
-    // Calculate the alpha
-    float alpha = lambda1 * sprite[0].alpha + lambda2 * sprite[1].alpha + lambda3 * sprite[2].alpha;
-    alpha *= sprite.alpha;
+    if (gradientAlpha) {
+        // Calculate the alpha
+        alpha = lambda1 * sprite[0].alpha + lambda2 * sprite[1].alpha + lambda3 * sprite[2].alpha;
+        alpha *= sprite.alpha;
 
-    // Clamp the alpha
-    alpha = (float)fmax(0, fmin(1, alpha));
+        // Clamp the alpha
+        alpha = (float) fmax(0, fmin(1, alpha));
+    }
 
     // Calculate the character
-    char character = alphaChars.at((int)((float)(alphaCharsCount-1) * alpha));
+    char character = alphaChars.at((int) ((float) (alphaCharsCount - 1) * alpha));
 
-    // Calculate the color
-    Color r = (int) (
-            lambda1 * float(sprite[0].color >> 16 & 0xFF) +
-            lambda2 * float(sprite[1].color >> 16 & 0xFF) +
-            lambda3 * float(sprite[2].color >> 16 & 0xFF));
-    Color g = (int) (
-            lambda1 * float(sprite[0].color >> 8 & 0xFF) +
-            lambda2 * float(sprite[1].color >> 8 & 0xFF) +
-            lambda3 * float(sprite[2].color >> 8 & 0xFF));
-    Color b = (int) (
-            lambda1 * float(sprite[0].color & 0xFF) +
-            lambda2 * float(sprite[1].color & 0xFF) +
-            lambda3 * float(sprite[2].color & 0xFF));
+    if (gradientColor) {
+        // Calculate the color
+        Color r = (int) (
+                lambda1 * float(sprite[0].color >> 16 & 0xFF) +
+                lambda2 * float(sprite[1].color >> 16 & 0xFF) +
+                lambda3 * float(sprite[2].color >> 16 & 0xFF));
+        Color g = (int) (
+                lambda1 * float(sprite[0].color >> 8 & 0xFF) +
+                lambda2 * float(sprite[1].color >> 8 & 0xFF) +
+                lambda3 * float(sprite[2].color >> 8 & 0xFF));
+        Color b = (int) (
+                lambda1 * float(sprite[0].color & 0xFF) +
+                lambda2 * float(sprite[1].color & 0xFF) +
+                lambda3 * float(sprite[2].color & 0xFF));
 
-    Color color = ((r << 16) | (g << 8) | b);
+        color = ((r << 16) | (g << 8) | b);
+    }
 
     // Merge the colour
     if (sprite.tintAlpha != 0) {
+        Color r = int(float(color >> 16 & 0xFF) * (1 - sprite.tintAlpha));
+        Color g = int(float(color >> 8 & 0xFF) * (1 - sprite.tintAlpha));
+        Color b = int(float(color & 0xFF) * (1 - sprite.tintAlpha));
+
         float tintR = (float(sprite.tint >> 16 & 0xFF) * sprite.tintAlpha);
         float tintG = (float(sprite.tint >> 8 & 0xFF) * sprite.tintAlpha);
         float tintB = (float(sprite.tint & 0xFF) * sprite.tintAlpha);
@@ -229,30 +289,33 @@ void RenderSystem::Update() {
     GetConsoleScreenBufferInfo(hStdOut, &consoleInfo);
     width = consoleInfo.srWindow.Right - consoleInfo.srWindow.Left + 1;
     height = consoleInfo.srWindow.Bottom - consoleInfo.srWindow.Top + 1;
+#elif EMSCRIPTEN
+    width = EM_ASM_INT({
+        return Module.width;
+    });
+    height = EM_ASM_INT({
+        return Module.height;
+    });
 #else
     struct winsize w{};
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
     width = w.ws_col;
     height = w.ws_row;
 #endif
+
     // If the size of the console has changed, clear the console
     if (width * height != charCount) {
         charCount = width * height;
         clearScreen = true;
         consoleBuffer = oof::screen(width, height, ' ');
-    } else {
-        // Clear the console buffer
-        consoleBuffer.clear();
     }
 
     // Loop over all the entities
     auto camera = CameraSystem::GetTransform();
     for (auto entity: Engine::GetEntities<Sprite>()) {
-        auto sprite = entity->GetComponent<Sprite>();
-
         auto entityTransformedSprite = TransformSystem::TransformSprite(
-                entity->GetComponent<Sprite>(),
-                entity->GetComponent<Transform>()
+            entity->GetComponent<Sprite>(),
+            entity->GetComponent<Transform>()
         );
 
         // Camera transform
@@ -278,7 +341,7 @@ void RenderSystem::Update() {
     if (clearScreen) {
 #ifdef _WIN32
         system("cls");
-#else
+#elif !EMSCRIPTEN
         std::cout << "\033[2J";
 #endif
         clearScreen = false;
@@ -288,6 +351,30 @@ void RenderSystem::Update() {
 #ifdef _WIN32
     auto const str = consoleBuffer.get_string();
     WriteConsoleA(hStdOut, str.c_str(), (DWORD)str.size(), nullptr, nullptr);
+#elif EMSCRIPTEN
+    std::string buffer;
+    oof::color lastColor = 0;
+    for(int y = 0; y < height; y++) {
+        for(int x = 0; x < width; x++) {
+            auto &cell = consoleBuffer.get_cell(x, y);
+            if (cell.m_letter == ' ')
+                buffer += "&nbsp;";
+            else {
+                if (cell.m_format.m_fg_color != lastColor) {
+                    if (!buffer.empty())
+                        buffer += "</span>";
+                    lastColor = cell.m_format.m_fg_color;
+                    buffer += "<span style=\"color:rgb(" + std::to_string(cell.m_format.m_fg_color.red) + "," + std::to_string(cell.m_format.m_fg_color.green) + "," + std::to_string(cell.m_format.m_fg_color.blue) + ")\">";
+                }
+                buffer += cell.m_letter;
+            }
+        }
+        buffer += "<br>";
+    }
+    buffer += "</span>";
+    EM_ASM({
+        Module.canvas.innerHTML = UTF8ToString($0);
+    }, buffer.c_str());
 #else
     std::cout << consoleBuffer.get_string();
 #endif

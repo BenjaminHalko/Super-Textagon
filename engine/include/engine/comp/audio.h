@@ -1,8 +1,6 @@
 #pragma once
 
 #include <engine/comp/_component.h>
-#include <soloud_wav.h>
-#include <memory>
 
 /**
  * @brief A component for handling audio in the engine.

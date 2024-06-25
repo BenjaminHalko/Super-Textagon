@@ -2,7 +2,10 @@
 #ifdef _WIN32
 #define NOVIRTUALKEYCODES
 #include <windows.h>
+#elif EMSCRIPTEN
+#include <emscripten.h>
 #else
+#define USING_NCURSES
 #include <ncurses.h>
 #endif
 
@@ -10,7 +13,16 @@
 std::unordered_map<int, Input::KeyState> Input::_keys;
 
 void Input::Init() {
-#ifndef _WIN32
+#ifdef EMSCRIPTEN
+    EM_ASM({
+        document.addEventListener('keydown', function(event) {
+            Module.keysDown[event.keyCode] = true;
+        });
+        document.addEventListener('keyup', function(event) {
+            Module.keysDown[event.keyCode] = false;
+        });
+    });
+#elif USING_NCURSES
     initscr();
     cbreak();
     noecho();
@@ -20,7 +32,7 @@ void Input::Init() {
 }
 
 void Input::Clean() {
-#ifndef _WIN32
+#ifdef USING_NCURSES
     endwin();
 #endif
 }
@@ -29,6 +41,17 @@ void Input::Update() {
 #ifdef _WIN32
     for(int i = 0; i < 256; i++) {
         if(GetAsyncKeyState(i) & 0x8000) {
+            if(_keys[i] == KeyState::UP)
+                _keys[i] = KeyState::PRESSED;
+            else
+                _keys[i] = KeyState::HELD;
+        } else {
+            _keys[i] = KeyState::UP;
+        }
+    }
+#elif EMSCRIPTEN
+    for(int i = 0; i < 256; i++) {
+        if(EM_ASM_INT({ return Module.keysDown[$0]; }, i)) {
             if(_keys[i] == KeyState::UP)
                 _keys[i] = KeyState::PRESSED;
             else

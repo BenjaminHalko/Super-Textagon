@@ -5,6 +5,9 @@
 #include <engine/sys/input.h>
 #include <engine/sys/audioSystem.h>
 #include <engine/sys/entityUpdateSystem.h>
+#ifdef EMSCRIPTEN
+#include <emscripten.h>
+#endif
 
 // We need to define the static variables here
 std::vector<std::unique_ptr<Entity>> Engine::_entities;
@@ -34,22 +37,37 @@ void Engine::RemoveDeletedEntities() {
 }
 
 void Engine::GameLoop() {
+    TimeSystem::FrameStart();
+
+    Input::Update();
+    AudioSystem::Update();
+    EntityUpdateSystem::Update();
+    RemoveDeletedEntities();
+    RenderSystem::Update();
+
+#ifndef EMSCRIPTEN
+    TimeSystem::FrameEnd();
+#else
+    if (!_isRunning)
+        emscripten_cancel_main_loop();
+#endif
+}
+
+void Engine::RunGame() {
+    // Init
     Input::Init();
     AudioSystem::Init();
     RenderSystem::Init();
 
-    while(_isRunning) {
-        TimeSystem::FrameStart();
+    // Game loop
+#ifndef EMSCRIPTEN
+    while (_isRunning)
+        GameLoop();
+#else
+    emscripten_set_main_loop(GameLoop, 0, 1);
+#endif
 
-        Input::Update();
-        AudioSystem::Update();
-        EntityUpdateSystem::Update();
-        RemoveDeletedEntities();
-        RenderSystem::Update();
-
-        TimeSystem::FrameEnd();
-    }
-
+    // Clean
     Input::Clean();
     AudioSystem::Clean();
 }

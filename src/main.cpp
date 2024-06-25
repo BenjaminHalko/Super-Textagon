@@ -3,7 +3,6 @@
 #include "entities/wallGenerator.h"
 #include "entities/gameOver.h"
 #include "entities/gui.h"
-#include "entities/core.h"
 
 int main() {
     CreateBackground();
@@ -11,6 +10,6 @@ int main() {
     CreateGameOverManager();
     CreateIntroGUI();
 
-    Engine::GameLoop();
+    Engine::RunGame();
     return 0;
 }

@@ -55,19 +55,31 @@ void PlayerUpdate(Entity& self) {
                 }
 
                 // Check for death :(
-                // Check if the player is in the same sextant as the wall at time of collision
-                auto a = (int) floor(startRotation / 60);
-                auto b = (int) floor(entity->GetComponent<Transform>().rotation / 60);
-
-                // Kill the player (clashing screen)
-                if (a == b) {
-                    transform.rotation = startRotation + rotationSpd * (float) dir;
-                    Global::finalScore = RoundRunning();
-                    Global::gameOver = true;
-                    FlashScreen();
-                    AudioSystem::PlayAudio("audio/death.wav", false, 0.3f);
+                // Check if the player is still alive
+                for (auto &entity2: Engine::GetEntities("wall")) {
+                    // Kill the player (clashing screen)
+                    if (CollisionSystem::CheckCollision(self, *entity2)) {
+                        transform.rotation = startRotation + rotationSpd * (float) dir;
+                        Global::finalScore = RoundRunning();
+                        Global::gameOver = true;
+                        FlashScreen();
+                        AudioSystem::PlayAudio("audio/death.wav", false, 0.3f);
+                        break;
+                    }
                 }
+
+                // Break out of the loop
+                if (Global::gameOver)
+                    break;
             }
+        }
+
+        // Safety Kill
+        if (TimeSystem::DeltaTime() >= 100.0f) {
+            Global::finalScore = 0.0f;
+            Global::gameOver = true;
+            FlashScreen();
+            AudioSystem::PlayAudio("audio/death.wav", false, 0.3f);
         }
     }
 

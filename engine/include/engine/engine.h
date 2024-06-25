@@ -9,6 +9,11 @@ class Engine {
     static bool CompareEntityDepth(const std::unique_ptr<Entity>& a, const std::unique_ptr<Entity>& b);
     static std::vector<std::unique_ptr<Entity>> _entities;
     static bool _isRunning;
+
+    /**
+     * @brief The game loop
+     */
+    static void GameLoop();
 public:
     /**
      * @brief Adds an entity to the Engine
@@ -44,7 +49,7 @@ public:
     /**
      * @brief Starts the game loop
      */
-    static void GameLoop();
+    static void RunGame();
 
     /**
      * @brief Stops the game loop
