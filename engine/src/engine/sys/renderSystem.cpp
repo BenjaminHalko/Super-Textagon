@@ -307,8 +307,9 @@ void RenderSystem::Update() {
     if (width * height != charCount) {
         charCount = width * height;
         clearScreen = true;
-        consoleBuffer = oof::screen(width, height, ' ');
     }
+
+    consoleBuffer = oof::screen(width, height, ' ');
 
     // Loop over all the entities
     auto camera = CameraSystem::GetTransform();
@@ -342,7 +343,7 @@ void RenderSystem::Update() {
 #ifdef _WIN32
         system("cls");
 #elif !EMSCRIPTEN
-        std::cout << "\033[2J";
+        std::cout << "\033[2J\033[H";
 #endif
         clearScreen = false;
     }

@@ -38,12 +38,14 @@ add_library(Engine ${ENGINE_SOURCES})
 target_include_directories(Engine PUBLIC include)
 
 if (NOT EMSCRIPTEN)
-    # Link Ncurses
-    if (UNIX)
-        find_package(Curses REQUIRED)
-        target_link_libraries(Engine PUBLIC ${CURSES_LIBRARIES} so_loud)
-        target_include_directories(Engine PUBLIC ${CURSES_INCLUDE_DIR})
-    else()
-        target_link_libraries(Engine so_loud)
+    target_link_libraries(Engine so_loud)
+    
+    # Link CoreGraphics framework on macOS
+    if (APPLE)
+        find_library(CORE_GRAPHICS CoreGraphics)
+        find_library(CORE_AUDIO CoreAudio)
+        find_library(AUDIO_TOOLBOX AudioToolbox)
+        find_library(AUDIO_UNIT AudioUnit)
+        target_link_libraries(Engine ${CORE_GRAPHICS} ${CORE_AUDIO} ${AUDIO_TOOLBOX} ${AUDIO_UNIT})
     endif()
 endif()

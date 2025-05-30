@@ -9,7 +9,7 @@
  * @brief Structure representing a point with color and alpha value.
  */
 struct ColoredPoint {
-    Point point;
+    Vector2 point;
     Color color; 
     float alpha; 
 };
@@ -18,7 +18,7 @@ struct ColoredPoint {
  * @brief A component that represents a sprite.
  * @details A sprite is a collection of points that are drawn on the screen.
  */
-class Sprite : public Component {
+class Sprite : public ComponentParent {
 private:
     std::vector<ColoredPoint> _sprite;
 public:

@@ -8,7 +8,7 @@
  * @details This manages the execution order of components in the game engine by assigning
  * a depth value. Components with different depth values can be processed in a specific order.
  */
-class Depth : public Component {
+class Depth : public ComponentParent {
     int _depth;
 public:
     /**

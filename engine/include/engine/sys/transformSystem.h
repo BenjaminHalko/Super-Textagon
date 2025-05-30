@@ -18,7 +18,7 @@ public:
      * @param x The offset along the x-axis.
      * @param y The offset along the y-axis.
      */
-    static void TranslatePoint(Point& point, float x, float y);
+    static void TranslatePoint(Vector2& point, float x, float y);
 
     /**
      * @brief Scales a point by the given x and y scale factors.
@@ -27,7 +27,7 @@ public:
      * @param x_scale The scale factor along the x-axis.
      * @param y_scale The scale factor along the y-axis.
      */
-    static void ScalePoint(Point& point, float x_scale, float y_scale);
+    static void ScalePoint(Vector2& point, float x_scale, float y_scale);
 
     /**
      * @brief Rotates a point by the given angle.
@@ -35,7 +35,7 @@ public:
      * @param point The point to rotate.
      * @param angle The angle to rotate the point, in degrees.
      */
-    static void RotatePoint(Point& point, float angle);
+    static void RotatePoint(Vector2& point, float angle);
 
     /**
      * @brief Applies a transformation to a point.
@@ -43,7 +43,7 @@ public:
      * @param point The point to transform.
      * @param transform The transformation to apply.
      */
-    static void ApplyTransformation(Point& point, Transform& transform);
+    static void ApplyTransformation(Vector2& point, Transform& transform);
 
     /**
      * @brief Transforms a sprite by applying a transformation.

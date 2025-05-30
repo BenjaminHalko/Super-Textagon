@@ -5,7 +5,7 @@
 /**
  * @brief A component that represents the position, scale, and rotation of an entity.
  */
-class Transform : public Component {
+class Transform : public ComponentParent {
 public:
     float x, y; 
     float x_scale = 1, y_scale = 1;

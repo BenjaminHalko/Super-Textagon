@@ -6,6 +6,6 @@
 /**
  * @brief Structure representing a point in 2D space.
  */
-struct Point {
+struct Vector2 {
     float x, y;
 };

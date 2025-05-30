@@ -8,7 +8,7 @@
  * @details Handles audio components within the game engine.
  * Stores audio component and allows access to it.
  */
-class AudioComponent : public Component {
+class AudioComponent : public ComponentParent {
     unsigned int _handle;
 public:
     /**

@@ -2,13 +2,12 @@
 #include <engine/sys/transformSystem.h>
 #include <engine/comp/collider.h>
 #include <engine/comp/transform.h>
-#include "engine/comp/tag.h"
 
-float sign(Point p1, Point p2, Point p3) {
+float sign(Vector2 p1, Vector2 p2, Vector2 p3) {
     return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
 }
 
-bool PointInTriangle(Point pt, Point v1, Point v2, Point v3) {
+bool PointInTriangle(Vector2 pt, Vector2 v1, Vector2 v2, Vector2 v3) {
     float d1, d2, d3;
     bool has_neg, has_pos;
 
@@ -23,17 +22,17 @@ bool PointInTriangle(Point pt, Point v1, Point v2, Point v3) {
 }
 
 
-int orientation(Point p, Point q, Point r) {
+int orientation(Vector2 p, Vector2 q, Vector2 r) {
     float val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
     if (val == 0) return 0; // collinear
     return (val > 0) ? 1 : 2; // clock or counterclockwise
 }
 
-bool onSegment(Point p, Point q, Point r) {
+bool onSegment(Vector2 p, Vector2 q, Vector2 r) {
     return q.x <= std::max(p.x, r.x) && q.x >= std::min(p.x, r.x) &&
         q.y <= std::max(p.y, r.y) && q.y >= std::min(p.y, r.y);
 }
-bool EdgeIntersection(Point p1, Point q1, Point p2, Point q2) {
+bool EdgeIntersection(Vector2 p1, Vector2 q1, Vector2 p2, Vector2 q2) {
     int o1 = orientation(p1, q1, p2);
     int o2 = orientation(p1, q1, q2);
     int o3 = orientation(p2, q2, p1);
@@ -61,13 +60,13 @@ bool CollisionSystem::CheckTriangleCollision(Collider& collider1, Collider& coll
     }
 
     // Get the triangles
-    Point tri1[3] = {
+    Vector2 tri1[3] = {
         collider1[start1],
         collider1[start1+1],
         collider1[start1+2]
     };
 
-    Point tri2[3] = {
+    Vector2 tri2[3] = {
         collider2[start2],
         collider2[start2+1],
         collider2[start2+2]
@@ -87,8 +86,8 @@ bool CollisionSystem::CheckTriangleCollision(Collider& collider1, Collider& coll
 
 
     // Check if any edges intersect
-    std::vector<std::pair<Point, Point>> edges1 = { {tri1[0], tri1[1]}, {tri1[1], tri1[2]}, {tri1[2], tri1[0]} };
-    std::vector<std::pair<Point, Point>> edges2 = { {tri2[0], tri2[1]}, {tri2[1], tri2[2]}, {tri2[2], tri2[0]} };
+    std::vector<std::pair<Vector2, Vector2>> edges1 = { {tri1[0], tri1[1]}, {tri1[1], tri1[2]}, {tri1[2], tri1[0]} };
+    std::vector<std::pair<Vector2, Vector2>> edges2 = { {tri2[0], tri2[1]}, {tri2[1], tri2[2]}, {tri2[2], tri2[0]} };
 
     for (const auto& edge1 : edges1) {
         for (const auto& edge2 : edges2) {
