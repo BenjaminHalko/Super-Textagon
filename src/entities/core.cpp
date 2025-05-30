@@ -1,6 +1,7 @@
 #include "core.h"
 #include "../global.h"
 #include "../helper.h"
+#include <cmath>
 #include <engine/engine.h>
 #include <engine/comp/depth.h>
 #include <engine/comp/sprite.h>

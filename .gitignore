@@ -1,5 +1,6 @@
 .idea/
 .vs/
+build/
 cmake-*/
 out/
 enc_temp_folder/

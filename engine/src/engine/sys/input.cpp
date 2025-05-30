@@ -22,7 +22,7 @@ void Input::Init() {
             Module.keysDown[event.keyCode] = false;
         });
     });
-#elif USING_NCURSES
+#elif defined(USING_NCURSES)
     initscr();
     cbreak();
     noecho();
