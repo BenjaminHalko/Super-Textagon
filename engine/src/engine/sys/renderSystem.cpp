@@ -11,6 +11,7 @@
 #elif !_WIN32
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <termios.h>
 #endif
 
 // Define the static variables
@@ -62,12 +63,37 @@ void RenderSystem::Init() {
         setSize();
         setTimeout(setSize, 100);
     });
+#else
+    // Get current terminal settings
+    struct termios term;
+    tcgetattr(STDIN_FILENO, &term);
+    
+    // Save original settings
+    static struct termios orig_term;
+    static bool settings_saved = false;
+    if (!settings_saved) {
+        orig_term = term;
+        settings_saved = true;
+        // Register restore on exit
+        std::atexit([]() {
+            tcsetattr(STDIN_FILENO, TCSANOW, &orig_term);
+            // Also restore cursor and clear screen
+            std::cout << "\033[?25h\033[2J\033[H";
+        });
+    }
+
+    // Modify terminal settings
+    term.c_lflag &= ~(ICANON | ECHO | ISIG); // Disable canonical mode, echo, and signals
+    term.c_iflag &= ~(IXON | ICRNL);  // Disable software flow control and CR/NL translation
+    term.c_cc[VMIN] = 0;  // Return immediately even if no input is available
+    term.c_cc[VTIME] = 0; // No timeout
+    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+
+    // Disable cursor
+    std::cout << "\033[?25l";
 #endif
 
 #ifndef EMSCRIPTEN
-    // Disable the cursor
-    std::cout << "\033[?25l";
-
     // Disable synchronous input
     std::ios::sync_with_stdio(false);
 
@@ -307,9 +333,8 @@ void RenderSystem::Update() {
     if (width * height != charCount) {
         charCount = width * height;
         clearScreen = true;
+        consoleBuffer = oof::screen(width, height, ' ');
     }
-
-    consoleBuffer = oof::screen(width, height, ' ');
 
     // Loop over all the entities
     auto camera = CameraSystem::GetTransform();
@@ -377,6 +402,7 @@ void RenderSystem::Update() {
         Module.canvas.innerHTML = UTF8ToString($0);
     }, buffer.c_str());
 #else
-    std::cout << consoleBuffer.get_string();
+    std::cout << consoleBuffer.get_string() << std::flush;
+    fflush(stdout);
 #endif
 }
