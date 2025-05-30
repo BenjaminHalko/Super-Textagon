@@ -16,11 +16,11 @@ if (NOT EMSCRIPTEN)
     FetchContent_MakeAvailable(so_loud)
 
     # Define SoLoud backend
-    add_definitions(-DWITH_MINIAUDIO)
+    add_definitions(-DWITH_COREAUDIO)
 
     # Link SoLoud
     file(GLOB SO_LOUD_CORE ${so_loud_SOURCE_DIR}/src/core/*)
-    file(GLOB SO_LOUD_BACKEND ${so_loud_SOURCE_DIR}/src/backend/miniaudio/*)
+    file(GLOB SO_LOUD_BACKEND ${so_loud_SOURCE_DIR}/src/backend/coreaudio/*)
     file(GLOB SO_LOUD_AUDIOSOURCE ${so_loud_SOURCE_DIR}/src/audiosource/wav/*)
     add_library(so_loud
         ${SO_LOUD_CORE}
