@@ -6,7 +6,7 @@
 
 The game is optimized for:
 - **[Windows Terminal](https://apps.microsoft.com/detail/9n0dx20hk701)** on Window
-- **[iTerm2](https://iterm2.com)** of MacOS
+- **[iTerm2](https://iterm2.com)** on MacOS
 
 It harnesses the terminal's capabilities to deliver a smooth and visually appealing ASCII gaming experience.
 
