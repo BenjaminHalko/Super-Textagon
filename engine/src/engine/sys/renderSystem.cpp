@@ -83,6 +83,9 @@ void RenderSystem::Init() {
 #endif
 
 #ifndef EMSCRIPTEN
+    // Disable the cursor	
+    std::cout << "\033[?25l";
+
     // Disable synchronous input
     std::ios::sync_with_stdio(false);
 
