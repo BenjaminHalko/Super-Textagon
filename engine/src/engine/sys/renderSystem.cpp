@@ -5,6 +5,8 @@
 #include <engine/sys/cameraSystem.h>
 #include <limits>
 #include <cmath>
+#include <algorithm>
+#include <iostream>
 #ifdef EMSCRIPTEN
 #include <emscripten.h>
 #include "engine/sys/timeSystem.h"
@@ -12,6 +14,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <termios.h>
+#include <ncurses.h>
 #endif
 
 // Define the static variables
@@ -64,33 +67,19 @@ void RenderSystem::Init() {
         setTimeout(setSize, 100);
     });
 #else
-    // Get current terminal settings
-    struct termios term;
-    tcgetattr(STDIN_FILENO, &term);
+    initscr();
+    start_color();
+    use_default_colors();  // Allow using default terminal colors
+    raw();
+    noecho();
+    keypad(stdscr, TRUE);
+    nodelay(stdscr, TRUE);
+    curs_set(0);  // Hide cursor
     
-    // Save original settings
-    static struct termios orig_term;
-    static bool settings_saved = false;
-    if (!settings_saved) {
-        orig_term = term;
-        settings_saved = true;
-        // Register restore on exit
-        std::atexit([]() {
-            tcsetattr(STDIN_FILENO, TCSANOW, &orig_term);
-            // Also restore cursor and clear screen
-            std::cout << "\033[?25h\033[2J\033[H";
-        });
-    }
-
-    // Modify terminal settings
-    term.c_lflag &= ~(ICANON | ECHO | ISIG); // Disable canonical mode, echo, and signals
-    term.c_iflag &= ~(IXON | ICRNL);  // Disable software flow control and CR/NL translation
-    term.c_cc[VMIN] = 0;  // Return immediately even if no input is available
-    term.c_cc[VTIME] = 0; // No timeout
-    tcsetattr(STDIN_FILENO, TCSANOW, &term);
-
-    // Disable cursor
-    std::cout << "\033[?25l";
+    // Register cleanup on exit
+    std::atexit([]() {
+        endwin();
+    });
 #endif
 
 #ifndef EMSCRIPTEN
@@ -203,7 +192,11 @@ void RenderSystem::DrawTriangle(Sprite& sprite, int index) {
     points.tintAlpha = sprite.tintAlpha;
 
     // Convert the points to screen space, from 0 to dwSize
-    const float fontAspectRatio = 0.5f; // The x to y ratio of the font
+    #ifdef __APPLE__
+    const float fontAspectRatio = 0.45f;
+    #else
+    const float fontAspectRatio = 0.5f;
+    #endif
     auto maxScreenSize = (float)fmax(width, (float)height / fontAspectRatio);
 
     for (int i = 0; i < 3; i++) {
@@ -403,6 +396,5 @@ void RenderSystem::Update() {
     }, buffer.c_str());
 #else
     std::cout << consoleBuffer.get_string() << std::flush;
-    fflush(stdout);
 #endif
 }

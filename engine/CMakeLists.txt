@@ -48,4 +48,10 @@ if (NOT EMSCRIPTEN)
         find_library(AUDIO_UNIT AudioUnit)
         target_link_libraries(Engine ${CORE_GRAPHICS} ${CORE_AUDIO} ${AUDIO_TOOLBOX} ${AUDIO_UNIT})
     endif()
+
+    if (UNIX)
+        # Find and link ncurses
+        find_package(Curses REQUIRED)
+        target_link_libraries(Engine ${CURSES_LIBRARIES})
+    endif()
 endif()
