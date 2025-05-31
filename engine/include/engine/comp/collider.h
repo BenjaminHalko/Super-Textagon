@@ -12,8 +12,8 @@
  * @details Handles colliders within the game engine.
  * Uses given points, either using a sprite or size as a reference.
  */
-class Collider : public Component {
-    std::vector<Point> _points;
+class Collider : public ComponentParent {
+    std::vector<Vector2> _points;
 public:
     /**
      * @brief Default constructor for Collider.
@@ -25,7 +25,7 @@ public:
      *
      * @param points Initializer list of points to initialize the collider.
      */
-    Collider(std::initializer_list<Point> points);
+    Collider(std::initializer_list<Vector2> points);
 
     /**
      * @brief Constructs a Collider from a sprite.
@@ -47,14 +47,14 @@ public:
      * @param index The index of the point to access.
      * @return Reference to the point at the specified index.
      */
-    Point& operator[](int index);
+    Vector2& operator[](int index);
 
     /**
      * @brief Adds a point to the collider.
      *
      * @param point The point to add to the collider.
      */
-    void AddPoint(Point point);
+    void AddPoint(Vector2 point);
 
     /**
      * @brief Returns the number of points in the collider.
@@ -75,12 +75,12 @@ public:
      *
      * @return Iterator to the beginning of the points.
      */
-    std::vector<Point>::iterator begin();
+    std::vector<Vector2>::iterator begin();
 
     /**
      * @brief Returns an iterator to the end of the points.
      *
      * @return Iterator to the end of the points.
      */
-    std::vector<Point>::iterator end();
+    std::vector<Vector2>::iterator end();
 };

@@ -5,12 +5,16 @@
 #include <engine/sys/cameraSystem.h>
 #include <limits>
 #include <cmath>
+#include <algorithm>
+#include <iostream>
 #ifdef EMSCRIPTEN
 #include <emscripten.h>
 #include "engine/sys/timeSystem.h"
 #elif !_WIN32
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <termios.h>
+#include <ncurses.h>
 #endif
 
 // Define the static variables
@@ -62,10 +66,24 @@ void RenderSystem::Init() {
         setSize();
         setTimeout(setSize, 100);
     });
+#else
+    initscr();
+    start_color();
+    use_default_colors();  // Allow using default terminal colors
+    raw();
+    noecho();
+    keypad(stdscr, TRUE);
+    nodelay(stdscr, TRUE);
+    curs_set(0);  // Hide cursor
+    
+    // Register cleanup on exit
+    std::atexit([]() {
+        endwin();
+    });
 #endif
 
 #ifndef EMSCRIPTEN
-    // Disable the cursor
+    // Disable the cursor	
     std::cout << "\033[?25l";
 
     // Disable synchronous input
@@ -177,7 +195,11 @@ void RenderSystem::DrawTriangle(Sprite& sprite, int index) {
     points.tintAlpha = sprite.tintAlpha;
 
     // Convert the points to screen space, from 0 to dwSize
-    const float fontAspectRatio = 0.5f; // The x to y ratio of the font
+    #ifdef __APPLE__
+    const float fontAspectRatio = 0.45f;
+    #else
+    const float fontAspectRatio = 0.5f;
+    #endif
     auto maxScreenSize = (float)fmax(width, (float)height / fontAspectRatio);
 
     for (int i = 0; i < 3; i++) {
@@ -342,7 +364,7 @@ void RenderSystem::Update() {
 #ifdef _WIN32
         system("cls");
 #elif !EMSCRIPTEN
-        std::cout << "\033[2J";
+        std::cout << "\033[2J\033[H";
 #endif
         clearScreen = false;
     }
@@ -376,6 +398,6 @@ void RenderSystem::Update() {
         Module.canvas.innerHTML = UTF8ToString($0);
     }, buffer.c_str());
 #else
-    std::cout << consoleBuffer.get_string();
+    std::cout << consoleBuffer.get_string() << std::flush;
 #endif
 }

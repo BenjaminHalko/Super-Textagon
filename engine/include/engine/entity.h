@@ -18,7 +18,7 @@ class Entity {
      * The value is a unique pointer to the component.
      * This is a map so that we can easily access the component by its type.
      */
-    std::unordered_map<std::type_index, std::unique_ptr<Component>> _components;
+    std::unordered_map<std::type_index, std::unique_ptr<ComponentParent>> _components;
 
     /**
      * @brief Flags the enemy for deletion

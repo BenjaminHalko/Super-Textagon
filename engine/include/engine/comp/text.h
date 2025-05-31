@@ -28,7 +28,7 @@ enum class VAlign {
  * @brief A component that represents text.
  * @details This class stores a collection of strings that can be drawn on the screen.
  */
-class Text : public Component {
+class Text : public ComponentParent {
     std::vector<std::string> _text;
     std::map<size_t, Color> _color{};
 public:

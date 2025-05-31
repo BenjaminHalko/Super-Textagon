@@ -16,11 +16,11 @@ if (NOT EMSCRIPTEN)
     FetchContent_MakeAvailable(so_loud)
 
     # Define SoLoud backend
-    add_definitions(-DWITH_MINIAUDIO)
+    add_definitions(-DWITH_COREAUDIO)
 
     # Link SoLoud
     file(GLOB SO_LOUD_CORE ${so_loud_SOURCE_DIR}/src/core/*)
-    file(GLOB SO_LOUD_BACKEND ${so_loud_SOURCE_DIR}/src/backend/miniaudio/*)
+    file(GLOB SO_LOUD_BACKEND ${so_loud_SOURCE_DIR}/src/backend/coreaudio/*)
     file(GLOB SO_LOUD_AUDIOSOURCE ${so_loud_SOURCE_DIR}/src/audiosource/wav/*)
     add_library(so_loud
         ${SO_LOUD_CORE}
@@ -38,12 +38,19 @@ add_library(Engine ${ENGINE_SOURCES})
 target_include_directories(Engine PUBLIC include)
 
 if (NOT EMSCRIPTEN)
-    # Link Ncurses
+    target_link_libraries(Engine so_loud)
+    
+    # Link CoreGraphics framework on macOS
+    if (APPLE)
+        find_library(CORE_GRAPHICS CoreGraphics)
+        find_library(CORE_AUDIO CoreAudio)
+        find_library(AUDIO_TOOLBOX AudioToolbox)
+        target_link_libraries(Engine ${CORE_GRAPHICS} ${CORE_AUDIO} ${AUDIO_TOOLBOX})
+    endif()
+
     if (UNIX)
+        # Find and link ncurses
         find_package(Curses REQUIRED)
-        target_link_libraries(Engine PUBLIC ${CURSES_LIBRARIES} so_loud)
-        target_include_directories(Engine PUBLIC ${CURSES_INCLUDE_DIR})
-    else()
-        target_link_libraries(Engine so_loud)
+        target_link_libraries(Engine ${CURSES_LIBRARIES})
     endif()
 endif()

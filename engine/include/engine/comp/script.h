@@ -12,7 +12,7 @@
  * @details This class allows attaching and executing scripts on entities.
  * Also provides a way to store and retrive data specific to the script.
  */
-class Script : public Component {
+class Script : public ComponentParent {
 private:
     void (*_script)(Entity&); // Function pointer to the script to be executed.
     std::unordered_map<std::string, std::shared_ptr<std::any>> _data; // Storage for script-specific data.

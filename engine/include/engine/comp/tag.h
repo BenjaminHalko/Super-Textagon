@@ -7,7 +7,7 @@
  * @brief A component that represents a tag.
  * @details This class stores a tag as a string, which can be used to identify or categorize entities.
  */
-class Tag : public Component {
+class Tag : public ComponentParent {
     std::string _tag;
 public:
     /**

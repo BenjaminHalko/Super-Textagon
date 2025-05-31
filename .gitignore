@@ -1,6 +1,8 @@
 .idea/
 .vs/
+.cache/
 build/
 cmake-*/
 out/
 enc_temp_folder/
+.DS_Store
